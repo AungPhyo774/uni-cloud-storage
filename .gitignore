@@ -1,0 +1,93 @@
+# =========================
+# Python
+# =========================
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Virtual Environment
+# =========================
+
+venv/
+.venv/
+env/
+ENV/
+
+# =========================
+# Environment Variables
+# =========================
+
+.env
+.env.*
+!.env.example
+
+# =========================
+# Database
+# =========================
+
+*.db
+*.sqlite
+*.sqlite3
+
+# =========================
+# Logs
+# =========================
+
+*.log
+logs/
+
+# =========================
+# IDE / Editor
+# =========================
+
+.vscode/
+.idea/
+
+# =========================
+# OS Generated Files
+# =========================
+
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# Python Testing
+# =========================
+
+.pytest_cache/
+.coverage
+htmlcov/
+
+# =========================
+# Build / Distribution
+# =========================
+
+build/
+dist/
+*.egg-info/
+
+# =========================
+# Temporary Files
+# =========================
+
+*.tmp
+*.temp
+*.bak
+
+# =========================
+# Storage Files
+# =========================
+
+storage-node-1/files/
+storage-node-2/files/
+storage-node-3/files/
+
+# =========================
+# Uploaded Documents
+# =========================
+
+uploads/
+uploaded_files/
