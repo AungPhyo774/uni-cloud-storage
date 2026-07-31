@@ -5,8 +5,12 @@ from app.database.session import engine
 
 from app.routers import auth
 from app.routers import users
+from app.routers import documents
 
+from app.models.user import User
+from app.models.document import Document
 
+# # Create Database Tables
 Base.metadata.create_all(bind=engine)
 
 
@@ -17,9 +21,7 @@ app = FastAPI(
 
 app.include_router(auth.router)
 app.include_router(users.router)
-
-# Create Database Tables
-Base.metadata.create_all(bind=engine)
+app.include_router(documents.router)
 
 
 @app.get("/")

@@ -23,7 +23,7 @@ SessionLocal = sessionmaker(
     bind=engine
 )
 
-print(DATABASE_URL)
+
 
 def get_db():
     db = SessionLocal()

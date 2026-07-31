@@ -91,3 +91,5 @@ storage-node-3/files/
 
 uploads/
 uploaded_files/
+
+database/postgres-data/
