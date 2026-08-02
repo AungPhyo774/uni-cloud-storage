@@ -81,9 +81,14 @@ dist/
 # Storage Files
 # =========================
 
-storage-node-1/files/
-storage-node-2/files/
-storage-node-3/files/
+storage-node-1/storage/.pdf
+storage-node-2/storage/.pdf
+storage-node-3/storage/.pdf
+
+
+!storage-node-1/storage/.gitkeep
+!storage-node-2/storage/.gitkeep
+!storage-node-3/storage/.gitkeep
 
 # =========================
 # Uploaded Documents
@@ -93,3 +98,9 @@ uploads/
 uploaded_files/
 
 database/postgres-data/
+
+
+
+# Ignore uploaded PDF files
+storage-service/storage/*.pdf
+!storage-service/storage/.gitkeep

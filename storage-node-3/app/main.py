@@ -4,7 +4,7 @@ from pathlib import Path
 
 
 app = FastAPI(
-    title="Distributed Cloud Storage - Storage Service"
+    title="Distributed Cloud Storage - Storage Service Node 3"
 )
 
 
