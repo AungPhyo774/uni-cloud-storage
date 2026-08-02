@@ -240,3 +240,107 @@ async def download_document(
             status_code=503,
             detail="Storage Node is unavailable"
         )
+
+
+# =========================================================
+# LIST MY DOCUMENTS
+# =========================================================
+
+@router.get("/")
+def get_my_documents(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    documents = (
+        db.query(Document)
+        .filter(
+            Document.owner_id == current_user.id
+        )
+        .order_by(
+            Document.created_at.desc()
+        )
+        .all()
+    )
+
+    return [
+        {
+            "id": document.id,
+            "file_name": document.file_name,
+            "file_size": document.file_size,
+            "content_type": document.content_type,
+            "storage_node": document.storage_node,
+            "created_at": document.created_at
+        }
+        for document in documents
+    ]
+
+# =========================================================
+# GET DOCUMENT DETAIL
+# =========================================================
+
+@router.get("/{document_id}")
+def get_document(
+    document_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    document = (
+        db.query(Document)
+        .filter(
+            Document.id == document_id,
+            Document.owner_id == current_user.id
+        )
+        .first()
+    )
+
+    if document is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Document not found"
+        )
+
+    return {
+        "id": document.id,
+        "file_name": document.file_name,
+        "file_size": document.file_size,
+        "content_type": document.content_type,
+        "storage_node": document.storage_node,
+        "created_at": document.created_at
+    }
+
+# =========================================================
+# DELETE DOCUMENT
+# =========================================================
+
+@router.delete("/{document_id}")
+def delete_document(
+    document_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    document = (
+        db.query(Document)
+        .filter(
+            Document.id == document_id,
+            Document.owner_id == current_user.id
+        )
+        .first()
+    )
+
+    if document is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Document not found"
+        )
+
+    db.delete(document)
+
+    db.commit()
+
+    return {
+        "message": "Document deleted successfully",
+        "document_id": document_id
+    }
