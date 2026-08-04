@@ -136,10 +136,7 @@ async def download_document(
     db: Session = Depends(get_db)
 ):
 
-    # -------------------------------------------------
-    # 1. Find document in PostgreSQL
-    # -------------------------------------------------
-
+    # 1. Find document
     document = (
         db.query(Document)
         .filter(Document.id == document_id)
@@ -147,83 +144,43 @@ async def download_document(
     )
 
     if document is None:
-
         raise HTTPException(
             status_code=404,
             detail="Document not found"
         )
 
-    # -------------------------------------------------
-    # 2. Check ownership
-    # -------------------------------------------------
-
-    if document.owner_id != current_user.id:
-
-        raise HTTPException(
-            status_code=403,
-            detail="You do not have permission to download this document"
-        )
-
-    # -------------------------------------------------
-    # 3. Get file name
-    # -------------------------------------------------
-
+    # 2. Get file name
     file_name = os.path.basename(
         document.file_path
     )
 
-    # -------------------------------------------------
-    # 4. Get the Storage Node from Database
-    #
-    # Example:
-    #
-    # Node 1 → http://127.0.0.1:9001
-    # Node 2 → http://127.0.0.1:9002
-    # Node 3 → http://127.0.0.1:9003
-    #
-    # This is the important part.
-    # -------------------------------------------------
-
+    # 3. Get REAL storage node from PostgreSQL
     storage_node = document.storage_node
 
     try:
 
-        # -------------------------------------------------
-        # 5. Request file from the correct Storage Node
-        # -------------------------------------------------
-
+        # 4. Ask correct storage node for file
         async with httpx.AsyncClient() as client:
 
             response = await client.get(
                 f"{storage_node}/storage/download/{file_name}"
             )
 
-        # -------------------------------------------------
-        # 6. File not found
-        # -------------------------------------------------
-
+        # 5. File does not exist
         if response.status_code == 404:
-
             raise HTTPException(
                 status_code=404,
                 detail="File not found in storage"
             )
 
-        # -------------------------------------------------
-        # 7. Storage Node error
-        # -------------------------------------------------
-
+        # 6. Storage node error
         if response.status_code != 200:
-
             raise HTTPException(
                 status_code=500,
                 detail="Storage Node failed to download the file"
             )
 
-        # -------------------------------------------------
-        # 8. Return file to user
-        # -------------------------------------------------
-
+        # 7. Return file
         return StreamingResponse(
             io.BytesIO(response.content),
             media_type=document.content_type,
@@ -235,12 +192,10 @@ async def download_document(
         )
 
     except httpx.RequestError:
-
         raise HTTPException(
             status_code=503,
             detail="Storage Node is unavailable"
         )
-
 
 # =========================================================
 # LIST MY DOCUMENTS
@@ -271,6 +226,41 @@ def get_my_documents(
             "content_type": document.content_type,
             "storage_node": document.storage_node,
             "created_at": document.created_at
+        }
+        for document in documents
+    ]
+
+# ------Lecturer Documents List
+
+@router.get("/lecturer-documents")
+def get_lecturer_documents(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    if current_user.role != "student":
+        raise HTTPException(
+            status_code=403,
+            detail="Only students can access lecturer documents"
+        )
+
+    documents = (
+        db.query(Document)
+        .join(User, Document.owner_id == User.id)
+        .filter(User.role == "lecturer")
+        .order_by(Document.created_at.desc())
+        .all()
+    )
+
+    return [
+        {
+            "id": document.id,
+            "file_name": document.file_name,
+            "file_size": document.file_size,
+            "content_type": document.content_type,
+            "storage_node": document.storage_node,
+            "created_at": document.created_at,
+            "lecturer": document.owner_id
         }
         for document in documents
     ]
@@ -315,18 +305,16 @@ def get_document(
 # =========================================================
 
 @router.delete("/{document_id}")
-def delete_document(
+async def delete_document(
     document_id: int,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
 
+    # 1. Find document
     document = (
         db.query(Document)
-        .filter(
-            Document.id == document_id,
-            Document.owner_id == current_user.id
-        )
+        .filter(Document.id == document_id)
         .first()
     )
 
@@ -336,11 +324,54 @@ def delete_document(
             detail="Document not found"
         )
 
-    db.delete(document)
+    # 2. Check ownership
+    if document.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to delete this document"
+        )
 
-    db.commit()
+    # Save values before deleting database object
+    file_name_from_db = document.file_name
+    file_name = os.path.basename(document.file_path)
+    storage_node = document.storage_node
 
-    return {
-        "message": "Document deleted successfully",
-        "document_id": document_id
-    }
+    try:
+
+        # 3. Delete physical file
+        async with httpx.AsyncClient() as client:
+
+            response = await client.delete(
+                f"{storage_node}/storage/delete/{file_name}"
+            )
+
+        # 4. Storage node error
+        if response.status_code not in [200, 404]:
+            raise HTTPException(
+                status_code=500,
+                detail="Storage Node failed to delete file"
+            )
+
+        # 5. Delete PostgreSQL metadata
+        db.delete(document)
+
+        # 6. Commit
+        db.commit()
+
+        return {
+            "message": "Document deleted successfully",
+            "document_id": document_id,
+            "file_name": file_name_from_db,
+            "storage_node": storage_node
+        }
+
+    except httpx.RequestError:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=503,
+            detail="Storage Node is unavailable"
+        )
+
+

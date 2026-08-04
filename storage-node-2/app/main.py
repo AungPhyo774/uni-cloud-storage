@@ -63,3 +63,21 @@ def download_file(file_name: str):
         path=file_path,
         filename=file_name
     )
+
+@app.delete("/storage/delete/{file_name}")
+def delete_file(file_name: str):
+
+    file_path = STORAGE_DIR / file_name
+
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="File not found"
+        )
+
+    file_path.unlink()
+
+    return {
+        "message": "File deleted successfully",
+        "file_name": file_name
+    }
