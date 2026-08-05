@@ -20,6 +20,8 @@ async def upload_to_storage(
 
     storage_node = STORAGE_NODES[current_node]
 
+    print(storage_node)
+    
     current_node = (
         current_node + 1
     ) % len(STORAGE_NODES)

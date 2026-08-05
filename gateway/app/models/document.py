@@ -1,10 +1,11 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.sql import func
 
 from app.database.base import Base
 
 
 class Document(Base):
+
     __tablename__ = "documents"
 
     id = Column(
@@ -13,7 +14,15 @@ class Document(Base):
         index=True
     )
 
+    # Student who uploaded the document
     owner_id = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    # Lecturer who is allowed to receive/download it
+    lecturer_id = Column(
         Integer,
         ForeignKey("users.id"),
         nullable=False

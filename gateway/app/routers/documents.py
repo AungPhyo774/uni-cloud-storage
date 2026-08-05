@@ -30,33 +30,61 @@ router = APIRouter(
 # =========================================================
 # UPLOAD DOCUMENT
 # =========================================================
-
-@router.post("/upload")
+@router.post("/upload-to-lecturer/{lecturer_id}")
 async def upload_document(
+    lecturer_id: int,
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
 
+    # -------------------------------------------------
+    # 1. Only students can upload documents to lecturers
+    # -------------------------------------------------
+
+    if current_user.role != "student":
+        raise HTTPException(
+            status_code=403,
+            detail="Only students can upload documents to lecturers"
+        )
+
+    # -------------------------------------------------
+    # 2. Find selected lecturer
+    # -------------------------------------------------
+
+    lecturer = (
+        db.query(User)
+        .filter(
+            User.id == lecturer_id,
+            User.role == "lecturer"
+        )
+        .first()
+    )
+
+    if lecturer is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Lecturer not found"
+        )
+
+    # -------------------------------------------------
+    # 3. Read uploaded file
+    # -------------------------------------------------
+
+    file_content = await file.read()
+
+    if not file_content:
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded file is empty"
+        )
+
     try:
 
         # -------------------------------------------------
-        # 1. Read uploaded file
-        # -------------------------------------------------
-
-        file_content = await file.read()
-
-        if not file_content:
-            raise HTTPException(
-                status_code=400,
-                detail="Uploaded file is empty"
-            )
-
-        # -------------------------------------------------
-        # 2. Upload to Storage Node
+        # 4. Upload to Storage Node
         #
-        # storage_service.py handles Round Robin:
-        #
+        # Round Robin:
         # Node 1 → Node 2 → Node 3 → Node 1
         # -------------------------------------------------
 
@@ -67,29 +95,26 @@ async def upload_document(
         )
 
         # -------------------------------------------------
-        # 3. Get selected Storage Node
+        # 5. Get selected storage node
         # -------------------------------------------------
 
         storage_node = storage_result["storage_node"]
 
         # -------------------------------------------------
-        # 4. Get Storage Node response
+        # 6. Get storage response
         # -------------------------------------------------
 
         node_response = storage_result["response"]
 
-        # -------------------------------------------------
-        # 5. Get stored file path
-        # -------------------------------------------------
-
         file_path = node_response["file_path"]
 
         # -------------------------------------------------
-        # 6. Save metadata to PostgreSQL
+        # 7. Save metadata
         # -------------------------------------------------
 
         new_document = Document(
             owner_id=current_user.id,
+            lecturer_id=lecturer_id,
             file_name=file.filename,
             file_path=file_path,
             file_size=len(file_content),
@@ -98,23 +123,20 @@ async def upload_document(
         )
 
         db.add(new_document)
-
         db.commit()
-
         db.refresh(new_document)
 
         # -------------------------------------------------
-        # 7. Return response
+        # 8. Response
         # -------------------------------------------------
 
         return {
             "message": "File uploaded successfully",
             "document_id": new_document.id,
             "file_name": new_document.file_name,
-            "file_size": new_document.file_size,
-            "content_type": new_document.content_type,
-            "storage_node": new_document.storage_node,
-            "user": current_user.full_name
+            "student": current_user.full_name,
+            "lecturer": lecturer.full_name,
+            "storage_node": new_document.storage_node
         }
 
     except httpx.RequestError:
@@ -124,11 +146,49 @@ async def upload_document(
             detail="Storage Node is unavailable"
         )
 
+# ---------------------------------------------------------
+# Get Lecturer List
+# Students can use this list when uploading documents
+# ---------------------------------------------------------
 
+@router.get("/lecturers-list")
+def get_lecturers(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    # -----------------------------------------------------
+    # 1. Only students can access lecturer list
+    # -----------------------------------------------------
+
+    if current_user.role != "student":
+        raise HTTPException(
+            status_code=403,
+            detail="Only students can access lecturer list"
+        )
+
+    # -----------------------------------------------------
+    # 2. Get all lecturers
+    # -----------------------------------------------------
+
+    lecturers = (
+        db.query(User)
+        .filter(
+            User.role == "lecturer"
+        )
+        .all()
+    )
+    return [
+        {
+            "id": lecturer.id,
+            "full_name": lecturer.full_name,
+            "email": lecturer.email
+        }
+        for lecturer in lecturers
+    ]
 # =========================================================
 # DOWNLOAD DOCUMENT
 # =========================================================
-
 @router.get("/{document_id}/download")
 async def download_document(
     document_id: int,
@@ -136,7 +196,10 @@ async def download_document(
     db: Session = Depends(get_db)
 ):
 
+    # -------------------------------------------------
     # 1. Find document
+    # -------------------------------------------------
+
     document = (
         db.query(Document)
         .filter(Document.id == document_id)
@@ -149,38 +212,97 @@ async def download_document(
             detail="Document not found"
         )
 
-    # 2. Get file name
+    # -------------------------------------------------
+    # 2. Permission checking
+    # -------------------------------------------------
+
+    allowed = False
+
+    # ---------------------------------------------
+    # Student
+    # ---------------------------------------------
+
+    if current_user.role == "student":
+
+        # Student can download own document
+        if document.owner_id == current_user.id:
+            allowed = True
+
+    # ---------------------------------------------
+    # Lecturer
+    # ---------------------------------------------
+
+    elif current_user.role == "lecturer":
+
+        # Lecturer can download:
+        # 1. Own documents
+        # 2. Documents specifically sent to them
+        if document.owner_id == current_user.id:
+            allowed = True
+
+        elif document.lecturer_id == current_user.id:
+            allowed = True
+
+    # -------------------------------------------------
+    # 3. Deny access
+    # -------------------------------------------------
+
+    if not allowed:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to download this document"
+        )
+
+    # -------------------------------------------------
+    # 4. Get file name
+    # -------------------------------------------------
+
     file_name = os.path.basename(
         document.file_path
     )
 
-    # 3. Get REAL storage node from PostgreSQL
+    # -------------------------------------------------
+    # 5. Get correct Storage Node
+    # -------------------------------------------------
+
     storage_node = document.storage_node
 
     try:
 
-        # 4. Ask correct storage node for file
+        # -------------------------------------------------
+        # 6. Request file from correct node
+        # -------------------------------------------------
+
         async with httpx.AsyncClient() as client:
 
             response = await client.get(
                 f"{storage_node}/storage/download/{file_name}"
             )
 
-        # 5. File does not exist
+        # -------------------------------------------------
+        # 7. File not found
+        # -------------------------------------------------
+
         if response.status_code == 404:
             raise HTTPException(
                 status_code=404,
                 detail="File not found in storage"
             )
 
-        # 6. Storage node error
+        # -------------------------------------------------
+        # 8. Storage error
+        # -------------------------------------------------
+
         if response.status_code != 200:
             raise HTTPException(
                 status_code=500,
                 detail="Storage Node failed to download the file"
             )
 
-        # 7. Return file
+        # -------------------------------------------------
+        # 9. Return file
+        # -------------------------------------------------
+
         return StreamingResponse(
             io.BytesIO(response.content),
             media_type=document.content_type,
@@ -192,16 +314,16 @@ async def download_document(
         )
 
     except httpx.RequestError:
+
         raise HTTPException(
             status_code=503,
             detail="Storage Node is unavailable"
-        )
-
+        )    
 # =========================================================
 # LIST MY DOCUMENTS
 # =========================================================
 
-@router.get("/")
+@router.get("/my-all-documents")
 def get_my_documents(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -374,4 +496,93 @@ async def delete_document(
             detail="Storage Node is unavailable"
         )
 
+#lecturer upload document
+@router.post("/lecturer/upload")
+async def lecturer_upload_document(
+    file: UploadFile = File(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
 
+    # -------------------------------------------------
+    # 1. Only lecturers can use this endpoint
+    # -------------------------------------------------
+
+    if current_user.role != "lecturer":
+        raise HTTPException(
+            status_code=403,
+            detail="Only lecturers can upload documents"
+        )
+
+    # -------------------------------------------------
+    # 2. Read file
+    # -------------------------------------------------
+
+    file_content = await file.read()
+
+    if not file_content:
+        raise HTTPException(
+            status_code=400,
+            detail="Uploaded file is empty"
+        )
+
+    try:
+
+        # -------------------------------------------------
+        # 3. Send to distributed storage
+        #
+        # Node 1 → Node 2 → Node 3 → Node 1
+        # -------------------------------------------------
+
+        storage_result = await upload_to_storage(
+            file_content,
+            file.filename,
+            file.content_type
+        )
+
+        # -------------------------------------------------
+        # 4. Get selected Storage Node
+        # -------------------------------------------------
+
+        storage_node = storage_result["storage_node"]
+
+        node_response = storage_result["response"]
+
+        file_path = node_response["file_path"]
+
+        # -------------------------------------------------
+        # 5. Save metadata
+        #
+        # Lecturer is the owner.
+        # Students will be allowed to download this
+        # document.
+        # -------------------------------------------------
+
+        new_document = Document(
+            owner_id=current_user.id,
+            lecturer_id=current_user.id,
+            file_name=file.filename,
+            file_path=file_path,
+            file_size=len(file_content),
+            content_type=file.content_type,
+            storage_node=storage_node
+        )
+
+        db.add(new_document)
+        db.commit()
+        db.refresh(new_document)
+
+        return {
+            "message": "Lecturer document uploaded successfully",
+            "document_id": new_document.id,
+            "file_name": new_document.file_name,
+            "lecturer": current_user.full_name,
+            "storage_node": new_document.storage_node
+        }
+
+    except httpx.RequestError:
+
+        raise HTTPException(
+            status_code=503,
+            detail="Storage Node is unavailable"
+        )
