@@ -106,6 +106,8 @@ async def upload_document(
 
         node_response = storage_result["response"]
 
+        replica_node = storage_result["replica_node"]
+
         file_path = node_response["file_path"]
 
         # -------------------------------------------------
@@ -119,7 +121,8 @@ async def upload_document(
             file_path=file_path,
             file_size=len(file_content),
             content_type=file.content_type,
-            storage_node=storage_node
+            storage_node=storage_node,
+            replica_node=replica_node
         )
 
         db.add(new_document)
@@ -546,6 +549,8 @@ async def lecturer_upload_document(
 
         storage_node = storage_result["storage_node"]
 
+        replica_node = storage_result["replica_node"]
+        
         node_response = storage_result["response"]
 
         file_path = node_response["file_path"]
@@ -565,7 +570,8 @@ async def lecturer_upload_document(
             file_path=file_path,
             file_size=len(file_content),
             content_type=file.content_type,
-            storage_node=storage_node
+            storage_node=storage_node,
+            replica_node=replica_node
         )
 
         db.add(new_document)

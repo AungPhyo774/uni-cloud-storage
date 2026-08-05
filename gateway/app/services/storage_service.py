@@ -18,10 +18,28 @@ async def upload_to_storage(
 
     global current_node
 
-    storage_node = STORAGE_NODES[current_node]
+    # -----------------------------------------
+    # 1. Select Primary Node
+    # -----------------------------------------
 
-    print(storage_node)
-    
+    primary_index = current_node
+
+    primary_node = STORAGE_NODES[primary_index]
+
+    # -----------------------------------------
+    # 2. Select Replica Node
+    # -----------------------------------------
+
+    replica_index = (
+        primary_index + 1
+    ) % len(STORAGE_NODES)
+
+    replica_node = STORAGE_NODES[replica_index]
+
+    # -----------------------------------------
+    # 3. Move Round Robin pointer
+    # -----------------------------------------
+
     current_node = (
         current_node + 1
     ) % len(STORAGE_NODES)
@@ -36,17 +54,36 @@ async def upload_to_storage(
 
     async with httpx.AsyncClient() as client:
 
-        response = await client.post(
-            f"{storage_node}/storage/upload",
+        # -----------------------------------------
+        # 4. Upload to Primary
+        # -----------------------------------------
+
+        primary_response = await client.post(
+            f"{primary_node}/storage/upload",
             files=files
         )
 
-    if response.status_code != 200:
-        raise Exception(
-            "Storage node failed"
+        if primary_response.status_code != 200:
+            raise Exception(
+                "Primary storage node failed"
+            )
+
+        # -----------------------------------------
+        # 5. Upload to Replica
+        # -----------------------------------------
+
+        replica_response = await client.post(
+            f"{replica_node}/storage/upload",
+            files=files
         )
 
+        if replica_response.status_code != 200:
+            raise Exception(
+                "Replica storage node failed"
+            )
+
     return {
-        "storage_node": storage_node,
-        "response": response.json()
+        "storage_node": primary_node,
+        "replica_node": replica_node,
+        "response": primary_response.json()
     }

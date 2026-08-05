@@ -53,6 +53,11 @@ class Document(Base):
         nullable=False
     )
 
+    replica_node = Column(
+        String,
+        nullable=True
+    )
+
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now()
