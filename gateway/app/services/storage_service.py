@@ -7,8 +7,42 @@ STORAGE_NODES = [
     "http://127.0.0.1:9003"
 ]
 
+
 current_node = 0
 
+
+# =========================================================
+# CHECK HEALTHY NODES
+# =========================================================
+
+async def get_healthy_nodes():
+
+    healthy_nodes = []
+
+    async with httpx.AsyncClient(timeout=3.0) as client:
+
+        for node in STORAGE_NODES:
+
+            try:
+
+                response = await client.get(
+                    f"{node}/health"
+                )
+
+                if response.status_code == 200:
+
+                    healthy_nodes.append(node)
+
+            except httpx.RequestError:
+
+                pass
+
+    return healthy_nodes
+
+
+# =========================================================
+# UPLOAD WITH PRIMARY + REPLICA
+# =========================================================
 
 async def upload_to_storage(
     file_content: bytes,
@@ -18,31 +52,59 @@ async def upload_to_storage(
 
     global current_node
 
-    # -----------------------------------------
-    # 1. Select Primary Node
-    # -----------------------------------------
+    # -----------------------------------------------------
+    # 1. Get healthy nodes
+    # -----------------------------------------------------
 
-    primary_index = current_node
+    healthy_nodes = await get_healthy_nodes()
 
-    primary_node = STORAGE_NODES[primary_index]
+    if not healthy_nodes:
 
-    # -----------------------------------------
-    # 2. Select Replica Node
-    # -----------------------------------------
+        raise Exception(
+            "No storage nodes are available"
+        )
 
-    replica_index = (
-        primary_index + 1
-    ) % len(STORAGE_NODES)
+    # -----------------------------------------------------
+    # 2. Select Primary Node using Round Robin
+    # -----------------------------------------------------
 
-    replica_node = STORAGE_NODES[replica_index]
+    primary_index = (
+        current_node % len(healthy_nodes)
+    )
 
-    # -----------------------------------------
+    storage_node = healthy_nodes[
+        primary_index
+    ]
+
+    # -----------------------------------------------------
     # 3. Move Round Robin pointer
-    # -----------------------------------------
+    # -----------------------------------------------------
 
     current_node = (
         current_node + 1
-    ) % len(STORAGE_NODES)
+    ) % len(healthy_nodes)
+
+    # -----------------------------------------------------
+    # 4. Select Replica Node
+    #
+    # Replica must be different from Primary
+    # -----------------------------------------------------
+
+    replica_node = None
+
+    if len(healthy_nodes) >= 2:
+
+        replica_index = (
+            primary_index + 1
+        ) % len(healthy_nodes)
+
+        replica_node = healthy_nodes[
+            replica_index
+        ]
+
+    # -----------------------------------------------------
+    # 5. Prepare file
+    # -----------------------------------------------------
 
     files = {
         "file": (
@@ -52,38 +114,56 @@ async def upload_to_storage(
         )
     }
 
-    async with httpx.AsyncClient() as client:
+    # -----------------------------------------------------
+    # 6. Upload to Primary Node
+    # -----------------------------------------------------
 
-        # -----------------------------------------
-        # 4. Upload to Primary
-        # -----------------------------------------
+    async with httpx.AsyncClient(timeout=30.0) as client:
 
         primary_response = await client.post(
-            f"{primary_node}/storage/upload",
+            f"{storage_node}/storage/upload",
             files=files
         )
 
         if primary_response.status_code != 200:
+
             raise Exception(
                 "Primary storage node failed"
             )
 
-        # -----------------------------------------
-        # 5. Upload to Replica
-        # -----------------------------------------
+        # -------------------------------------------------
+        # 7. Upload same file to Replica Node
+        # -------------------------------------------------
 
-        replica_response = await client.post(
-            f"{replica_node}/storage/upload",
-            files=files
-        )
+        if replica_node is not None:
 
-        if replica_response.status_code != 200:
-            raise Exception(
-                "Replica storage node failed"
+            replica_files = {
+                "file": (
+                    file_name,
+                    file_content,
+                    content_type
+                )
+            }
+
+            replica_response = await client.post(
+                f"{replica_node}/storage/upload",
+                files=replica_files
             )
 
+            if replica_response.status_code != 200:
+
+                # Important:
+                # Primary succeeded but replica failed.
+                raise Exception(
+                    "Replica storage node failed"
+                )
+
+    # -----------------------------------------------------
+    # 8. Return both nodes
+    # -----------------------------------------------------
+
     return {
-        "storage_node": primary_node,
+        "storage_node": storage_node,
         "replica_node": replica_node,
         "response": primary_response.json()
     }

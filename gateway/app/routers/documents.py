@@ -142,11 +142,11 @@ async def upload_document(
             "storage_node": new_document.storage_node
         }
 
-    except httpx.RequestError:
+    except Exception as e:
 
         raise HTTPException(
             status_code=503,
-            detail="Storage Node is unavailable"
+            detail=str(e)
         )
 
 # ---------------------------------------------------------
