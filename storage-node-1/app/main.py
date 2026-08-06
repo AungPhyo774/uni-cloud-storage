@@ -81,3 +81,9 @@ def delete_file(file_name: str):
         "message": "File deleted successfully",
         "file_name": file_name
     }
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "healthy"
+    }
