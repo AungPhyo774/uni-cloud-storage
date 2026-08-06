@@ -216,39 +216,44 @@ async def download_document(
         )
 
     # -------------------------------------------------
-    # 2. Permission checking
+    # 2. Find owner
+    # -------------------------------------------------
+
+    owner = (
+        db.query(User)
+        .filter(User.id == document.owner_id)
+        .first()
+    )
+
+    if owner is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Document owner not found"
+        )
+
+    # -------------------------------------------------
+    # 3. Permission
     # -------------------------------------------------
 
     allowed = False
 
-    # ---------------------------------------------
-    # Student
-    # ---------------------------------------------
+    # Owner can download
+    if document.owner_id == current_user.id:
+        allowed = True
 
-    if current_user.role == "student":
+    # Student can download lecturer documents
+    elif (
+        current_user.role == "student"
+        and owner.role == "lecturer"
+    ):
+        allowed = True
 
-        # Student can download own document
-        if document.owner_id == current_user.id:
-            allowed = True
-
-    # ---------------------------------------------
-    # Lecturer
-    # ---------------------------------------------
-
-    elif current_user.role == "lecturer":
-
-        # Lecturer can download:
-        # 1. Own documents
-        # 2. Documents specifically sent to them
-        if document.owner_id == current_user.id:
-            allowed = True
-
-        elif document.lecturer_id == current_user.id:
-            allowed = True
-
-    # -------------------------------------------------
-    # 3. Deny access
-    # -------------------------------------------------
+    # Lecturer can download document shared with them
+    elif (
+        current_user.role == "lecturer"
+        and document.lecturer_id == current_user.id
+    ):
+        allowed = True
 
     if not allowed:
         raise HTTPException(
@@ -257,7 +262,7 @@ async def download_document(
         )
 
     # -------------------------------------------------
-    # 4. Get file name
+    # 4. File name
     # -------------------------------------------------
 
     file_name = os.path.basename(
@@ -265,63 +270,67 @@ async def download_document(
     )
 
     # -------------------------------------------------
-    # 5. Get correct Storage Node
+    # 5. Primary + Replica
     # -------------------------------------------------
 
-    storage_node = document.storage_node
+    primary_node = document.storage_node
+    replica_node = document.replica_node
 
-    try:
+    nodes_to_try = [
+        primary_node,
+        replica_node
+    ]
 
-        # -------------------------------------------------
-        # 6. Request file from correct node
-        # -------------------------------------------------
+    # -------------------------------------------------
+    # 6. Try Primary first
+    #    If failed → try Replica
+    # -------------------------------------------------
 
-        async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=10.0) as client:
 
-            response = await client.get(
-                f"{storage_node}/storage/download/{file_name}"
-            )
+        for storage_node in nodes_to_try:
 
-        # -------------------------------------------------
-        # 7. File not found
-        # -------------------------------------------------
+            if not storage_node:
+                continue
 
-        if response.status_code == 404:
-            raise HTTPException(
-                status_code=404,
-                detail="File not found in storage"
-            )
+            try:
 
-        # -------------------------------------------------
-        # 8. Storage error
-        # -------------------------------------------------
-
-        if response.status_code != 200:
-            raise HTTPException(
-                status_code=500,
-                detail="Storage Node failed to download the file"
-            )
-
-        # -------------------------------------------------
-        # 9. Return file
-        # -------------------------------------------------
-
-        return StreamingResponse(
-            io.BytesIO(response.content),
-            media_type=document.content_type,
-            headers={
-                "Content-Disposition": (
-                    f'attachment; filename="{document.file_name}"'
+                response = await client.get(
+                    f"{storage_node}/storage/download/{file_name}"
                 )
-            }
-        )
 
-    except httpx.RequestError:
+                # File successfully downloaded
+                if response.status_code == 200:
 
-        raise HTTPException(
-            status_code=503,
-            detail="Storage Node is unavailable"
-        )    
+                    return StreamingResponse(
+                        io.BytesIO(response.content),
+                        media_type=document.content_type,
+                        headers={
+                            "Content-Disposition": (
+                                f'attachment; '
+                                f'filename="{document.file_name}"'
+                            )
+                        }
+                    )
+
+                # Try next node
+                if response.status_code in [404, 500, 502, 503]:
+                    continue
+
+            except httpx.RequestError:
+
+                # Node unavailable
+                continue
+
+    # -------------------------------------------------
+    # 7. Both nodes failed
+    # -------------------------------------------------
+
+    raise HTTPException(
+        status_code=503,
+        detail="Document is unavailable. Both storage nodes failed."
+    )
+  
 # =========================================================
 # LIST MY DOCUMENTS
 # =========================================================
