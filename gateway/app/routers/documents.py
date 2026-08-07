@@ -469,7 +469,6 @@ def get_document(
 # =========================================================
 # DELETE DOCUMENT
 # =========================================================
-
 @router.delete("/{document_id}")
 async def delete_document(
     document_id: int,
@@ -477,7 +476,10 @@ async def delete_document(
     db: Session = Depends(get_db)
 ):
 
+    # ============================================
     # 1. Find document
+    # ============================================
+
     document = (
         db.query(Document)
         .filter(Document.id == document_id)
@@ -490,50 +492,95 @@ async def delete_document(
             detail="Document not found"
         )
 
-    # 2. Check ownership
+    # ============================================
+    # 2. Permission check
+    # ============================================
+
     if document.owner_id != current_user.id:
+
         raise HTTPException(
             status_code=403,
             detail="You do not have permission to delete this document"
         )
 
-    # Save values before deleting database object
-    file_name_from_db = document.file_name
-    file_name = os.path.basename(document.file_path)
-    storage_node = document.storage_node
+    # ============================================
+    # 3. Get file name
+    # ============================================
+
+    file_name = os.path.basename(
+        document.file_path
+    )
+
+    # ============================================
+    # 4. Get Primary + Replica Node
+    # ============================================
+
+    primary_node = document.storage_node
+    replica_node = document.replica_node
 
     try:
 
-        # 3. Delete physical file
         async with httpx.AsyncClient() as client:
 
-            response = await client.delete(
-                f"{storage_node}/storage/delete/{file_name}"
+            # ========================================
+            # 5. Delete Primary
+            # ========================================
+
+            primary_response = await client.delete(
+                f"{primary_node}/storage/delete/{file_name}"
             )
 
-        # 4. Storage node error
-        if response.status_code not in [200, 404]:
+            # ========================================
+            # 6. Delete Replica
+            # ========================================
+
+            replica_response = await client.delete(
+                f"{replica_node}/storage/delete/{file_name}"
+            )
+
+        # ============================================
+        # 7. Check Primary
+        # ============================================
+
+        if primary_response.status_code not in [200, 404]:
+
             raise HTTPException(
                 status_code=500,
-                detail="Storage Node failed to delete file"
+                detail="Failed to delete file from primary node"
             )
 
-        # 5. Delete PostgreSQL metadata
+        # ============================================
+        # 8. Check Replica
+        # ============================================
+
+        if replica_response.status_code not in [200, 404]:
+
+            raise HTTPException(
+                status_code=500,
+                detail="Failed to delete file from replica node"
+            )
+
+        # ============================================
+        # 9. Delete PostgreSQL metadata
+        # ============================================
+
         db.delete(document)
 
-        # 6. Commit
         db.commit()
+
+        # ============================================
+        # 10. Return response
+        # ============================================
 
         return {
             "message": "Document deleted successfully",
             "document_id": document_id,
-            "file_name": file_name_from_db,
-            "storage_node": storage_node
+            "file_name": file_name,
+            "primary_node": primary_node,
+            "replica_node": replica_node
         }
 
     except httpx.RequestError:
-
-        db.rollback()
 
         raise HTTPException(
             status_code=503,

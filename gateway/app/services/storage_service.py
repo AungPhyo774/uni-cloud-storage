@@ -167,3 +167,39 @@ async def upload_to_storage(
         "replica_node": replica_node,
         "response": primary_response.json()
     }
+
+# Download from all nodes
+async def download_from_storage(
+    file_name: str,
+    primary_node: str,
+    replica_node: str
+):
+    nodes = [
+        primary_node,
+        replica_node
+    ]
+
+    async with httpx.AsyncClient(timeout=10.0) as client:
+
+        for node in nodes:
+
+            if not node:
+                continue
+
+            try:
+
+                response = await client.get(
+                    f"{node}/storage/download/{file_name}"
+                )
+
+                if response.status_code == 200:
+
+                    return {
+                        "response": response,
+                        "storage_node": node
+                    }
+
+            except httpx.RequestError:
+                continue
+
+    return None

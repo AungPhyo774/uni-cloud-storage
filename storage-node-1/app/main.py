@@ -82,6 +82,7 @@ def delete_file(file_name: str):
         "file_name": file_name
     }
 
+# checking nodes healthy ------------
 @app.get("/health")
 def health_check():
     return {
