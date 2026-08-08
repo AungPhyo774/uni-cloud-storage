@@ -11,6 +11,12 @@ from fastapi import (
     HTTPException
 )
 
+from app.services.storage_service import (
+    check_node_health,
+    check_file_on_node,
+    recover_file_to_node
+)
+
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
@@ -680,3 +686,145 @@ async def lecturer_upload_document(
             status_code=503,
             detail="Storage Node is unavailable"
         )
+
+
+# build Recovery Endpoint
+@router.post("/recovery/{document_id}")
+async def recover_document(
+    document_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    # -----------------------------------------
+    # 1. Only lecturer/admin should recover
+    # -----------------------------------------
+
+    if current_user.role != "lecturer":
+        raise HTTPException(
+            status_code=403,
+            detail="Only lecturers can perform recovery"
+        )
+
+    # -----------------------------------------
+    # 2. Find document
+    # -----------------------------------------
+
+    document = (
+        db.query(Document)
+        .filter(
+            Document.id == document_id
+        )
+        .first()
+    )
+
+    if document is None:
+
+        raise HTTPException(
+            status_code=404,
+            detail="Document not found"
+        )
+
+    primary = document.storage_node
+    replica = document.replica_node
+
+    file_name = os.path.basename(
+        document.file_path
+    )
+
+    # -----------------------------------------
+    # 3. Check primary
+    # -----------------------------------------
+
+    primary_online = await check_node_health(
+        primary
+    )
+
+    # -----------------------------------------
+    # 4. Check replica
+    # -----------------------------------------
+
+    replica_online = await check_node_health(
+        replica
+    )
+
+    if not primary_online and not replica_online:
+
+        raise HTTPException(
+            status_code=503,
+            detail="Both storage nodes are offline"
+        )
+
+    # -----------------------------------------
+    # 5. Check whether primary has file
+    # -----------------------------------------
+
+    primary_has_file = False
+
+    if primary_online:
+
+        primary_has_file = await check_file_on_node(
+            primary,
+            file_name
+        )
+
+    # -----------------------------------------
+    # 6. Already healthy
+    # -----------------------------------------
+
+    if primary_has_file:
+
+        return {
+            "message": "No recovery needed",
+            "primary": primary,
+            "replica": replica
+        }
+
+    # -----------------------------------------
+    # 7. Primary missing file
+    # -----------------------------------------
+
+    if not replica_online:
+
+        raise HTTPException(
+            status_code=503,
+            detail="Replica node is offline"
+        )
+
+    replica_has_file = await check_file_on_node(
+        replica,
+        file_name
+    )
+
+    if not replica_has_file:
+
+        raise HTTPException(
+            status_code=404,
+            detail="File does not exist on replica"
+        )
+
+    # -----------------------------------------
+    # 8. Recover replica → primary
+    # -----------------------------------------
+
+    success = await recover_file_to_node(
+        source_node=replica,
+        target_node=primary,
+        file_name=file_name,
+        content_type=document.content_type
+    )
+
+    if not success:
+
+        raise HTTPException(
+            status_code=500,
+            detail="Automatic recovery failed"
+        )
+
+    return {
+        "message": "Document recovered successfully",
+        "document_id": document.id,
+        "file_name": document.file_name,
+        "recovered_from": replica,
+        "recovered_to": primary
+    }

@@ -88,3 +88,13 @@ def health_check():
     return {
         "status": "healthy"
     }
+
+@app.get("/storage/exists/{file_name}")
+def check_file_exists(file_name: str):
+
+    file_path = STORAGE_DIR / file_name
+
+    return {
+        "file_name": file_name,
+        "exists": file_path.exists()
+    }

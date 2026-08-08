@@ -203,3 +203,111 @@ async def download_from_storage(
                 continue
 
     return None
+
+
+# add the node health function for data existing
+async def check_node_health(node: str):
+
+    try:
+
+        async with httpx.AsyncClient(
+            timeout=3.0
+        ) as client:
+
+            response = await client.get(
+                f"{node}/"
+            )
+
+        return response.status_code == 200
+
+    except httpx.RequestError:
+
+        return False
+
+
+# check the pdf file exist or not
+async def check_file_on_node(
+    node: str,
+    file_name: str
+):
+
+    try:
+
+        async with httpx.AsyncClient(
+            timeout=5.0
+        ) as client:
+
+            response = await client.get(
+                f"{node}/storage/exists/{file_name}"
+            )
+
+        if response.status_code != 200:
+            return False
+
+        result = response.json()
+
+        return result.get("exists", False)
+
+    except httpx.RequestError:
+
+        return False
+
+
+# Recovery function 
+async def recover_file_to_node(
+    source_node: str,
+    target_node: str,
+    file_name: str,
+    content_type: str
+):
+
+    try:
+
+        # -----------------------------------------
+        # 1. Download file from source node
+        # -----------------------------------------
+
+        async with httpx.AsyncClient(
+            timeout=30.0
+        ) as client:
+
+            response = await client.get(
+                f"{source_node}/storage/download/{file_name}"
+            )
+
+        if response.status_code != 200:
+
+            return False
+
+        file_content = response.content
+
+        # -----------------------------------------
+        # 2. Upload file to target node
+        # -----------------------------------------
+
+        files = {
+            "file": (
+                file_name,
+                file_content,
+                content_type
+            )
+        }
+
+        async with httpx.AsyncClient(
+            timeout=30.0
+        ) as client:
+
+            upload_response = await client.post(
+                f"{target_node}/storage/upload",
+                files=files
+            )
+
+        if upload_response.status_code != 200:
+
+            return False
+
+        return True
+
+    except httpx.RequestError:
+
+        return False
