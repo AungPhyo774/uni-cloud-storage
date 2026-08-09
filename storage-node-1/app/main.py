@@ -1,6 +1,9 @@
+import hashlib
+
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import FileResponse
 from pathlib import Path
+
 
 
 app = FastAPI(
@@ -123,4 +126,36 @@ async def restore_file(
     return {
         "message": "File restored successfully",
         "file_name": file_name
+    }
+
+
+@app.get("/storage/checksum/{file_name}")
+def get_file_checksum(file_name: str):
+
+    file_path = STORAGE_DIR / file_name
+
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="File not found"
+        )
+
+    sha256 = hashlib.sha256()
+
+    try:
+
+        with open(file_path, "rb") as file:
+
+            while chunk := file.read(1024 * 1024):
+                sha256.update(chunk)
+
+    except Exception:
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to calculate checksum"
+        )
+
+    return {
+        "file_name": file_name,
+        "checksum": sha256.hexdigest()
     }

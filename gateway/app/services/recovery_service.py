@@ -1,12 +1,21 @@
 import os
+import hashlib
 import httpx
 
 from app.database.session import SessionLocal
 from app.models.document import Document
 
 
+# =========================================================
+# CONFIGURATION
+# =========================================================
+
 CHECK_INTERVAL = 30
 
+
+# =========================================================
+# CHECK FILE EXISTS
+# =========================================================
 
 async def check_file_exists(
     storage_node: str,
@@ -15,7 +24,9 @@ async def check_file_exists(
 
     try:
 
-        async with httpx.AsyncClient(timeout=10) as client:
+        async with httpx.AsyncClient(
+            timeout=10
+        ) as client:
 
             response = await client.get(
                 f"{storage_node}/storage/check/{file_name}"
@@ -26,19 +37,28 @@ async def check_file_exists(
 
         data = response.json()
 
-        return data.get("exists", False)
+        return data.get(
+            "exists",
+            False
+        )
 
     except httpx.RequestError:
 
         return False
 
 
+# =========================================================
+# DOWNLOAD FILE FROM NODE
+# =========================================================
+
 async def download_from_node(
     storage_node: str,
     file_name: str
 ):
 
-    async with httpx.AsyncClient(timeout=30) as client:
+    async with httpx.AsyncClient(
+        timeout=30
+    ) as client:
 
         response = await client.get(
             f"{storage_node}/storage/download/{file_name}"
@@ -47,12 +67,17 @@ async def download_from_node(
     if response.status_code != 200:
 
         raise Exception(
-            f"Failed to download {file_name} "
+            f"Failed to download "
+            f"{file_name} "
             f"from {storage_node}"
         )
 
     return response.content
 
+
+# =========================================================
+# RESTORE FILE TO NODE
+# =========================================================
 
 async def restore_to_node(
     storage_node: str,
@@ -68,7 +93,9 @@ async def restore_to_node(
         )
     }
 
-    async with httpx.AsyncClient(timeout=30) as client:
+    async with httpx.AsyncClient(
+        timeout=30
+    ) as client:
 
         response = await client.post(
             f"{storage_node}/storage/restore/{file_name}",
@@ -78,13 +105,69 @@ async def restore_to_node(
     if response.status_code != 200:
 
         raise Exception(
-            f"Failed to restore {file_name} "
+            f"Failed to restore "
+            f"{file_name} "
             f"to {storage_node}"
         )
 
 
+# =========================================================
+# GET SHA-256 CHECKSUM FROM STORAGE NODE
+# =========================================================
+
+async def get_node_checksum(
+    storage_node: str,
+    file_name: str
+):
+
+    try:
+
+        async with httpx.AsyncClient(
+            timeout=30
+        ) as client:
+
+            response = await client.get(
+                f"{storage_node}/storage/checksum/{file_name}"
+            )
+
+        if response.status_code == 404:
+
+            return None
+
+        if response.status_code != 200:
+
+            return None
+
+        data = response.json()
+
+        return data.get("checksum")
+
+    except httpx.RequestError:
+
+        return None
+
+
+# =========================================================
+# CALCULATE SHA-256 LOCALLY
+#
+# Used after downloading replica.
+# =========================================================
+
+def calculate_checksum(
+    file_content: bytes
+):
+
+    return hashlib.sha256(
+        file_content
+    ).hexdigest()
+
+
+# =========================================================
+# RECOVER DOCUMENT
+# =========================================================
+
 async def recover_document(
-    document
+    document: Document
 ):
 
     file_name = os.path.basename(
@@ -98,46 +181,32 @@ async def recover_document(
         f"[RECOVERY] Checking {file_name}"
     )
 
-    # ---------------------------------------------
-    # Check primary
-    # ---------------------------------------------
+    # =====================================================
+    # 1. CHECK PRIMARY CHECKSUM
+    # =====================================================
 
-    primary_exists = await check_file_exists(
+    primary_checksum = await get_node_checksum(
         primary,
         file_name
     )
 
-    # ---------------------------------------------
-    # Primary is healthy
-    # ---------------------------------------------
+    # =====================================================
+    # 2. CHECK REPLICA CHECKSUM
+    # =====================================================
 
-    if primary_exists:
-
-        print(
-            f"[OK] Primary has {file_name}"
-        )
-
-        return
-
-    # ---------------------------------------------
-    # Primary missing
-    # ---------------------------------------------
-
-    print(
-        f"[WARNING] Primary missing: "
-        f"{file_name}"
-    )
-
-    # ---------------------------------------------
-    # Check replica
-    # ---------------------------------------------
-
-    replica_exists = await check_file_exists(
+    replica_checksum = await get_node_checksum(
         replica,
         file_name
     )
 
-    if not replica_exists:
+    # =====================================================
+    # 3. BOTH FILES MISSING
+    # =====================================================
+
+    if (
+        primary_checksum is None
+        and replica_checksum is None
+    ):
 
         print(
             f"[ERROR] Both primary and replica "
@@ -146,28 +215,153 @@ async def recover_document(
 
         return
 
-    # ---------------------------------------------
-    # Download from replica
-    # ---------------------------------------------
+    # =====================================================
+    # 4. PRIMARY MISSING
+    # =====================================================
+
+    if primary_checksum is None:
+
+        print(
+            f"[WARNING] Primary missing: "
+            f"{file_name}"
+        )
+
+        if replica_checksum is None:
+
+            print(
+                f"[ERROR] Replica also missing: "
+                f"{file_name}"
+            )
+
+            return
+
+        # -----------------------------------------------
+        # Download from replica
+        # -----------------------------------------------
+
+        file_content = await download_from_node(
+            replica,
+            file_name
+        )
+
+        # -----------------------------------------------
+        # Restore primary
+        # -----------------------------------------------
+
+        await restore_to_node(
+            primary,
+            file_name,
+            file_content
+        )
+
+        print(
+            f"[RECOVERY SUCCESS] "
+            f"{file_name} restored to primary"
+        )
+
+        return
+
+    # =====================================================
+    # 5. REPLICA MISSING
+    # =====================================================
+
+    if replica_checksum is None:
+
+        print(
+            f"[WARNING] Replica missing: "
+            f"{file_name}"
+        )
+
+        # -----------------------------------------------
+        # Download from primary
+        # -----------------------------------------------
+
+        file_content = await download_from_node(
+            primary,
+            file_name
+        )
+
+        # -----------------------------------------------
+        # Restore replica
+        # -----------------------------------------------
+
+        await restore_to_node(
+            replica,
+            file_name,
+            file_content
+        )
+
+        print(
+            f"[RECOVERY SUCCESS] "
+            f"{file_name} restored to replica"
+        )
+
+        return
+
+    # =====================================================
+    # 6. BOTH EXIST
+    # =====================================================
+
+    if primary_checksum == replica_checksum:
+
+        print(
+            f"[INTEGRITY OK] "
+            f"{file_name}"
+        )
+
+        return
+
+    # =====================================================
+    # 7. CHECKSUM MISMATCH
+    # =====================================================
 
     print(
-        f"[RECOVERY] Downloading "
-        f"{file_name} from replica"
+        f"[CORRUPTION DETECTED] "
+        f"{file_name}"
     )
+
+    print(
+        f"[PRIMARY CHECKSUM] "
+        f"{primary_checksum}"
+    )
+
+    print(
+        f"[REPLICA CHECKSUM] "
+        f"{replica_checksum}"
+    )
+
+    # =====================================================
+    # 8. RECOVER PRIMARY FROM REPLICA
+    #
+    # For this lesson, replica is treated as
+    # the trusted copy.
+    # =====================================================
 
     file_content = await download_from_node(
         replica,
         file_name
     )
 
-    # ---------------------------------------------
-    # Restore primary
-    # ---------------------------------------------
-
-    print(
-        f"[RECOVERY] Restoring "
-        f"{file_name} to primary"
+    downloaded_checksum = calculate_checksum(
+        file_content
     )
+
+    # =====================================================
+    # 9. VERIFY DOWNLOADED REPLICA
+    # =====================================================
+
+    if downloaded_checksum != replica_checksum:
+
+        print(
+            f"[ERROR] Replica data is also corrupted: "
+            f"{file_name}"
+        )
+
+        return
+
+    # =====================================================
+    # 10. RESTORE PRIMARY
+    # =====================================================
 
     await restore_to_node(
         primary,
@@ -177,9 +371,14 @@ async def recover_document(
 
     print(
         f"[RECOVERY SUCCESS] "
-        f"{file_name} restored"
+        f"Corrupted primary restored: "
+        f"{file_name}"
     )
 
+
+# =========================================================
+# RUN RECOVERY CHECK
+# =========================================================
 
 async def run_recovery_check():
 

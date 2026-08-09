@@ -26,6 +26,7 @@ from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.models.document import Document
 
+from app.utils.checksum import calculate_checksum
 
 router = APIRouter(
     prefix="/documents",
@@ -84,6 +85,8 @@ async def upload_document(
             status_code=400,
             detail="Uploaded file is empty"
         )
+    
+    checksum = calculate_checksum(file_content)
 
     try:
 
@@ -128,7 +131,8 @@ async def upload_document(
             file_size=len(file_content),
             content_type=file.content_type,
             storage_node=storage_node,
-            replica_node=replica_node
+            replica_node=replica_node,
+            checksum=checksum
         )
 
         db.add(new_document)
@@ -145,7 +149,9 @@ async def upload_document(
             "file_name": new_document.file_name,
             "student": current_user.full_name,
             "lecturer": lecturer.full_name,
-            "storage_node": new_document.storage_node
+            "storage_node": new_document.storage_node,
+            "replica_node": new_document.replica_node,
+            "checksum": new_document.checksum
         }
 
     except Exception as e:
@@ -622,6 +628,8 @@ async def lecturer_upload_document(
             status_code=400,
             detail="Uploaded file is empty"
         )
+    
+    checksum = calculate_checksum(file_content)
 
     try:
 
@@ -665,7 +673,8 @@ async def lecturer_upload_document(
             file_size=len(file_content),
             content_type=file.content_type,
             storage_node=storage_node,
-            replica_node=replica_node
+            replica_node=replica_node,
+            checksum=checksum
         )
 
         db.add(new_document)
@@ -677,7 +686,9 @@ async def lecturer_upload_document(
             "document_id": new_document.id,
             "file_name": new_document.file_name,
             "lecturer": current_user.full_name,
-            "storage_node": new_document.storage_node
+            "storage_node": new_document.storage_node,
+            "replica_node": new_document.replica_node,
+            "checksum": new_document.checksum
         }
 
     except httpx.RequestError:
