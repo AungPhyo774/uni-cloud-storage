@@ -330,13 +330,6 @@ async def recover_document(
         f"{replica_checksum}"
     )
 
-    # =====================================================
-    # 8. RECOVER PRIMARY FROM REPLICA
-    #
-    # For this lesson, replica is treated as
-    # the trusted copy.
-    # =====================================================
-
     file_content = await download_from_node(
         replica,
         file_name
@@ -345,11 +338,6 @@ async def recover_document(
     downloaded_checksum = calculate_checksum(
         file_content
     )
-
-    # =====================================================
-    # 9. VERIFY DOWNLOADED REPLICA
-    # =====================================================
-
     if downloaded_checksum != replica_checksum:
 
         print(
@@ -395,8 +383,14 @@ async def run_recovery_check():
 
             try:
 
-                await recover_document(
+                result = await verify_document_integrity(
                     document
+                )
+
+                print(
+                    f"[INTEGRITY RESULT] "
+                    f"Document {document.id}: "
+                    f"{result}"
                 )
 
             except Exception as error:
@@ -410,3 +404,158 @@ async def run_recovery_check():
     finally:
 
         db.close()
+                
+
+async def verify_document_integrity(document):
+
+    file_name = os.path.basename(
+        document.file_path
+    )
+
+    db_checksum = document.checksum
+
+    primary_checksum = await get_node_checksum(
+        document.storage_node,
+        file_name
+    )
+
+    replica_checksum = await get_node_checksum(
+        document.replica_node,
+        file_name
+    )
+
+    print(
+        f"[CHECKSUM] {file_name}"
+    )
+
+    print(
+        f"  DB      : {db_checksum}"
+    )
+
+    print(
+        f"  Primary : {primary_checksum}"
+    )
+
+    print(
+        f"  Replica : {replica_checksum}"
+    )
+
+    # ------------------------------------------
+    # Case 1
+    # ------------------------------------------
+
+    if (
+        db_checksum
+        and primary_checksum == db_checksum
+        and replica_checksum == db_checksum
+    ):
+
+        print(
+            f"[INTEGRITY OK] "
+            f"{file_name}"
+        )
+
+        return "healthy"
+
+    # ------------------------------------------
+    # Case 2
+    # Primary missing/corrupted
+    # Replica matches DB
+    # ------------------------------------------
+
+    if (
+        db_checksum
+        and replica_checksum == db_checksum
+        and primary_checksum != db_checksum
+    ):
+
+        print(
+            f"[RECOVERY] "
+            f"Primary corrupted/missing: "
+            f"{file_name}"
+        )
+
+        file_content = await download_from_node(
+            document.replica_node,
+            file_name
+        )
+
+        await restore_to_node(
+            document.storage_node,
+            file_name,
+            file_content
+        )
+
+        print(
+            f"[RECOVERY SUCCESS] "
+            f"Primary restored: "
+            f"{file_name}"
+        )
+
+        return "primary_recovered"
+
+    # ------------------------------------------
+    # Case 3
+    # Replica missing/corrupted
+    # Primary matches DB
+    # ------------------------------------------
+
+    if (
+        db_checksum
+        and primary_checksum == db_checksum
+        and replica_checksum != db_checksum
+    ):
+
+        print(
+            f"[RECOVERY] "
+            f"Replica corrupted/missing: "
+            f"{file_name}"
+        )
+
+        file_content = await download_from_node(
+            document.storage_node,
+            file_name
+        )
+
+        await restore_to_node(
+            document.replica_node,
+            file_name,
+            file_content
+        )
+
+        print(
+            f"[RECOVERY SUCCESS] "
+            f"Replica restored: "
+            f"{file_name}"
+        )
+
+        return "replica_recovered"
+
+    # ------------------------------------------
+    # Case 4
+    # ------------------------------------------
+
+    if (
+        primary_checksum is None
+        and replica_checksum is None
+    ):
+
+        print(
+            f"[CRITICAL] "
+            f"Both copies missing: "
+            f"{file_name}"
+        )
+
+        return "both_missing"
+
+    # ------------------------------------------
+    # Case 5
+    # ------------------------------------------
+
+    print(
+        f"[CRITICAL] "
+        f"No trusted copy available: "
+        f"{file_name}"
+    )
+
+    return "unrecoverable"

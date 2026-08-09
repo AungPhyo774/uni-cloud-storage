@@ -1,3 +1,4 @@
+import hashlib
 import io
 import os
 
@@ -86,7 +87,9 @@ async def upload_document(
             detail="Uploaded file is empty"
         )
     
-    checksum = calculate_checksum(file_content)
+    checksum = hashlib.sha256(
+        file_content
+        ).hexdigest()
 
     try:
 
@@ -628,8 +631,10 @@ async def lecturer_upload_document(
             status_code=400,
             detail="Uploaded file is empty"
         )
-    
-    checksum = calculate_checksum(file_content)
+
+    checksum = hashlib.sha256(
+        file_content
+    ).hexdigest()
 
     try:
 

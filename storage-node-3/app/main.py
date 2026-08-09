@@ -133,6 +133,7 @@ def get_file_checksum(file_name: str):
     file_path = STORAGE_DIR / file_name
 
     if not file_path.exists():
+
         raise HTTPException(
             status_code=404,
             detail="File not found"
@@ -140,18 +141,11 @@ def get_file_checksum(file_name: str):
 
     sha256 = hashlib.sha256()
 
-    try:
+    with open(file_path, "rb") as file:
 
-        with open(file_path, "rb") as file:
+        while chunk := file.read(1024 * 1024):
 
-            while chunk := file.read(1024 * 1024):
-                sha256.update(chunk)
-
-    except Exception:
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to calculate checksum"
-        )
+            sha256.update(chunk)
 
     return {
         "file_name": file_name,
