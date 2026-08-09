@@ -88,12 +88,38 @@ def health_check():
         "status": "healthy"
     }
 
-@app.get("/storage/exists/{file_name}")
-def check_file_exists(file_name: str):
-
+@app.get("/storage/check/{file_name}")
+def check_file(file_name: str):
     file_path = STORAGE_DIR / file_name
-
     return {
         "file_name": file_name,
         "exists": file_path.exists()
+    }
+
+
+@app.post("/storage/restore/{file_name}")
+async def restore_file(
+    file_name: str,
+    file: UploadFile = File(...)
+):
+
+    file_path = STORAGE_DIR / file_name
+
+    try:
+
+        with open(file_path, "wb") as buffer:
+
+            while chunk := await file.read(1024 * 1024):
+                buffer.write(chunk)
+
+    except Exception:
+
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to restore file"
+        )
+
+    return {
+        "message": "File restored successfully",
+        "file_name": file_name
     }

@@ -81,10 +81,10 @@ dist/
 # Storage Files
 # =========================
 
-storage-node-1/storage/*.pdf
-storage-node-2/storage/*.pdf
-storage-node-3/storage/*.pdf
 
+storage-node-1/storage/*
+storage-node-2/storage/*
+storage-node-3/storage/*    
 
 !storage-node-1/storage/.gitkeep
 !storage-node-2/storage/.gitkeep
