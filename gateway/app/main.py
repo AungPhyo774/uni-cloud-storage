@@ -9,6 +9,8 @@ from app.routers import documents
 
 from app.models.user import User
 from app.models.document import Document
+from app.models.recovery_log import RecoveryLog
+from app.routers.recovery import router as recovery_router
 
 from app.routers import health
 
@@ -62,6 +64,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+app.include_router(recovery_router)
 app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(users.router)
