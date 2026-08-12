@@ -64,15 +64,20 @@ async def upload_document(
         db.query(User)
         .filter(
             User.id == lecturer_id,
-            User.role == "lecturer"
+            User.role == "lecturer",
+            User.class_year == current_user.class_year
         )
         .first()
     )
 
+
     if lecturer is None:
         raise HTTPException(
-            status_code=404,
-            detail="Lecturer not found"
+            status_code=403,
+            detail=(
+                "You can only upload documents "
+                "to lecturers from your own class"
+            )
         )
 
     # -------------------------------------------------
@@ -171,39 +176,350 @@ async def upload_document(
 
 @router.get("/lecturers-list")
 def get_lecturers(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(
+        get_current_user
+    ),
     db: Session = Depends(get_db)
 ):
 
-    # -----------------------------------------------------
-    # 1. Only students can access lecturer list
-    # -----------------------------------------------------
-
     if current_user.role != "student":
+
         raise HTTPException(
             status_code=403,
             detail="Only students can access lecturer list"
         )
 
-    # -----------------------------------------------------
-    # 2. Get all lecturers
-    # -----------------------------------------------------
-
     lecturers = (
         db.query(User)
         .filter(
-            User.role == "lecturer"
+            User.role == "lecturer",
+            User.class_year == current_user.class_year
+        )
+        .order_by(
+            User.full_name
         )
         .all()
     )
+
     return [
         {
             "id": lecturer.id,
             "full_name": lecturer.full_name,
-            "email": lecturer.email
+            "email": lecturer.email,
+            "class_year": lecturer.class_year
         }
         for lecturer in lecturers
     ]
+
+# ------Lecturer Documents List
+
+@router.get("/lecturer-documents")
+def get_lecturer_documents(
+    current_user: User = Depends(
+        get_current_user
+    ),
+    db: Session = Depends(get_db)
+):
+
+    if current_user.role != "student":
+
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Only students can access "
+                "lecturer documents"
+            )
+        )
+
+    documents = (
+        db.query(Document)
+        .join(
+            User,
+            Document.owner_id == User.id
+        )
+        .filter(
+            User.role == "lecturer",
+            User.class_year == current_user.class_year
+        )
+        .order_by(
+            Document.created_at.desc()
+        )
+        .all()
+    )
+
+    return [
+        {
+            "id": document.id,
+            "file_name": document.file_name,
+            "file_size": document.file_size,
+            "content_type": document.content_type,
+            "storage_node": document.storage_node,
+            "created_at": document.created_at,
+            "lecturer": document.owner_id
+        }
+        for document in documents
+    ]
+
+#lecturer view student documents
+@router.get("/student-documents")
+def get_student_documents(
+    current_user: User = Depends(
+        get_current_user
+    ),
+    db: Session = Depends(get_db)
+):
+
+    if current_user.role != "lecturer":
+
+        raise HTTPException(
+            status_code=403,
+            detail=(
+                "Only lecturers can access "
+                "student documents"
+            )
+        )
+
+    documents = (
+        db.query(Document)
+        .join(
+            User,
+            Document.owner_id == User.id
+        )
+        .filter(
+            User.role == "student",
+            User.class_year == current_user.class_year,
+            Document.lecturer_id == current_user.id
+        )
+        .order_by(
+            Document.created_at.desc()
+        )
+        .all()
+    )
+
+    return [
+        {
+            "id": document.id,
+            "file_name": document.file_name,
+            "file_size": document.file_size,
+            "content_type": document.content_type,
+            "student_id": document.owner_id,
+            "storage_node": document.storage_node,
+            "created_at": document.created_at
+        }
+        for document in documents
+    ]
+
+
+# =========================================================
+# LIST MY DOCUMENTS
+# =========================================================
+
+@router.get("/my-all-documents")
+def get_my_documents(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    documents = (
+        db.query(Document)
+        .filter(
+            Document.owner_id == current_user.id
+        )
+        .order_by(
+            Document.created_at.desc()
+        )
+        .all()
+    )
+
+    return [
+        {
+            "id": document.id,
+            "file_name": document.file_name,
+            "file_size": document.file_size,
+            "content_type": document.content_type,
+            "storage_node": document.storage_node,
+            "created_at": document.created_at
+        }
+        for document in documents
+    ]
+
+# build Recovery Endpoint
+@router.post("/recovery/{document_id}")
+async def recover_document_endpoint(
+    document_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+
+    # =====================================================
+    # ONLY ADMIN CAN PERFORM RECOVERY
+    # =====================================================
+
+    if current_user.role != "admin":
+        raise HTTPException(
+            status_code=403,
+            detail="Only admin can perform document recovery"
+        )
+
+    # =====================================================
+    # FIND DOCUMENT
+    # =====================================================
+
+    document = (
+        db.query(Document)
+        .filter(
+            Document.id == document_id
+        )
+        .first()
+    )
+
+    if document is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Document not found"
+        )
+
+    primary = document.storage_node
+    replica = document.replica_node
+
+    file_name = os.path.basename(
+        document.file_path
+    )
+
+    # =====================================================
+    # CHECK PRIMARY
+    # =====================================================
+
+    primary_online = await check_node_health(
+        primary
+    )
+
+    # =====================================================
+    # CHECK REPLICA
+    # =====================================================
+
+    replica_online = await check_node_health(
+        replica
+    )
+
+    if (
+        not primary_online
+        and not replica_online
+    ):
+        raise HTTPException(
+            status_code=503,
+            detail="Both storage nodes are offline"
+        )
+
+    # =====================================================
+    # PRIMARY ONLINE -> CHECK FILE
+    # =====================================================
+
+    primary_has_file = False
+
+    if primary_online:
+
+        primary_has_file = await check_file_on_node(
+            primary,
+            file_name
+        )
+
+    print(
+        f"[RECOVERY] Primary: {primary}"
+    )
+
+    print(
+        f"[RECOVERY] Primary online: "
+        f"{primary_online}"
+    )
+
+    print(
+        f"[RECOVERY] Primary file exists: "
+        f"{primary_has_file}"
+    )
+
+    # =====================================================
+    # PRIMARY FILE EXISTS
+    # =====================================================
+
+    if primary_has_file:
+
+        return {
+            "message": "No recovery needed",
+            "document_id": document.id,
+            "file_name": document.file_name,
+            "primary": primary,
+            "replica": replica
+        }
+
+    # =====================================================
+    # REPLICA MUST BE ONLINE
+    # =====================================================
+
+    if not replica_online:
+
+        raise HTTPException(
+            status_code=503,
+            detail="Replica node is offline"
+        )
+
+    # =====================================================
+    # CHECK REPLICA FILE
+    # =====================================================
+
+    replica_has_file = await check_file_on_node(
+        replica,
+        file_name
+    )
+
+    print(
+        f"[RECOVERY] Replica: "
+        f"{replica}"
+    )
+
+    print(
+        f"[RECOVERY] Replica online: "
+        f"{replica_online}"
+    )
+
+    print(
+        f"[RECOVERY] Replica file exists: "
+        f"{replica_has_file}"
+    )
+
+    if not replica_has_file:
+
+        raise HTTPException(
+            status_code=404,
+            detail="File does not exist on replica"
+        )
+
+    # =====================================================
+    # RECOVER REPLICA -> PRIMARY
+    # =====================================================
+
+    success = await recover_file_to_node(
+        source_node=replica,
+        target_node=primary,
+        file_name=file_name,
+        content_type=document.content_type
+    )
+
+    if not success:
+
+        raise HTTPException(
+            status_code=500,
+            detail="Document recovery failed"
+        )
+
+    return {
+        "message": "Document recovered successfully",
+        "document_id": document.id,
+        "file_name": document.file_name,
+        "recovered_from": replica,
+        "recovered_to": primary
+    }
+
 # =========================================================
 # DOWNLOAD DOCUMENT
 # =========================================================
@@ -263,16 +579,27 @@ async def download_document(
     elif (
         current_user.role == "student"
         and owner.role == "lecturer"
+        and owner.class_year
+            == current_user.class_year
     ):
-
         allowed = True
 
     # Lecturer can download documents specifically
     # assigned to that lecturer
     elif (
         current_user.role == "lecturer"
+        and owner.role == "student"
         and document.lecturer_id == current_user.id
+        and owner.class_year
+            == current_user.class_year
     ):
+        allowed = True
+
+# =====================================================
+# 4. ADMIN
+# =====================================================
+
+    elif current_user.role == "admin":
 
         allowed = True
 
@@ -377,74 +704,7 @@ async def download_document(
         status_code=503,
         detail="File is unavailable from all storage nodes"
     )
-  
-# =========================================================
-# LIST MY DOCUMENTS
-# =========================================================
 
-@router.get("/my-all-documents")
-def get_my_documents(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-
-    documents = (
-        db.query(Document)
-        .filter(
-            Document.owner_id == current_user.id
-        )
-        .order_by(
-            Document.created_at.desc()
-        )
-        .all()
-    )
-
-    return [
-        {
-            "id": document.id,
-            "file_name": document.file_name,
-            "file_size": document.file_size,
-            "content_type": document.content_type,
-            "storage_node": document.storage_node,
-            "created_at": document.created_at
-        }
-        for document in documents
-    ]
-
-# ------Lecturer Documents List
-
-@router.get("/lecturer-documents")
-def get_lecturer_documents(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-
-    if current_user.role != "student":
-        raise HTTPException(
-            status_code=403,
-            detail="Only students can access lecturer documents"
-        )
-
-    documents = (
-        db.query(Document)
-        .join(User, Document.owner_id == User.id)
-        .filter(User.role == "lecturer")
-        .order_by(Document.created_at.desc())
-        .all()
-    )
-
-    return [
-        {
-            "id": document.id,
-            "file_name": document.file_name,
-            "file_size": document.file_size,
-            "content_type": document.content_type,
-            "storage_node": document.storage_node,
-            "created_at": document.created_at,
-            "lecturer": document.owner_id
-        }
-        for document in documents
-    ]
 
 # =========================================================
 # GET DOCUMENT DETAIL
@@ -703,144 +963,3 @@ async def lecturer_upload_document(
             detail="Storage Node is unavailable"
         )
 
-
-# build Recovery Endpoint
-@router.post("/recovery/{document_id}")
-async def recover_document(
-    document_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-
-    # -----------------------------------------
-    # 1. Only lecturer/admin should recover
-    # -----------------------------------------
-
-    if current_user.role != "lecturer":
-        raise HTTPException(
-            status_code=403,
-            detail="Only lecturers can perform recovery"
-        )
-
-    # -----------------------------------------
-    # 2. Find document
-    # -----------------------------------------
-
-    document = (
-        db.query(Document)
-        .filter(
-            Document.id == document_id
-        )
-        .first()
-    )
-
-    if document is None:
-
-        raise HTTPException(
-            status_code=404,
-            detail="Document not found"
-        )
-
-    primary = document.storage_node
-    replica = document.replica_node
-
-    file_name = os.path.basename(
-        document.file_path
-    )
-
-    # -----------------------------------------
-    # 3. Check primary
-    # -----------------------------------------
-
-    primary_online = await check_node_health(
-        primary
-    )
-
-    # -----------------------------------------
-    # 4. Check replica
-    # -----------------------------------------
-
-    replica_online = await check_node_health(
-        replica
-    )
-
-    if not primary_online and not replica_online:
-
-        raise HTTPException(
-            status_code=503,
-            detail="Both storage nodes are offline"
-        )
-
-    # -----------------------------------------
-    # 5. Check whether primary has file
-    # -----------------------------------------
-
-    primary_has_file = False
-
-    if primary_online:
-
-        primary_has_file = await check_file_on_node(
-            primary,
-            file_name
-        )
-
-    # -----------------------------------------
-    # 6. Already healthy
-    # -----------------------------------------
-
-    if primary_has_file:
-
-        return {
-            "message": "No recovery needed",
-            "primary": primary,
-            "replica": replica
-        }
-
-    # -----------------------------------------
-    # 7. Primary missing file
-    # -----------------------------------------
-
-    if not replica_online:
-
-        raise HTTPException(
-            status_code=503,
-            detail="Replica node is offline"
-        )
-
-    replica_has_file = await check_file_on_node(
-        replica,
-        file_name
-    )
-
-    if not replica_has_file:
-
-        raise HTTPException(
-            status_code=404,
-            detail="File does not exist on replica"
-        )
-
-    # -----------------------------------------
-    # 8. Recover replica → primary
-    # -----------------------------------------
-
-    success = await recover_file_to_node(
-        source_node=replica,
-        target_node=primary,
-        file_name=file_name,
-        content_type=document.content_type
-    )
-
-    if not success:
-
-        raise HTTPException(
-            status_code=500,
-            detail="Automatic recovery failed"
-        )
-
-    return {
-        "message": "Document recovered successfully",
-        "document_id": document.id,
-        "file_name": document.file_name,
-        "recovered_from": replica,
-        "recovered_to": primary
-    }

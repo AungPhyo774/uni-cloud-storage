@@ -20,6 +20,8 @@ class User(Base):  # user Table ကို ကိုယ်စားပြုတ�
 
     role = Column(String(20), default="student")
 
+    class_year = Column(String(20),nullable=True)
+    
     created_at = Column(
         DateTime(timezone=True),
         server_default=func.now()
