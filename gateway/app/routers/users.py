@@ -174,7 +174,9 @@ def admin_create_user(
     if data.class_year not in [
         "first_year",
         "second_year",
-        "third_year"
+        "third_year",
+        "fourth_year",
+        "fifth_year",
     ]:
 
         raise HTTPException(
