@@ -740,6 +740,7 @@ def get_document(
         "storage_node": document.storage_node,
         "created_at": document.created_at
     }
+from sqlalchemy.exc import IntegrityError
 
 # =========================================================
 # DELETE DOCUMENT
@@ -751,101 +752,137 @@ async def delete_document(
     db: Session = Depends(get_db)
 ):
 
-    # ============================================
+    # =====================================================
     # 1. Find document
-    # ============================================
+    # =====================================================
 
     document = (
         db.query(Document)
-        .filter(Document.id == document_id)
+        .filter(
+            Document.id == document_id
+        )
         .first()
     )
 
     if document is None:
+
         raise HTTPException(
             status_code=404,
             detail="Document not found"
         )
 
-    # ============================================
-    # 2. Permission check
-    # ============================================
+    # =====================================================
+    # 2. Permission
+    # =====================================================
 
     if document.owner_id != current_user.id:
 
         raise HTTPException(
             status_code=403,
-            detail="You do not have permission to delete this document"
+            detail=(
+                "You do not have permission "
+                "to delete this document"
+            )
         )
 
-    # ============================================
-    # 3. Get file name
-    # ============================================
+    # =====================================================
+    # 3. Save metadata BEFORE deleting object
+    # =====================================================
 
     file_name = os.path.basename(
         document.file_path
     )
-
-    # ============================================
-    # 4. Get Primary + Replica Node
-    # ============================================
 
     primary_node = document.storage_node
     replica_node = document.replica_node
 
     try:
 
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(
+            timeout=10.0
+        ) as client:
 
-            # ========================================
-            # 5. Delete Primary
-            # ========================================
+            # =================================================
+            # 4. Delete Primary
+            # =================================================
 
-            primary_response = await client.delete(
-                f"{primary_node}/storage/delete/{file_name}"
-            )
+            if primary_node:
 
-            # ========================================
-            # 6. Delete Replica
-            # ========================================
+                try:
 
-            replica_response = await client.delete(
-                f"{replica_node}/storage/delete/{file_name}"
-            )
+                    primary_response = await client.delete(
+                        f"{primary_node}/storage/delete/{file_name}"
+                    )
 
-        # ============================================
-        # 7. Check Primary
-        # ============================================
+                except httpx.RequestError:
 
-        if primary_response.status_code not in [200, 404]:
+                    raise HTTPException(
+                        status_code=503,
+                        detail=(
+                            "Primary storage node "
+                            "is unavailable"
+                        )
+                    )
 
-            raise HTTPException(
-                status_code=500,
-                detail="Failed to delete file from primary node"
-            )
+                if primary_response.status_code not in [
+                    200,
+                    404
+                ]:
 
-        # ============================================
-        # 8. Check Replica
-        # ============================================
+                    raise HTTPException(
+                        status_code=500,
+                        detail=(
+                            "Failed to delete file "
+                            "from primary node"
+                        )
+                    )
 
-        if replica_response.status_code not in [200, 404]:
+            # =================================================
+            # 5. Delete Replica
+            # =================================================
 
-            raise HTTPException(
-                status_code=500,
-                detail="Failed to delete file from replica node"
-            )
+            if replica_node:
 
-        # ============================================
-        # 9. Delete PostgreSQL metadata
-        # ============================================
+                try:
+
+                    replica_response = await client.delete(
+                        f"{replica_node}/storage/delete/{file_name}"
+                    )
+
+                except httpx.RequestError:
+
+                    raise HTTPException(
+                        status_code=503,
+                        detail=(
+                            "Replica storage node "
+                            "is unavailable"
+                        )
+                    )
+
+                if replica_response.status_code not in [
+                    200,
+                    404
+                ]:
+
+                    raise HTTPException(
+                        status_code=500,
+                        detail=(
+                            "Failed to delete file "
+                            "from replica node"
+                        )
+                    )
+
+        # =====================================================
+        # 6. Delete PostgreSQL document metadata
+        # =====================================================
 
         db.delete(document)
 
         db.commit()
 
-        # ============================================
-        # 10. Return response
-        # ============================================
+        # =====================================================
+        # 7. Response
+        # =====================================================
 
         return {
             "message": "Document deleted successfully",
@@ -855,11 +892,28 @@ async def delete_document(
             "replica_node": replica_node
         }
 
-    except httpx.RequestError:
+    except HTTPException:
+        raise
+
+    except IntegrityError:
+
+        db.rollback()
 
         raise HTTPException(
-            status_code=503,
-            detail="Storage Node is unavailable"
+            status_code=409,
+            detail=(
+                "Document cannot be deleted because "
+                "related database records still reference it"
+            )
+        )
+
+    except Exception as error:
+
+        db.rollback()
+
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete document: {str(error)}"
         )
 
 #lecturer upload document

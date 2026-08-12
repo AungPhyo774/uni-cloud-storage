@@ -16,7 +16,10 @@ class RecoveryLog(Base):
 
     document_id = Column(
         Integer,
-        ForeignKey("documents.id"),
+        ForeignKey(
+            "documents.id",
+            ondelete="SET NULL"
+        ),
         nullable=True
     )
 
