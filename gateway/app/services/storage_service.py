@@ -238,7 +238,7 @@ async def check_file_on_node(
         ) as client:
 
             response = await client.get(
-                f"{node}/storage/exists/{file_name}"
+                f"{node}/storage/check/{file_name}"
             )
 
         if response.status_code != 200:
@@ -246,13 +246,15 @@ async def check_file_on_node(
 
         result = response.json()
 
-        return result.get("exists", False)
+        return result.get(
+            "exists",
+            False
+        )
 
     except httpx.RequestError:
 
         return False
-
-
+    
 # Recovery function 
 async def recover_file_to_node(
     source_node: str,
