@@ -21,6 +21,9 @@ class User(Base):  # user Table ကို ကိုယ်စားပြုတ�
     role = Column(String(20), default="student")
 
     class_year = Column(String(20),nullable=True)
+
+    #default=True(default=1) 1=active, 0=inactive
+    is_active = Column(Integer,nullable=False,default=True)
     
     created_at = Column(
         DateTime(timezone=True),

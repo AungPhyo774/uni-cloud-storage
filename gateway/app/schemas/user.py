@@ -1,27 +1,3 @@
-# from pydantic import BaseModel, EmailStr
-
-
-# class UserRegister(BaseModel):
-#     full_name: str
-#     email: EmailStr
-#     password: str
-
-# class UserLogin(BaseModel):
-#     email: EmailStr
-#     password: str
-
-
-# class UserResponse(BaseModel):
-#     id: int
-#     full_name: str
-#     email: EmailStr
-#     role: str
-
-#     class Config:
-#         from_attributes = True
-
-
-
 from pydantic import BaseModel, EmailStr
 
 
@@ -48,6 +24,13 @@ class UserResponse(BaseModel):
     email: EmailStr
     role: str
     class_year: str | None = None
+    is_active: bool
 
     class Config:
         from_attributes = True
+
+
+class AdminUpdateUser(BaseModel):
+
+    class_year: str | None = None
+    is_active: bool | None = None

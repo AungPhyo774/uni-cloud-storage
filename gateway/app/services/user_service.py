@@ -20,9 +20,16 @@ def authenticate_user(
     email: str,
     password: str
 ):
-    user = get_user_by_email(db, email)
+
+    user = get_user_by_email(
+        db,
+        email
+    )
 
     if not user:
+        return None
+
+    if not user.is_active:
         return None
 
     if not verify_password(

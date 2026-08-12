@@ -6,6 +6,7 @@ from app.database.session import engine
 from app.routers import auth
 from app.routers import users
 from app.routers import documents
+from app.routers import admin
 
 from app.models.user import User
 from app.models.document import Document
@@ -69,7 +70,7 @@ app.include_router(health.router)
 app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(documents.router)
-
+app.include_router(admin.router)
 
 @app.get("/")
 def home():
