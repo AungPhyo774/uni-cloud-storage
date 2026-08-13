@@ -217,8 +217,7 @@ async function uploadLecturerDocument(
     file
 ) {
 
-    const formData =
-        new FormData();
+    const formData =new FormData();
 
     formData.append(
         "file",

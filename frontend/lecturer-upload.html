@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Upload Lecture Document</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Upload Lecture Document</h1>
+
+    <p id="lecturerClass"></p>
+
+
+    <form id="uploadForm">
+
+        <label for="file">
+            Select PDF
+        </label>
+
+        <input
+            type="file"
+            id="file"
+            accept="application/pdf,.pdf"
+            required
+        >
+
+        <br><br>
+
+        <button type="submit">
+            Upload PDF
+        </button>
+
+    </form>
+
+
+    <p
+        id="uploadMessage"
+        class="message"
+    ></p>
+
+    <p
+        id="uploadError"
+        class="error"
+    ></p>
+
+    <br>
+
+    <a href="lecturer-dashboard.html">
+        Back to Dashboard
+    </a>
+
+</div>
+
+
+<script src="js/api.js"></script>
+
+<script>
+
+async function loadLecturerUploadPage() {
+
+    try {
+
+        const user =
+            await getCurrentUser();
+
+
+        if (
+            user.role !== "lecturer"
+        ) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+        }
+
+
+        document.getElementById(
+            "lecturerClass"
+        ).textContent =
+            `Class: ${user.class_year}`;
+
+    } catch (error) {
+
+        document.getElementById(
+            "uploadError"
+        ).textContent =
+            error.message;
+
+    }
+
+}
+
+
+document
+    .getElementById("uploadForm")
+    .addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+
+            const file =
+                document.getElementById(
+                    "file"
+                ).files[0];
+
+
+            const message =
+                document.getElementById(
+                    "uploadMessage"
+                );
+
+            const error =
+                document.getElementById(
+                    "uploadError"
+                );
+
+
+            message.textContent = "";
+
+            error.textContent = "";
+
+
+            // -------------------------------------
+            // File validation
+            // -------------------------------------
+
+            if (!file) {
+
+                error.textContent =
+                    "Please select a PDF file.";
+
+                return;
+            }
+
+
+            if (
+                file.type !==
+                "application/pdf"
+            ) {
+
+                error.textContent =
+                    "Only PDF files are allowed.";
+
+                return;
+            }
+
+
+            try {
+
+                message.textContent =
+                    "Uploading...";
+
+
+                const result =
+                    await uploadLecturerDocument(
+                        file
+                    );
+
+
+                message.textContent =
+                    `Upload successful: ${result.file_name}`;
+
+
+                document
+                    .getElementById(
+                        "uploadForm"
+                    )
+                    .reset();
+
+
+            } catch (err) {
+
+                message.textContent =
+                    "";
+
+                error.textContent =
+                    err.message;
+
+            }
+
+        }
+    );
+
+
+loadLecturerUploadPage();
+
+</script>
+
+</body>
+</html>

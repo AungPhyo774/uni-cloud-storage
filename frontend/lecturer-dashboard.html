@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Lecturer Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Lecturer Dashboard</h1>
+
+    <div class="user-card">
+
+        <h2 id="welcome">
+            Welcome
+        </h2>
+
+        <p id="email"></p>
+
+        <p id="classYear"></p>
+
+    </div>
+
+
+    <div class="menu">
+
+        <a href="lecturer-upload.html">
+            Upload Lecture Document
+        </a>
+
+        <a href="student-submissions.html">
+            Student Submissions
+        </a>
+
+        <a href="lecturer-my-documents.html">
+            My Documents
+        </a>
+
+        <button
+            type="button"
+            onclick="logout()"
+        >
+            Logout
+        </button>
+
+    </div>
+
+
+    <p
+        id="dashboardError"
+        class="error"
+    ></p>
+
+</div>
+
+
+<script src="js/api.js"></script>
+
+<script>
+
+async function loadLecturerDashboard() {
+
+    try {
+
+        const user =
+            await getCurrentUser();
+
+
+        // -----------------------------------------
+        // Role check
+        // -----------------------------------------
+
+        if (
+            user.role !== "lecturer"
+        ) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+        }
+
+
+        // -----------------------------------------
+        // Display user information
+        // -----------------------------------------
+
+        document.getElementById(
+            "welcome"
+        ).textContent =
+            `Welcome, ${user.full_name}`;
+
+
+        document.getElementById(
+            "email"
+        ).textContent =
+            `Email: ${user.email}`;
+
+
+        document.getElementById(
+            "classYear"
+        ).textContent =
+            `Class: ${user.class_year}`;
+
+    } catch (error) {
+
+        document.getElementById(
+            "dashboardError"
+        ).textContent =
+            error.message;
+
+    }
+
+}
+
+
+loadLecturerDashboard();
+
+</script>
+
+</body>
+</html>
