@@ -10,6 +10,15 @@ from app.services.node_health_service import get_node_health
 from app.database.session import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import User
+from app.models.document import Document
+
+from app.services.node_health_service import (
+    check_node_health
+)
+from app.services.recovery_service import (
+    get_node_checksum
+)
+
 from app.schemas.user import (
     UserResponse,
     AdminUpdateUser
@@ -167,4 +176,109 @@ async def get_nodes_health(
 
     return {
         "nodes": nodes
+    }
+
+
+@router.get("/replication/status")
+async def get_replication_status(
+    current_user: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+
+    documents = (
+        db.query(Document)
+        .order_by(
+            Document.created_at.desc()
+        )
+        .all()
+    )
+
+    results = []
+
+    for document in documents:
+
+        file_name = document.file_name
+
+        primary = document.storage_node
+        replica = document.replica_node
+
+        expected_checksum = document.checksum
+
+        # -------------------------------------------------
+        # Check Primary
+        # -------------------------------------------------
+
+        primary_checksum = None
+
+        if primary:
+
+            primary_checksum = await get_node_checksum(
+                primary,
+                file_name
+            )
+
+        # -------------------------------------------------
+        # Check Replica
+        # -------------------------------------------------
+
+        replica_checksum = None
+
+        if replica:
+
+            replica_checksum = await get_node_checksum(
+                replica,
+                file_name
+            )
+
+        # -------------------------------------------------
+        # Determine status
+        # -------------------------------------------------
+
+        if (
+            primary_checksum is not None
+            and replica_checksum is not None
+            and expected_checksum is not None
+            and primary_checksum == expected_checksum
+            and replica_checksum == expected_checksum
+        ):
+
+            status = "HEALTHY"
+
+        elif primary_checksum is None:
+
+            status = "PRIMARY_MISSING"
+
+        elif replica_checksum is None:
+
+            status = "REPLICA_MISSING"
+
+        elif (
+            expected_checksum
+            and (
+                primary_checksum != expected_checksum
+                or replica_checksum != expected_checksum
+            )
+        ):
+
+            status = "CHECKSUM_MISMATCH"
+
+        else:
+
+            status = "UNKNOWN"
+
+        results.append(
+            {
+                "id": document.id,
+                "file_name": file_name,
+                "primary_node": primary,
+                "replica_node": replica,
+                "expected_checksum": expected_checksum,
+                "primary_checksum": primary_checksum,
+                "replica_checksum": replica_checksum,
+                "status": status
+            }
+        )
+
+    return {
+        "documents": results
     }
