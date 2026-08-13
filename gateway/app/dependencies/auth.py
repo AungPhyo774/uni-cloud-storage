@@ -152,7 +152,8 @@ def get_current_user(
             ),
             password_hash="",
             role="admin",
-            class_year=None
+            class_year=None,
+            is_active=True
         )
 
     try:

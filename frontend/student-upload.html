@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Upload Document</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Upload Document</h1>
+
+    <p id="studentClass"></p>
+
+    <form id="uploadForm">
+
+        <label for="lecturer">
+            Select Lecturer
+        </label>
+
+        <select
+            id="lecturer"
+            required
+        >
+            <option value="">
+                Loading lecturers...
+            </option>
+        </select>
+
+        <br><br>
+
+        <label for="file">
+            Select PDF
+        </label>
+
+        <input
+            type="file"
+            id="file"
+            accept="application/pdf,.pdf"
+            required
+        >
+
+        <br><br>
+
+        <button type="submit">
+            Upload PDF
+        </button>
+
+    </form>
+
+    <p
+        id="uploadMessage"
+        class="message"
+    ></p>
+
+    <p
+        id="uploadError"
+        class="error"
+    ></p>
+
+    <br>
+
+    <a href="student-dashboard.html">
+        Back to Dashboard
+    </a>
+
+</div>
+
+<script src="js/api.js"></script>
+
+<script>
+
+async function loadUploadPage() {
+
+    try {
+
+        // -----------------------------------------
+        // Current user
+        // -----------------------------------------
+
+        const user =
+            await getCurrentUser();
+
+        if (
+            user.role !== "student"
+        ) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+        }
+
+        document.getElementById(
+            "studentClass"
+        ).textContent =
+            `Your class: ${user.class_year}`;
+
+
+        // -----------------------------------------
+        // Get lecturers
+        // Backend already filters
+        // same class lecturers
+        // -----------------------------------------
+
+        const lecturers =
+            await getLecturers();
+
+        const select =
+            document.getElementById(
+                "lecturer"
+            );
+
+        select.innerHTML =
+            '<option value="">Select Lecturer</option>';
+
+        lecturers.forEach(
+            lecturer => {
+
+                const option =
+                    document.createElement(
+                        "option"
+                    );
+
+                option.value =
+                    lecturer.id;
+
+                option.textContent =
+                    `${lecturer.full_name} (${lecturer.class_year})`;
+
+                select.appendChild(
+                    option
+                );
+            }
+        );
+
+    } catch (error) {
+
+        document.getElementById(
+            "uploadError"
+        ).textContent =
+            error.message;
+
+    }
+
+}
+
+
+document
+    .getElementById("uploadForm")
+    .addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+            const lecturerId =
+                document.getElementById(
+                    "lecturer"
+                ).value;
+
+            const file =
+                document.getElementById(
+                    "file"
+                ).files[0];
+
+            const message =
+                document.getElementById(
+                    "uploadMessage"
+                );
+
+            const error =
+                document.getElementById(
+                    "uploadError"
+                );
+
+            message.textContent = "";
+            error.textContent = "";
+
+
+            if (!lecturerId) {
+
+                error.textContent =
+                    "Please select a lecturer.";
+
+                return;
+            }
+
+
+            if (!file) {
+
+                error.textContent =
+                    "Please select a PDF.";
+
+                return;
+            }
+
+
+            if (
+                file.type !==
+                "application/pdf"
+            ) {
+
+                error.textContent =
+                    "Only PDF files are allowed.";
+
+                return;
+            }
+
+
+            try {
+
+                message.textContent =
+                    "Uploading...";
+
+
+                const result =
+                    await uploadStudentDocument(
+                        lecturerId,
+                        file
+                    );
+
+
+                message.textContent =
+                    `Upload successful: ${result.file_name}`;
+
+
+                document
+                    .getElementById("uploadForm")
+                    .reset();
+
+
+            } catch (err) {
+
+                message.textContent = "";
+
+                error.textContent =
+                    err.message;
+            }
+
+        }
+    );
+
+
+loadUploadPage();
+
+</script>
+
+</body>
+</html>

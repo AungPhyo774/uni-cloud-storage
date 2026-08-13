@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Student Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Student Dashboard</h1>
+
+        <div class="user-card">
+
+            <h2 id="welcome">
+                Welcome
+            </h2>
+
+            <p id="email"></p>
+
+            <p id="classYear"></p>
+
+        </div>
+
+        <div class="menu">
+
+            <a href="student-upload.html">
+                Upload Document
+            </a>
+
+            <a href="student-documents.html">
+                My Documents
+            </a>
+
+            <a href="lecturer-documents.html">
+                Lecturer Documents
+            </a>
+
+            <button
+                type="button"
+                onclick="logout()"
+            >
+                Logout
+            </button>
+
+        </div>
+
+        <p
+            id="dashboardError"
+            class="error"
+        ></p>
+
+    </div>
+
+    <script src="js/api.js"></script>
+
+    <script>
+        async function loadStudentDashboard() {
+
+            try {
+
+                const user =
+                    await getCurrentUser();
+
+                if (
+                    user.role !== "student"
+                ) {
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+                }
+
+                document.getElementById(
+                    "welcome"
+                ).textContent =
+                    `Welcome, ${user.full_name}`;
+
+                document.getElementById(
+                    "email"
+                ).textContent =
+                    `Email: ${user.email}`;
+
+                document.getElementById(
+                    "classYear"
+                ).textContent =
+                    `Class: ${user.class_year}`;
+
+            } catch (error) {
+
+                document.getElementById(
+                    "dashboardError"
+                ).textContent =
+                    error.message;
+
+            }
+
+        }
+
+        loadStudentDashboard();
+    </script>
+
+</body>
+</html>
