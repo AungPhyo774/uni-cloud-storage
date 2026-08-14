@@ -45,20 +45,19 @@
         <br><br>
 
         <label for="file">
-            Select PDF
+            Select Document
         </label>
 
         <input
             type="file"
             id="file"
-            accept="application/pdf,.pdf"
             required
         >
 
         <br><br>
 
         <button type="submit">
-            Upload PDF
+            Upload Document
         </button>
 
     </form>
@@ -201,28 +200,13 @@ document
                 return;
             }
 
-
             if (!file) {
 
                 error.textContent =
-                    "Please select a PDF.";
+                    "Please select a file.";
 
                 return;
             }
-
-
-            if (
-                file.type !==
-                "application/pdf"
-            ) {
-
-                error.textContent =
-                    "Only PDF files are allowed.";
-
-                return;
-            }
-
-
             try {
 
                 message.textContent =
