@@ -43,6 +43,8 @@
             <tr>
 
                 <th>File Name</th>
+                <th>Lecturer</th>
+                <th>Class</th>
                 <th>Size</th>
                 <th>Date</th>
                 <th>Action</th>
@@ -97,7 +99,7 @@ async function loadMyDocuments() {
 
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="4">
+                    <td colspan="6">
                         No documents found.
                     </td>
                 </tr>
@@ -115,10 +117,19 @@ async function loadMyDocuments() {
                     );
 
                 row.innerHTML = `
-
                     <td>
                         ${escapeHtml(
                             item.file_name
+                        )}
+                    </td>
+                    <td>
+                        ${escapeHtml(
+                            item.lecturer_name
+                        )}
+                    </td>
+                    <td>
+                        ${escapeHtml(
+                            item.lecturer_class
                         )}
                     </td>
 
