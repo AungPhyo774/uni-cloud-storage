@@ -215,9 +215,7 @@ def get_lecturers(
 
 @router.get("/lecturer-documents")
 def get_lecturer_documents(
-    current_user: User = Depends(
-        get_current_user
-    ),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
 
@@ -225,14 +223,18 @@ def get_lecturer_documents(
 
         raise HTTPException(
             status_code=403,
-            detail=(
-                "Only students can access "
-                "lecturer documents"
-            )
+            detail="Only students can access lecturer documents"
+        )
+
+    if not current_user.class_year:
+
+        raise HTTPException(
+            status_code=400,
+            detail="Student class is not assigned"
         )
 
     documents = (
-        db.query(Document)
+        db.query(Document, User)
         .join(
             User,
             Document.owner_id == User.id
@@ -247,18 +249,28 @@ def get_lecturer_documents(
         .all()
     )
 
-    return [
-        {
-            "id": document.id,
-            "file_name": document.file_name,
-            "file_size": document.file_size,
-            "content_type": document.content_type,
-            "storage_node": document.storage_node,
-            "created_at": document.created_at,
-            "lecturer": document.owner_id
-        }
-        for document in documents
-    ]
+    result = []
+
+    for document, lecturer in documents:
+
+        result.append(
+            {
+                "id": document.id,
+                "file_name": document.file_name,
+                "file_size": document.file_size,
+                "content_type": document.content_type,
+                "storage_node": document.storage_node,
+                "replica_node": document.replica_node,
+                "created_at": document.created_at,
+
+                # Lecturer information
+                "lecturer_id": lecturer.id,
+                "lecturer_name": lecturer.full_name,
+                "lecturer_class": lecturer.class_year
+            }
+        )
+
+    return result
 
 #lecturer view student documents
 @router.get("/student-documents")
@@ -303,8 +315,9 @@ def get_student_documents(
             "file_size": document.file_size,
             "content_type": document.content_type,
             "student_id": document.owner_id,
+            "student_name": db.query(User).filter(User.id == document.owner_id).first().full_name,
             "storage_node": document.storage_node,
-            "created_at": document.created_at
+            "created_at": document.created_at,
         }
         for document in documents
     ]
@@ -338,7 +351,10 @@ def get_my_documents(
             "file_size": document.file_size,
             "content_type": document.content_type,
             "storage_node": document.storage_node,
-            "created_at": document.created_at
+            "created_at": document.created_at,
+            "lecturer_class":lecturer.class_year if (lecturer := db.query(User).filter(User.id == document.lecturer_id).first()) else None,
+            
+            "lecturer_name":lecturer.full_name,
         }
         for document in documents
     ]

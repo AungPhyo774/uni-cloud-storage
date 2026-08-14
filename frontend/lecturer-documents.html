@@ -31,7 +31,10 @@
 
     <br><br>
 
-    <p id="documentsError"></p>
+    <p
+        id="documentsError"
+        class="error"
+    ></p>
 
     <table>
 
@@ -40,6 +43,7 @@
             <tr>
                 <th>File</th>
                 <th>Lecturer</th>
+                <th>Class</th>
                 <th>Date</th>
                 <th>Action</th>
             </tr>
@@ -67,6 +71,10 @@ async function loadLecturerDocuments() {
         const user =
             await getCurrentUser();
 
+        // -----------------------------------------
+        // Only students
+        // -----------------------------------------
+
         if (
             user.role !== "student"
         ) {
@@ -77,10 +85,14 @@ async function loadLecturerDocuments() {
             return;
         }
 
+        // -----------------------------------------
+        // Get lecturer documents
+        // Backend already filters
+        // same-class lecturer documents
+        // -----------------------------------------
 
         const documents =
             await getLecturerDocuments();
-
 
         const tbody =
             document.getElementById(
@@ -89,6 +101,9 @@ async function loadLecturerDocuments() {
 
         tbody.innerHTML = "";
 
+        // -----------------------------------------
+        // No documents
+        // -----------------------------------------
 
         if (
             documents.length === 0
@@ -97,7 +112,7 @@ async function loadLecturerDocuments() {
             tbody.innerHTML =
                 `
                 <tr>
-                    <td colspan="4">
+                    <td colspan="5">
                         No lecturer documents found.
                     </td>
                 </tr>
@@ -106,6 +121,9 @@ async function loadLecturerDocuments() {
             return;
         }
 
+        // -----------------------------------------
+        // Render documents
+        // -----------------------------------------
 
         documents.forEach(
             documentItem => {
@@ -115,7 +133,6 @@ async function loadLecturerDocuments() {
                         "tr"
                     );
 
-
                 row.innerHTML = `
                     <td>
                         ${escapeHtml(
@@ -124,7 +141,15 @@ async function loadLecturerDocuments() {
                     </td>
 
                     <td>
-                        ${documentItem.lecturer}
+                        ${escapeHtml(
+                            documentItem.lecturer_name
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            documentItem.lecturer_class
+                        )}
                     </td>
 
                     <td>
@@ -132,6 +157,7 @@ async function loadLecturerDocuments() {
                     </td>
 
                     <td>
+
                         <button
                             onclick="downloadLecturerDocument(
                                 ${documentItem.id},
@@ -142,9 +168,9 @@ async function loadLecturerDocuments() {
                         >
                             Download
                         </button>
+
                     </td>
                 `;
-
 
                 tbody.appendChild(
                     row
@@ -164,6 +190,10 @@ async function loadLecturerDocuments() {
 
 }
 
+
+// =========================================================
+// DOWNLOAD
+// =========================================================
 
 async function downloadLecturerDocument(
     documentId,
@@ -188,32 +218,71 @@ async function downloadLecturerDocument(
 }
 
 
+// =========================================================
+// ESCAPE HTML
+// =========================================================
+
 function escapeHtml(
     value
 ) {
 
-    return String(value)
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
+    return String(value ?? "")
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
 
 }
 
+
+// =========================================================
+// ESCAPE JAVASCRIPT
+// =========================================================
 
 function escapeJs(
     value
 ) {
 
-    return String(value)
-        .replaceAll("\\", "\\\\")
-        .replaceAll("'", "\\'")
-        .replaceAll("\n", "\\n")
-        .replaceAll("\r", "\\r");
+    return String(value ?? "")
+        .replaceAll(
+            "\\",
+            "\\\\"
+        )
+        .replaceAll(
+            "'",
+            "\\'"
+        )
+        .replaceAll(
+            "\n",
+            "\\n"
+        )
+        .replaceAll(
+            "\r",
+            "\\r"
+        );
 
 }
 
+
+// =========================================================
+// LOAD PAGE
+// =========================================================
 
 loadLecturerDocuments();
 

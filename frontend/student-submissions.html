@@ -156,9 +156,9 @@ async function loadStudentSubmissions() {
                     </td>
 
                     <td>
-                        Student #${
-                            item.student_id
-                        }
+                        ${escapeHtml(
+                            item.student_name
+                        )}
                     </td>
 
                     <td>
