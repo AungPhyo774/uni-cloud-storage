@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Admin Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Admin Dashboard</h1>
+
+    <div class="user-card">
+
+        <h2 id="welcome">
+            Welcome
+        </h2>
+
+        <p id="email"></p>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- NAVIGATION -->
+    <!-- ========================================= -->
+
+    <div class="menu">
+
+        <a href="admin-users.html">
+            User Management
+        </a>
+
+        <a href="admin-node-status.html">
+            Node Status
+        </a>
+
+        <a href="admin-recovery-logs.html">
+            Recovery Monitoring
+        </a>
+
+        <button
+            type="button"
+            onclick="logout()"
+        >
+            Logout
+        </button>
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- CLASS SUMMARY -->
+    <!-- ========================================= -->
+
+    <h2>Class Summary</h2>
+
+    <div id="classSummary">
+
+        Loading...
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- NODE SUMMARY -->
+    <!-- ========================================= -->
+
+    <h2>Storage Nodes</h2>
+
+    <div id="nodeSummary">
+
+        Loading...
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- REPLICATION SUMMARY -->
+    <!-- ========================================= -->
+
+    <h2>Replication</h2>
+
+    <div id="replicationSummary">
+
+        Loading...
+
+    </div>
+
+
+    <!-- ========================================= -->
+    <!-- RECOVERY SUMMARY -->
+    <!-- ========================================= -->
+
+    <h2>Recovery</h2>
+
+    <div id="recoverySummary">
+
+        Loading...
+
+    </div>
+
+
+    <p
+        id="dashboardError"
+        class="error"
+    ></p>
+
+</div>
+
+
+<script src="js/api.js"></script>
+
+<script>
+
+async function loadAdminDashboard() {
+
+    try {
+
+        // =========================================
+        // CURRENT USER
+        // =========================================
+
+        const user =
+            await getCurrentUser();
+
+
+        if (
+            user.role !== "admin"
+        ) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+        }
+
+
+        document.getElementById(
+            "welcome"
+        ).textContent =
+            `Welcome, ${user.full_name}`;
+
+
+        document.getElementById(
+            "email"
+        ).textContent =
+            `Email: ${user.email}`;
+
+
+        // =========================================
+        // LOAD ALL DATA
+        // =========================================
+
+        await Promise.all([
+            loadClassSummary(),
+            loadNodeSummary(),
+            loadReplicationSummary(),
+            loadRecoverySummary()
+        ]);
+
+    } catch (error) {
+
+        document.getElementById(
+            "dashboardError"
+        ).textContent =
+            error.message;
+
+    }
+
+}
+
+
+// =================================================
+// CLASS SUMMARY
+// =================================================
+
+async function loadClassSummary() {
+
+    const data =
+        await getClassSummary();
+
+
+    const container =
+        document.getElementById(
+            "classSummary"
+        );
+
+
+    container.innerHTML = "";
+
+
+    for (
+        const [year, counts]
+        of Object.entries(data)
+    ) {
+
+        const div =
+            document.createElement(
+                "div"
+            );
+
+
+        div.innerHTML = `
+            <strong>
+                ${formatClassYear(year)}
+            </strong>
+
+            <p>
+                Students:
+                ${counts.students}
+            </p>
+
+            <p>
+                Lecturers:
+                ${counts.lecturers}
+            </p>
+        `;
+
+
+        container.appendChild(
+            div
+        );
+
+    }
+
+}
+
+
+// =================================================
+// NODE SUMMARY
+// =================================================
+
+async function loadNodeSummary() {
+
+    const data =
+        await getNodeHealth();
+
+
+    const container =
+        document.getElementById(
+            "nodeSummary"
+        );
+
+
+    container.innerHTML = "";
+
+
+    data.nodes.forEach(
+        node => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            const icon =
+                node.status === "online"
+                    ? "🟢"
+                    : "🔴";
+
+
+            div.innerHTML = `
+                <p>
+                    ${icon}
+                    <strong>
+                        ${node.name}
+                    </strong>
+
+                    -
+                    ${node.status}
+                </p>
+            `;
+
+
+            container.appendChild(
+                div
+            );
+
+        }
+    );
+
+}
+
+
+// =================================================
+// REPLICATION SUMMARY
+// =================================================
+
+async function loadReplicationSummary() {
+
+    const data =
+        await getReplicationStatus();
+
+
+    const summary =
+        document.getElementById(
+            "replicationSummary"
+        );
+
+
+    const items =
+        data.documents || [];
+
+
+    const healthy =
+        items.filter(
+            item =>
+                item.status ===
+                "HEALTHY"
+        ).length;
+
+
+    const primaryMissing =
+        items.filter(
+            item =>
+                item.status ===
+                "PRIMARY_MISSING"
+        ).length;
+
+
+    const replicaMissing =
+        items.filter(
+            item =>
+                item.status ===
+                "REPLICA_MISSING"
+        ).length;
+
+
+    const mismatch =
+        items.filter(
+            item =>
+                item.status ===
+                "CHECKSUM_MISMATCH"
+        ).length;
+
+
+    summary.innerHTML = `
+        <p>
+            Total Documents:
+            ${items.length}
+        </p>
+
+        <p>
+            Healthy:
+            ${healthy}
+        </p>
+
+        <p>
+            Primary Missing:
+            ${primaryMissing}
+        </p>
+
+        <p>
+            Replica Missing:
+            ${replicaMissing}
+        </p>
+
+        <p>
+            Checksum Mismatch:
+            ${mismatch}
+        </p>
+    `;
+
+}
+
+
+// =================================================
+// RECOVERY SUMMARY
+// =================================================
+
+async function loadRecoverySummary() {
+
+    const data =
+        await getRecoveryStats();
+
+
+    const container =
+        document.getElementById(
+            "recoverySummary"
+        );
+
+
+    container.innerHTML = `
+        <p>
+            Total Attempts:
+            ${data.total_recovery_attempts}
+        </p>
+
+        <p>
+            Successful:
+            ${data.successful}
+        </p>
+
+        <p>
+            Failed:
+            ${data.failed}
+        </p>
+
+        <p>
+            Checksum Mismatch:
+            ${data.checksum_mismatch ?? 0}
+        </p>
+    `;
+
+}
+
+
+// =================================================
+// HELPERS
+// =================================================
+
+function formatClassYear(
+    value
+) {
+
+    return value
+        .replaceAll(
+            "_",
+            " "
+        )
+        .replace(
+            /\b\w/g,
+            char =>
+                char.toUpperCase()
+        );
+}
+
+
+loadAdminDashboard();
+
+</script>
+
+</body>
+</html>

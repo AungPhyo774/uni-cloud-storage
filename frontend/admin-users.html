@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Admin - Users</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>User Management</h1>
+
+    <a href="admin-dashboard.html">
+        Back to Dashboard
+    </a>
+
+    <br><br>
+
+
+    <h2>Create User</h2>
+
+
+    <form id="createUserForm">
+
+        <input
+            type="text"
+            id="fullName"
+            placeholder="Full Name"
+            required
+        >
+
+
+        <input
+            type="email"
+            id="email"
+            placeholder="Email"
+            required
+        >
+
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            required
+        >
+
+
+        <select
+            id="role"
+            required
+        >
+
+            <option value="">
+                Select Role
+            </option>
+
+            <option value="student">
+                Student
+            </option>
+
+            <option value="lecturer">
+                Lecturer
+            </option>
+
+        </select>
+
+
+        <select
+            id="classYear"
+            required
+        >
+
+            <option value="">
+                Select Class
+            </option>
+
+            <option value="first_year">
+                First Year
+            </option>
+
+            <option value="second_year">
+                Second Year
+            </option>
+
+            <option value="third_year">
+                Third Year
+            </option>
+
+            <option value="fourth_year">
+                Fourth Year
+            </option>
+
+            <option value="fifth_year">
+                Fifth Year
+            </option>
+
+        </select>
+
+
+        <button type="submit">
+            Create User
+        </button>
+
+    </form>
+
+
+    <p
+        id="createMessage"
+    ></p>
+
+
+    <h2>Users</h2>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>Name</th>
+
+                <th>Email</th>
+
+                <th>Role</th>
+
+                <th>Class</th>
+
+                <th>Status</th>
+
+                <th>Action</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody
+            id="usersBody"
+        ></tbody>
+
+    </table>
+
+
+    <p
+        id="usersError"
+        class="error"
+    ></p>
+
+</div>
+
+
+<script src="js/api.js"></script>
+
+<script>
+
+async function loadUsers() {
+
+    try {
+
+        const user =
+            await getCurrentUser();
+
+
+        if (
+            user.role !== "admin"
+        ) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+        }
+
+
+        const users =
+            await getAdminUsers();
+
+
+        const tbody =
+            document.getElementById(
+                "usersBody"
+            );
+
+
+        tbody.innerHTML = "";
+
+
+        users.forEach(
+            item => {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                row.innerHTML = `
+
+                    <td>
+                        ${escapeHtml(
+                            item.full_name
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            item.email
+                        )}
+                    </td>
+
+                    <td>
+                        ${item.role}
+                    </td>
+
+                    <td>
+                        ${item.class_year ?? "-"}
+                    </td>
+
+                    <td>
+                        ${
+                            item.is_active
+                                ? "Active"
+                                : "Inactive"
+                        }
+                    </td>
+
+                    <td>
+
+                        <button
+                            onclick="changeStatus(
+                                ${item.id},
+                                ${item.is_active}
+                            )"
+                        >
+                            ${
+                                item.is_active
+                                    ? "Deactivate"
+                                    : "Activate"
+                            }
+                        </button>
+                    </td>
+                `;
+
+
+                tbody.appendChild(
+                    row
+                );
+
+            }
+        );
+
+    } catch (error) {
+
+        document.getElementById(
+            "usersError"
+        ).textContent =
+            error.message;
+
+    }
+
+}
+
+
+// =================================================
+// CREATE USER
+// =================================================
+
+document
+    .getElementById(
+        "createUserForm"
+    )
+    .addEventListener(
+        "submit",
+        async function(event) {
+
+            event.preventDefault();
+
+
+            const message =
+                document.getElementById(
+                    "createMessage"
+                );
+
+
+            const data = {
+
+                full_name:
+                    document.getElementById(
+                        "fullName"
+                    ).value,
+
+                email:
+                    document.getElementById(
+                        "email"
+                    ).value,
+
+                password:
+                    document.getElementById(
+                        "password"
+                    ).value,
+
+                role:
+                    document.getElementById(
+                        "role"
+                    ).value,
+
+                class_year:
+                    document.getElementById(
+                        "classYear"
+                    ).value
+
+            };
+
+
+            try {
+
+                const result =
+                    await createAdminUser(
+                        data
+                    );
+
+
+                message.textContent =
+                    `User created: ${result.full_name}`;
+
+
+                document
+                    .getElementById(
+                        "createUserForm"
+                    )
+                    .reset();
+
+
+                await loadUsers();
+
+            } catch (error) {
+
+                message.textContent =
+                    error.message;
+
+            }
+
+        }
+    );
+
+
+// =================================================
+// CHANGE STATUS
+// =================================================
+
+async function changeStatus(
+    userId,
+    currentStatus
+) {
+
+    try {
+
+        await updateAdminUser(
+            userId,
+            {
+                is_active:
+                    !currentStatus
+            }
+        );
+
+
+        await loadUsers();
+
+    } catch (error) {
+
+        alert(
+            error.message
+        );
+
+    }
+
+}
+
+// =================================================
+// HELPERS
+// =================================================
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+loadUsers();
+
+</script>
+
+</body>
+</html>

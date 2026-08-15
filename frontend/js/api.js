@@ -92,6 +92,44 @@ async function loginUser(
     return data;
 }
 
+// ADMIN - CREATE USER
+async function createAdminUser(data) {
+
+    return await apiRequest(
+        "/users/admin/create-user",
+        {
+            method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify(data)
+        }
+    );
+}
+
+async function updateAdminUser(
+    userId,
+    data
+) {
+
+    return await apiRequest(
+        `/admin/users/${userId}`,
+        {
+            method: "PATCH",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify(data)
+        }
+    );
+}
+
 async function getCurrentUser() {
 
     return await apiRequest(

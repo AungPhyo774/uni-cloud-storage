@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Recovery Monitoring</title>
+
+    <link
+        rel="stylesheet"
+        href="css/style.css"
+    >
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>Recovery Monitoring</h1>
+
+    <a href="admin-dashboard.html">
+        Back to Dashboard
+    </a>
+
+    <br><br>
+
+
+    <h2>Recovery Statistics</h2>
+
+
+    <div id="statsContainer">
+        Loading...
+    </div>
+
+
+    <h2>Recovery Logs</h2>
+
+
+    <label>
+        Filter:
+    </label>
+
+
+    <select
+        id="statusFilter"
+        onchange="loadLogs()"
+    >
+
+        <option value="">
+            All
+        </option>
+
+        <option value="SUCCESS">
+            SUCCESS
+        </option>
+
+        <option value="FAILED">
+            FAILED
+        </option>
+
+        <option value="CHECKSUM_MISMATCH">
+            CHECKSUM_MISMATCH
+        </option>
+
+    </select>
+
+
+    <br><br>
+
+
+    <table>
+
+        <thead>
+
+            <tr>
+
+                <th>File</th>
+                <th>Source</th>
+                <th>Target</th>
+                <th>Status</th>
+                <th>Message</th>
+                <th>Time</th>
+
+            </tr>
+
+        </thead>
+
+
+        <tbody
+            id="logsBody"
+        ></tbody>
+
+    </table>
+
+
+    <p
+        id="logsError"
+        class="error"
+    ></p>
+
+</div>
+
+
+<script src="js/api.js"></script>
+
+<script>
+
+async function loadStats() {
+
+    const data =
+        await getRecoveryStats();
+
+
+    document.getElementById(
+        "statsContainer"
+    ).innerHTML = `
+
+        <p>
+            Total:
+            ${data.total_recovery_attempts}
+        </p>
+
+        <p>
+            Successful:
+            ${data.successful}
+        </p>
+
+        <p>
+            Failed:
+            ${data.failed}
+        </p>
+
+        <p>
+            Checksum Mismatch:
+            ${data.checksum_mismatch ?? 0}
+        </p>
+    `;
+
+}
+
+
+async function loadLogs() {
+
+    try {
+
+        const status =
+            document.getElementById(
+                "statusFilter"
+            ).value;
+
+
+        const logs =
+            await getRecoveryLogs(
+                status || null
+            );
+
+
+        const tbody =
+            document.getElementById(
+                "logsBody"
+            );
+
+
+        tbody.innerHTML = "";
+
+
+        if (
+            logs.length === 0
+        ) {
+
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6">
+                        No recovery logs found.
+                    </td>
+                </tr>
+            `;
+
+            return;
+        }
+
+
+        logs.forEach(
+            item => {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                row.innerHTML = `
+
+                    <td>
+                        ${escapeHtml(
+                            item.file_name
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            item.source_node
+                        )}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            item.target_node
+                        )}
+                    </td>
+
+                    <td>
+                        ${item.status}
+                    </td>
+
+                    <td>
+                        ${escapeHtml(
+                            item.message
+                        )}
+                    </td>
+
+                    <td>
+                        ${item.created_at}
+                    </td>
+
+                `;
+
+
+                tbody.appendChild(
+                    row
+                );
+
+            }
+        );
+
+    } catch (error) {
+
+        document.getElementById(
+            "logsError"
+        ).textContent =
+            error.message;
+
+    }
+
+}
+
+
+function escapeHtml(
+    value
+) {
+
+    return String(
+        value ?? ""
+    )
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+async function loadPage() {
+
+    try {
+
+        const user =
+            await getCurrentUser();
+
+
+        if (
+            user.role !== "admin"
+        ) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+        }
+
+
+        await loadStats();
+
+        await loadLogs();
+
+    } catch (error) {
+
+        document.getElementById(
+            "logsError"
+        ).textContent =
+            error.message;
+
+    }
+
+}
+
+
+loadPage();
+
+</script>
+
+</body>
+</html>
