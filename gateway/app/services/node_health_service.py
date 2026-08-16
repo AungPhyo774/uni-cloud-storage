@@ -8,15 +8,15 @@ import httpx
 STORAGE_NODES = [
     {
         "name": "Node 1",
-        "url": "http://127.0.0.1:9001"
+        "url": "http://storage-node-1:9001"
     },
     {
         "name": "Node 2",
-        "url": "http://127.0.0.1:9002"
+        "url": "http://storage-node-2:9002"
     },
     {
         "name": "Node 3",
-        "url": "http://127.0.0.1:9003"
+        "url": "http://storage-node-3:9003"
     }
 ]
 

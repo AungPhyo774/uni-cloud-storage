@@ -2,9 +2,9 @@ import httpx
 
 
 STORAGE_NODES = [
-    "http://127.0.0.1:9001",
-    "http://127.0.0.1:9002",
-    "http://127.0.0.1:9003"
+    "http://storage-node-1:9001",
+    "http://storage-node-2:9002",
+    "http://storage-node-3:9003"
 ]
 
 

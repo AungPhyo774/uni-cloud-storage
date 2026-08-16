@@ -1,4 +1,4 @@
-from sqlalchemy import Column
+from sqlalchemy import Boolean, Column
 from sqlalchemy import DateTime
 from sqlalchemy import Integer
 from sqlalchemy import String
@@ -23,7 +23,7 @@ class User(Base):  # user Table ကို ကိုယ်စားပြုတ�
     class_year = Column(String(20),nullable=True)
 
     #default=True(default=1) 1=active, 0=inactive
-    is_active = Column(Integer,nullable=False,default=True)
+    is_active = Column(Boolean,nullable=False,default=True)
     
     created_at = Column(
         DateTime(timezone=True),

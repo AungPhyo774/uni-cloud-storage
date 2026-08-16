@@ -1,61 +1,12 @@
-# from fastapi import APIRouter, Depends
-
-# from app.dependencies.auth import (
-#     get_current_user,
-#     require_role
-# )
-
-# from app.models.user import User
-# from app.schemas.user import UserResponse
-
-
-# router = APIRouter(
-#     prefix="/users",
-#     tags=["Users"]
-# )
-
-
-# @router.get("/me", response_model=UserResponse)
-# def get_me(
-#     current_user: User = Depends(get_current_user)
-# ):
-#     return current_user
-
-
-# @router.get("/student-area")
-# def student_area(
-#     current_user: User = Depends(
-#         require_role("student")
-#     )
-# ):
-#     return {
-#         "message": "Welcome student",
-#         "user": current_user.full_name,
-#         "role": current_user.role
-#     }
-
-# @router.get("/admin-area")
-# def admin_area(
-#     current_user: User = Depends(
-#         require_role("admin")
-#     )
-# ):
-#     return {
-#         "message": "Welcome administrator",
-#         "user": current_user.full_name,
-#         "role": current_user.role
-#     }
-
-
-
-
 from fastapi import (
     APIRouter,
     Depends,
-    HTTPException
+    HTTPException,
+    status
 )
 
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from app.database.session import get_db
 
@@ -98,43 +49,6 @@ def get_me(
 
 
 # =========================================================
-# STUDENT AREA
-# =========================================================
-
-@router.get("/student-area")
-def student_area(
-    current_user: User = Depends(
-        require_role("student")
-    )
-):
-
-    return {
-        "message": "Welcome student",
-        "user": current_user.full_name,
-        "role": current_user.role,
-        "class_year": current_user.class_year
-    }
-
-
-# =========================================================
-# ADMIN AREA
-# =========================================================
-
-@router.get("/admin-area")
-def admin_area(
-    current_user: User = Depends(
-        require_role("admin")
-    )
-):
-
-    return {
-        "message": "Welcome administrator",
-        "user": current_user.full_name,
-        "role": current_user.role
-    }
-
-
-# =========================================================
 # ADMIN CREATE USER
 # =========================================================
 
@@ -151,7 +65,7 @@ def admin_create_user(
 ):
 
     # -----------------------------------------------------
-    # Validate role
+    # 1. Validate role
     # -----------------------------------------------------
 
     if data.role not in [
@@ -168,16 +82,18 @@ def admin_create_user(
         )
 
     # -----------------------------------------------------
-    # Validate class year
+    # 2. Validate class
     # -----------------------------------------------------
 
-    if data.class_year not in [
+    allowed_classes = [
         "first_year",
         "second_year",
         "third_year",
         "fourth_year",
-        "fifth_year",
-    ]:
+        "fifth_year"
+    ]
+
+    if data.class_year not in allowed_classes:
 
         raise HTTPException(
             status_code=400,
@@ -185,7 +101,7 @@ def admin_create_user(
         )
 
     # -----------------------------------------------------
-    # Check duplicate email
+    # 3. Check duplicate email
     # -----------------------------------------------------
 
     existing_user = (
@@ -204,7 +120,7 @@ def admin_create_user(
         )
 
     # -----------------------------------------------------
-    # Create user
+    # 4. Create user
     # -----------------------------------------------------
 
     new_user = User(
@@ -214,13 +130,32 @@ def admin_create_user(
             data.password
         ),
         role=data.role,
-        class_year=data.class_year
+        class_year=data.class_year,
+        is_active=True
     )
 
-    db.add(new_user)
+    try:
 
-    db.commit()
+        db.add(new_user)
 
-    db.refresh(new_user)
+        db.commit()
+
+        db.refresh(new_user)
+
+    except IntegrityError as error:
+
+        db.rollback()
+
+        print(
+            f"[CREATE USER ERROR] {error}"
+        )
+
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "User could not be created. "
+                "Check email or database constraints."
+            )
+        )
 
     return new_user
