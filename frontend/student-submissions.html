@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
     <meta charset="UTF-8">
@@ -12,302 +11,565 @@
 
     <title>Student Submissions</title>
 
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <link
         rel="stylesheet"
-        href="css/style.css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#fffdf2',
+                            100: '#fff8d9',
+                            200: '#fceca8',
+                            300: '#f7d96b',
+                            400: '#e8c23a',
+                            500: '#cb9c0d',
+                            600: '#a77d08',
+                            700: '#806008'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+                BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+    </style>
 
 </head>
 
-<body>
+<body class="min-h-screen bg-slate-50 text-slate-800">
 
-<div class="container">
+    <!-- NAVBAR -->
 
-    <h1>Student Submissions</h1>
+    <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
 
-    <a href="lecturer-dashboard.html">
-        Back to Dashboard
-    </a>
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-    <br><br>
+            <div class="flex h-20 items-center justify-between">
 
+                <a
+                    href="lecturer-dashboard.html"
+                    class="flex items-center gap-3"
+                >
 
-    <p id="classInfo"></p>
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gold-500 text-white shadow-lg shadow-gold-500/20">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
 
-    <p
-        id="submissionsError"
-        class="error"
-    ></p>
+                    <div class="hidden sm:block">
 
+                        <h1 class="text-lg font-bold text-slate-900">
+                            Lecturer Portal
+                        </h1>
 
-    <table>
+                        <p class="text-xs text-slate-500">
+                            Academic Management System
+                        </p>
 
-        <thead>
+                    </div>
 
-            <tr>
-
-                <th>File Name</th>
-
-                <th>Student</th>
-
-                <th>Size</th>
-
-                <th>Date</th>
-
-                <th>Action</th>
-
-            </tr>
-
-        </thead>
+                </a>
 
 
-        <tbody
-            id="submissionsBody"
-        >
+                <nav class="hidden items-center gap-1 lg:flex">
 
-        </tbody>
+                    <a
+                        href="lecturer-dashboard.html"
+                        class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    >
+                        <i class="fa-solid fa-chart-line"></i>
+                        Dashboard
+                    </a>
 
-    </table>
+                    <a
+                        href="lecturer-upload.html"
+                        class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    >
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        Upload
+                    </a>
 
-</div>
+                    <a
+                        href="student-submissions.html"
+                        class="flex items-center gap-2 rounded-xl bg-gold-50 px-4 py-2.5 text-sm font-semibold text-gold-600"
+                    >
+                        <i class="fa-solid fa-user-graduate"></i>
+                        Submissions
+                    </a>
+
+                    <a
+                        href="lecturer-my-documents.html"
+                        class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    >
+                        <i class="fa-solid fa-folder-open"></i>
+                        My Documents
+                    </a>
+
+                </nav>
 
 
-<script src="js/api.js"></script>
-
-<script>
-
-async function loadStudentSubmissions() {
-
-    try {
-
-        const user =
-            await getCurrentUser();
+                <button
+                    onclick="logout()"
+                    class="hidden h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600 hover:bg-red-100 lg:flex"
+                >
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
 
 
-        // -----------------------------------------
-        // Role check
-        // -----------------------------------------
+                <button
+                    onclick="toggleMobileMenu()"
+                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 lg:hidden"
+                >
+                    <i class="fa-solid fa-bars"></i>
+                </button>
 
-        if (
-            user.role !== "lecturer"
-        ) {
+            </div>
 
-            window.location.href =
-                "login.html";
 
-            return;
+            <div
+                id="mobileMenu"
+                class="hidden border-t border-slate-100 pb-4 pt-3 lg:hidden"
+            >
+
+                <div class="space-y-1">
+
+                    <a href="lecturer-dashboard.html" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-chart-line w-5"></i>
+                        Dashboard
+                    </a>
+
+                    <a href="lecturer-upload.html" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-cloud-arrow-up w-5"></i>
+                        Upload Document
+                    </a>
+
+                    <a href="student-submissions.html" class="flex items-center gap-3 rounded-xl bg-gold-50 px-4 py-3 text-sm font-semibold text-gold-600">
+                        <i class="fa-solid fa-user-graduate w-5"></i>
+                        Student Submissions
+                    </a>
+
+                    <a href="lecturer-my-documents.html" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-folder-open w-5"></i>
+                        My Documents
+                    </a>
+
+                    <button onclick="logout()" class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50">
+                        <i class="fa-solid fa-right-from-bracket w-5"></i>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- MAIN -->
+
+    <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+
+        <div class="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+
+            <div>
+
+                <div class="mb-3 flex items-center gap-2 text-sm font-semibold text-emerald-600">
+                    <i class="fa-solid fa-user-graduate"></i>
+                    Student Management
+                </div>
+
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900">
+                    Student Submissions
+                </h2>
+
+                <p class="mt-2 text-slate-500">
+                    Review documents submitted by students in your class.
+                </p>
+
+            </div>
+
+
+            <div class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+
+                <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-gold-50 text-gold-600">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+
+                <div>
+
+                    <p class="text-xs text-slate-400">
+                        Current Class
+                    </p>
+
+                    <p
+                        id="classInfo"
+                        class="text-sm font-bold text-slate-800"
+                    >
+                        Loading...
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <p
+            id="submissionsError"
+            class="mb-5 text-center text-sm font-medium text-red-600"
+        ></p>
+
+
+        <!-- Table Card -->
+
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+            <div class="flex items-center justify-between border-b border-slate-100 px-5 py-5 sm:px-6">
+
+                <div>
+
+                    <h3 class="font-bold text-slate-900">
+                        Submitted Documents
+                    </h3>
+
+                    <p class="mt-1 text-xs text-slate-500">
+                        Student files for your class
+                    </p>
+
+                </div>
+
+                <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                    <i class="fa-solid fa-file-lines"></i>
+                </div>
+
+            </div>
+
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full min-w-[750px] text-left">
+
+                    <thead class="bg-slate-50">
+
+                        <tr>
+
+                            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                File Name
+                            </th>
+
+                            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                Student
+                            </th>
+
+                            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                Size
+                            </th>
+
+                            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                Date
+                            </th>
+
+                            <th class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                Action
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody
+                        id="submissionsBody"
+                        class="divide-y divide-slate-100"
+                    ></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <div class="mt-6">
+
+            <a
+                href="lecturer-dashboard.html"
+                class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-gold-600"
+            >
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Dashboard
+            </a>
+
+        </div>
+
+    </main>
+
+
+    <script src="js/api.js"></script>
+
+    <script>
+
+        function toggleMobileMenu() {
+
+            document
+                .getElementById("mobileMenu")
+                .classList.toggle("hidden");
+
         }
 
 
-        document.getElementById(
-            "classInfo"
-        ).textContent =
-            `Class: ${user.class_year}`;
+        async function loadStudentSubmissions() {
+
+            try {
+
+                const user =
+                    await getCurrentUser();
 
 
-        // -----------------------------------------
-        // Get student submissions
-        // -----------------------------------------
+                if (user.role !== "lecturer") {
 
-        const documents =
-            await getStudentSubmissions();
+                    window.location.href =
+                        "login.html";
 
+                    return;
 
-        const tbody =
-            document.getElementById(
-                "submissionsBody"
-            );
+                }
 
 
-        tbody.innerHTML = "";
+                document.getElementById("classInfo")
+                    .textContent =
+                    user.class_year || "Not assigned";
 
 
-        if (
-            documents.length === 0
-        ) {
+                const documents =
+                    await getStudentSubmissions();
 
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="5">
-                        No student submissions found.
-                    </td>
-                </tr>
-            `;
 
-            return;
+                const tbody =
+                    document.getElementById("submissionsBody");
+
+
+                tbody.innerHTML = "";
+
+
+                if (documents.length === 0) {
+
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="5" class="px-6 py-16 text-center">
+
+                                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                                    <i class="fa-solid fa-inbox text-xl"></i>
+                                </div>
+
+                                <p class="mt-4 font-semibold text-slate-700">
+                                    No student submissions found
+                                </p>
+
+                                <p class="mt-1 text-sm text-slate-400">
+                                    Student submissions will appear here.
+                                </p>
+
+                            </td>
+                        </tr>
+                    `;
+
+                    return;
+
+                }
+
+
+                documents.forEach(item => {
+
+                    const row =
+                        document.createElement("tr");
+
+                    row.className =
+                        "transition hover:bg-slate-50";
+
+
+                    row.innerHTML = `
+
+                        <td class="px-6 py-4">
+
+                            <div class="flex items-center gap-3">
+
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+
+                                    <i class="fa-solid fa-file-lines"></i>
+
+                                </div>
+
+                                <div class="min-w-0">
+
+                                    <p class="max-w-xs truncate text-sm font-semibold text-slate-800">
+                                        ${escapeHtml(item.file_name)}
+                                    </p>
+
+                                    <p class="text-xs text-slate-400">
+                                        Submitted document
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td class="px-6 py-4">
+
+                            <div class="flex items-center gap-2">
+
+                                <div class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700">
+
+                                    ${escapeHtml(
+                                        (item.student_name || "S")
+                                            .charAt(0)
+                                            .toUpperCase()
+                                    )}
+
+                                </div>
+
+                                <span class="text-sm font-medium text-slate-700">
+                                    ${escapeHtml(item.student_name)}
+                                </span>
+
+                            </div>
+
+                        </td>
+
+
+                        <td class="px-6 py-4 text-sm text-slate-500">
+
+                            ${formatFileSize(item.file_size)}
+
+                        </td>
+
+
+                        <td class="px-6 py-4 text-sm text-slate-500">
+
+                            ${escapeHtml(item.created_at)}
+
+                        </td>
+
+
+                        <td class="px-6 py-4 text-right">
+
+                            <button
+                                onclick="downloadSubmission(
+                                    ${item.id},
+                                    '${escapeJs(item.file_name)}'
+                                )"
+                                class="inline-flex items-center gap-2 rounded-lg bg-gold-50 px-3 py-2 text-xs font-semibold text-gold-600 transition hover:bg-gold-500 hover:text-white"
+                            >
+
+                                <i class="fa-solid fa-download"></i>
+
+                                Download
+
+                            </button>
+
+                        </td>
+
+                    `;
+
+
+                    tbody.appendChild(row);
+
+                });
+
+
+            } catch (error) {
+
+                document.getElementById(
+                    "submissionsError"
+                ).textContent =
+                    error.message;
+
+            }
+
         }
 
 
-        documents.forEach(
-            item => {
+        async function downloadSubmission(
+            documentId,
+            fileName
+        ) {
 
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
+            try {
 
+                await downloadDocument(
+                    documentId,
+                    fileName
+                );
 
-                row.innerHTML = `
+            } catch (error) {
 
-                    <td>
-                        ${escapeHtml(
-                            item.file_name
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            item.student_name
-                        )}
-                    </td>
-
-                    <td>
-                        ${formatFileSize(
-                            item.file_size
-                        )}
-                    </td>
-
-                    <td>
-                        ${item.created_at}
-                    </td>
-
-                    <td>
-
-                        <button
-                            onclick="downloadSubmission(
-                                ${item.id},
-                                '${escapeJs(
-                                    item.file_name
-                                )}'
-                            )"
-                        >
-                            Download
-                        </button>
-
-                    </td>
-
-                `;
-
-
-                tbody.appendChild(
-                    row
+                alert(
+                    `Download failed: ${error.message}`
                 );
 
             }
-        );
 
-    } catch (error) {
-
-        document.getElementById(
-            "submissionsError"
-        ).textContent =
-            error.message;
-
-    }
-
-}
+        }
 
 
-async function downloadSubmission(
-    documentId,
-    fileName
-) {
+        function formatFileSize(bytes) {
 
-    try {
+            if (bytes < 1024) {
+                return `${bytes} B`;
+            }
 
-        await downloadDocument(
-            documentId,
-            fileName
-        );
+            if (bytes < 1024 * 1024) {
+                return `${(bytes / 1024).toFixed(2)} KB`;
+            }
 
-    } catch (error) {
+            return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 
-        alert(
-            `Download failed: ${error.message}`
-        );
-
-    }
-
-}
+        }
 
 
-function formatFileSize(bytes) {
+        function escapeHtml(value) {
 
-    if (bytes < 1024) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
 
-        return `${bytes} B`;
-
-    }
-
-    if (bytes < 1024 * 1024) {
-
-        return `${(
-            bytes / 1024
-        ).toFixed(2)} KB`;
-
-    }
-
-    return `${(
-        bytes /
-        (1024 * 1024)
-    ).toFixed(2)} MB`;
-
-}
+        }
 
 
-function escapeHtml(value) {
+        function escapeJs(value) {
 
-    return String(value)
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
+            return String(value ?? "")
+                .replaceAll("\\", "\\\\")
+                .replaceAll("'", "\\'")
+                .replaceAll("\n", "\\n")
+                .replaceAll("\r", "\\r");
 
-}
+        }
 
 
-function escapeJs(value) {
+        loadStudentSubmissions();
 
-    return String(value)
-        .replaceAll(
-            "\\",
-            "\\\\"
-        )
-        .replaceAll(
-            "'",
-            "\\'"
-        )
-        .replaceAll(
-            "\n",
-            "\\n"
-        )
-        .replaceAll(
-            "\r",
-            "\\r"
-        );
-
-}
-
-
-loadStudentSubmissions();
-
-</script>
+    </script>
 
 </body>
 </html>

@@ -1,79 +1,352 @@
-<form id="loginForm">
-
-    <input
-        type="email"
-        id="email"
-        placeholder="Email"
-        required
-    >
-
-    <input
-        type="password"
-        id="password"
-        placeholder="Password"
-        required
-    >
-
-    <button type="submit">
-        Login
-    </button>
-
-</form>
-
-<p id="loginError"></p>
-
-<script src="js/api.js"></script>
-<script>
-document
-    .getElementById("loginForm")
-    .addEventListener(
-        "submit",
-        async function(event) {
-
-            event.preventDefault();
-
-            const email =
-                document.getElementById(
-                    "email"
-                ).value;
-
-            const password =
-                document.getElementById(
-                    "password"
-                ).value;
-
-            const errorElement =
-                document.getElementById(
-                    "loginError"
-                );
-
-            try {
-
-                await loginUser(
-                    email,
-                    password
-                );
-
-                const user =await getCurrentUser();
-
-                if (user.role === "admin") {
-
-                    window.location.href ="admin-dashboard.html";
-
-                } else if (user.role === "lecturer") {
-
-                    window.location.href ="lecturer-dashboard.html";
-                } else {
-                    
-                    window.location.href ="student-dashboard.html";
-                }
-                
-            } catch (error) {
-
-                errorElement.textContent =
-
-                error.message;
-            }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animated Login Lamp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-    );
-</script>
+
+        /* ၁။ မီးမလင်းခင် နောက်ခံ: ခဲနုရောင် ရေစို (Soft Light Gray Gradient) */
+        body {
+            background: linear-gradient(135deg, #f1f5f9 0%, #cbd5e1 50%, #94a3b8 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            user-select: none;
+            transition: background 0.6s ease;
+        }
+
+        /* ၂။ ကြိုးဆွဲလိုက်ပါက နောက်ခံ: အဝါရောင် ရေစို (Soft Warm Yellow Gradient) */
+        body[data-on="true"] {
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
+        }
+
+        /* တစ်ခုထဲ ပေါင်းထားသော Outer Container */
+        .outer-container {
+            position: relative;
+            background: #23232e; /* မီးမလင်းခင် Container အမှောင်ရောင် */
+            padding: 40px 50px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            transition: background-color 0.5s ease, box-shadow 0.5s ease;
+        }
+
+        /* ကြိုးဆွဲလိုက်ပါက Container ကို အဖြူရောင် ပြောင်းမည် */
+        body[data-on="true"] .outer-container {
+            background: #ffffff;
+            box-shadow: 0 15px 35px rgba(245, 158, 11, 0.25);
+        }
+
+        /* အပေါ်ဆုံးမှ လမ်းညွှန်စာသား (English) */
+        .instruction-text {
+            color: #fbd361;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            opacity: 1;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        /* ကြိုးဆွဲလိုက်ပါက စာသား ပျောက်သွားမည် */
+        body[data-on="true"] .instruction-text {
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
+        }
+
+        /* Lamp နဲ့ Form ကို ဘေးချင်းယှဉ်ပေးသည့် Inner Layout */
+        .inner-content {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+        }
+
+        /* Lamp Section */
+        .lamp-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Lamp Shade (မီးအိမ်ခေါင်း) */
+        .lamp-shade {
+            width: 150px;
+            height: 85px;
+            background: #d8d8d8;
+            border-top-left-radius: 85px;
+            border-top-right-radius: 85px;
+            position: relative;
+            z-index: 2;
+            box-shadow: inset 0 -5px 10px rgba(0,0,0,0.15);
+            transition: 0.5s ease;
+        }
+
+        body[data-on="true"] .lamp-shade {
+            background: #fbd361;
+            box-shadow: 0 0 35px #fbd361, inset 0 -5px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Lamp Pole & Base */
+        .lamp-pole {
+            width: 12px;
+            height: 150px;
+            background: #d8d8d8;
+            transition: 0.5s ease;
+        }
+
+        .lamp-base {
+            width: 90px;
+            height: 14px;
+            background: #d8d8d8;
+            border-radius: 7px 7px 0 0;
+            transition: 0.5s ease;
+        }
+
+        body[data-on="true"] .lamp-pole,
+        body[data-on="true"] .lamp-base {
+            background: #555;
+        }
+
+        /* Pull Chain (မီးအိမ်ကြိုး) */
+        .pull-chain {
+            position: absolute;
+            top: 80px;
+            left: 65%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            z-index: 3;
+            transition: transform 0.15s ease-in-out;
+        }
+        .pull-chain:active {
+            transform: translateY(15px);
+        }
+
+        .string {
+            width: 2px;
+            height: 45px;
+            background: #888;
+        }
+
+        .handle {
+            width: 14px;
+            height: 14px;
+            background: #d4a359;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        /* Light Cone Effect */
+        .light-cone {
+            position: absolute;
+            top: 80px;
+            width: 180px;
+            height: 220px;
+            background: linear-gradient(to bottom, rgba(251, 211, 97, 0.4), transparent);
+            clip-path: polygon(30% 0%, 70% 0%, 100% 100%, 0% 100%);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        body[data-on="true"] .light-cone {
+            opacity: 1;
+        }
+
+        /* Welcome Login Form Section */
+        .login-box {
+            width: 300px;
+            padding: 20px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        /* မီးလင်းသွားပါက Form ပေါ်လာမည် */
+        body[data-on="true"] .login-box {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .login-box h2 {
+            color: #222;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            color: #555;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px 14px;
+            background: #f0f2f5;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            color: #222;
+            outline: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #fbd361;
+            background: #fff;
+        }
+
+        .sign-in-btn {
+            width: 100%;
+            padding: 12px;
+            background: #fbd361;
+            border: none;
+            border-radius: 8px;
+            color: #111;
+            font-weight: bold;
+            font-size: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .sign-in-btn:hover {
+            background: #f9c835;
+            box-shadow: 0 4px 12px rgba(251, 211, 97, 0.4);
+        }
+
+        /* Login Error Message Styling */
+        #loginError {
+            color: #e63946;
+            font-size: 13px;
+            margin-top: 12px;
+            text-align: center;
+            min-height: 18px;
+        }
+    </style>
+</head>
+<body data-on="false">
+
+    <!-- Outer Container -->
+    <div class="outer-container">
+        
+        <!-- အပေါ်ဆုံးမှ လမ်းညွှန်စာသား -->
+        <div class="instruction-text">Pull the lamp string 💡</div>
+
+        <!-- Lamp နှင့် Form အတွင်းပိုင်း Layout -->
+        <div class="inner-content">
+            
+            <!-- Lamp Section -->
+            <div class="lamp-wrapper">
+                <div class="lamp-shade"></div>
+                <div class="light-cone"></div>
+                
+                <!-- မီးအိမ်ကြိုး -->
+                <div class="pull-chain" onclick="toggleLamp()">
+                    <div class="string"></div>
+                    <div class="handle"></div>
+                </div>
+
+                <div class="lamp-pole"></div>
+                <div class="lamp-base"></div>
+            </div>
+
+            <!-- Welcome Login Form Section -->
+            <div class="login-box">
+                <h2>Welcome</h2>
+                
+                <form id="loginForm">
+                    <div class="input-group">
+                        <label for="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            placeholder="Enter email"
+                            required
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password">Password</label>
+                        <input
+                            type="password"
+                            id="password"
+                            placeholder="Enter password"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="sign-in-btn">
+                        Login
+                    </button>
+                </form>
+
+                <p id="loginError"></p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- API and Login Functionality -->
+    <script src="js/api.js"></script>
+    <script>
+        let isOn = false;
+
+        function toggleLamp() {
+            isOn = !isOn;
+            document.body.setAttribute("data-on", isOn);
+        }
+
+        document
+            .getElementById("loginForm")
+            .addEventListener("submit", async function(event) {
+                event.preventDefault();
+
+                const email = document.getElementById("email").value;
+                const password = document.getElementById("password").value;
+                const errorElement = document.getElementById("loginError");
+
+                try {
+                    await loginUser(email, password);
+
+                    const user = await getCurrentUser();
+
+                    if (user.role === "admin") {
+                        window.location.href = "admin-dashboard.html";
+                    } else if (user.role === "lecturer") {
+                        window.location.href = "lecturer-dashboard.html";
+                    } else {
+                        window.location.href = "student-dashboard.html";
+                    }
+                    
+                } catch (error) {
+                    errorElement.textContent = error.message;
+                }
+            });
+    </script>
+</body>
+</html>

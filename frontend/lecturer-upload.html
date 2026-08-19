@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
     <meta charset="UTF-8">
@@ -12,182 +11,533 @@
 
     <title>Upload Lecture Document</title>
 
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <link
         rel="stylesheet"
-        href="css/style.css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#fffdf2',
+                            100: '#fff8d9',
+                            200: '#fceca8',
+                            300: '#f7d96b',
+                            400: '#e8c23a',
+                            500: '#cb9c0d',
+                            600: '#a77d08',
+                            700: '#806008'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+                BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+    </style>
 
 </head>
 
-<body>
+<body class="min-h-screen bg-slate-50 text-slate-800">
 
-<div class="container">
+    <!-- =========================================================
+         NAVBAR
+    ========================================================== -->
 
-    <h1>Upload Lecture Document</h1>
+    <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
 
-    <p id="lecturerClass"></p>
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
+            <div class="flex h-20 items-center justify-between">
 
-    <form id="uploadForm">
+                <a
+                    href="lecturer-dashboard.html"
+                    class="flex items-center gap-3"
+                >
 
-        <label for="file">
-            Select Document
-        </label>
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gold-500 text-white shadow-lg shadow-gold-500/20">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
 
-        <input
-            type="file"
-            id="file"
-            required
-        >
+                    <div class="hidden sm:block">
 
-        <br><br>
+                        <h1 class="text-lg font-bold text-slate-900">
+                            Lecturer Portal
+                        </h1>
 
-        <button type="submit">
-            Upload Document
-        </button>
+                        <p class="text-xs text-slate-500">
+                            Academic Management System
+                        </p>
 
-    </form>
+                    </div>
 
-
-    <p
-        id="uploadMessage"
-        class="message"
-    ></p>
-
-    <p
-        id="uploadError"
-        class="error"
-    ></p>
-
-    <br>
-
-    <a href="lecturer-dashboard.html">
-        Back to Dashboard
-    </a>
-
-</div>
+                </a>
 
 
-<script src="js/api.js"></script>
+                <nav class="hidden items-center gap-1 lg:flex">
 
-<script>
+                    <a
+                        href="lecturer-dashboard.html"
+                        class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    >
+                        <i class="fa-solid fa-chart-line"></i>
+                        Dashboard
+                    </a>
 
-async function loadLecturerUploadPage() {
+                    <a
+                        href="lecturer-upload.html"
+                        class="flex items-center gap-2 rounded-xl bg-gold-50 px-4 py-2.5 text-sm font-semibold text-gold-600"
+                    >
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        Upload
+                    </a>
 
-    try {
+                    <a
+                        href="student-submissions.html"
+                        class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    >
+                        <i class="fa-solid fa-user-graduate"></i>
+                        Submissions
+                    </a>
 
-        const user =
-            await getCurrentUser();
+                    <a
+                        href="lecturer-my-documents.html"
+                        class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    >
+                        <i class="fa-solid fa-folder-open"></i>
+                        My Documents
+                    </a>
+
+                </nav>
 
 
-        if (
-            user.role !== "lecturer"
-        ) {
+                <div class="hidden lg:block">
 
-            window.location.href =
-                "login.html";
+                    <button
+                        onclick="logout()"
+                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600 hover:bg-red-100"
+                    >
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
 
-            return;
+                </div>
+
+
+                <button
+                    onclick="toggleMobileMenu()"
+                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 lg:hidden"
+                >
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+            </div>
+
+
+            <div
+                id="mobileMenu"
+                class="hidden border-t border-slate-100 pb-4 pt-3 lg:hidden"
+            >
+
+                <div class="space-y-1">
+
+                    <a
+                        href="lecturer-dashboard.html"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
+                    >
+                        <i class="fa-solid fa-chart-line w-5"></i>
+                        Dashboard
+                    </a>
+
+                    <a
+                        href="lecturer-upload.html"
+                        class="flex items-center gap-3 rounded-xl bg-gold-50 px-4 py-3 text-sm font-semibold text-gold-600"
+                    >
+                        <i class="fa-solid fa-cloud-arrow-up w-5"></i>
+                        Upload Document
+                    </a>
+
+                    <a
+                        href="student-submissions.html"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
+                    >
+                        <i class="fa-solid fa-user-graduate w-5"></i>
+                        Student Submissions
+                    </a>
+
+                    <a
+                        href="lecturer-my-documents.html"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100"
+                    >
+                        <i class="fa-solid fa-folder-open w-5"></i>
+                        My Documents
+                    </a>
+
+                    <button
+                        onclick="logout()"
+                        class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50"
+                    >
+                        <i class="fa-solid fa-right-from-bracket w-5"></i>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         MAIN
+    ========================================================== -->
+
+    <main class="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+
+        <div class="mb-8">
+
+            <div class="mb-3 flex items-center gap-2 text-sm font-semibold text-gold-600">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                Document Management
+            </div>
+
+            <h2 class="text-3xl font-bold tracking-tight text-slate-900">
+                Upload Lecture Document
+            </h2>
+
+            <p class="mt-2 text-slate-500">
+                Upload lecture notes, assignments, slides, and other teaching materials.
+            </p>
+
+        </div>
+
+
+        <!-- Upload Card -->
+        <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+
+            <div class="border-b border-slate-100 bg-slate-50 px-6 py-5">
+
+                <div class="flex items-center gap-4">
+
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-gold-100 text-gold-600">
+                        <i class="fa-solid fa-file-arrow-up text-lg"></i>
+                    </div>
+
+                    <div>
+
+                        <h3 class="font-bold text-slate-900">
+                            New Lecture Material
+                        </h3>
+
+                        <p
+                            id="lecturerClass"
+                            class="mt-1 text-sm text-slate-500"
+                        >
+                            Loading class...
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <form
+                id="uploadForm"
+                class="p-6 sm:p-8"
+            >
+
+                <!-- File Upload -->
+                <label
+                    for="file"
+                    class="group block cursor-pointer rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 p-10 text-center transition hover:border-gold-400 hover:bg-gold-50"
+                >
+
+                    <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-gold-500 shadow-sm transition group-hover:bg-gold-500 group-hover:text-white">
+
+                        <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+
+                    </div>
+
+                    <h4 class="mt-5 font-bold text-slate-900">
+                        Choose a document
+                    </h4>
+
+                    <p class="mt-2 text-sm text-slate-500">
+                        Click here to select a file from your computer
+                    </p>
+
+                    <p class="mt-3 text-xs text-slate-400">
+                        Supported document types depend on your backend configuration.
+                    </p>
+
+                    <input
+                        type="file"
+                        id="file"
+                        class="hidden"
+                        required
+                    >
+
+                </label>
+
+
+                <!-- Selected File -->
+                <div
+                    id="selectedFile"
+                    class="mt-5 hidden rounded-xl border border-slate-200 bg-white p-4"
+                >
+
+                    <div class="flex items-center gap-3">
+
+                        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gold-50 text-gold-600">
+                            <i class="fa-solid fa-file"></i>
+                        </div>
+
+                        <div class="min-w-0 flex-1">
+
+                            <p
+                                id="selectedFileName"
+                                class="truncate text-sm font-semibold text-slate-800"
+                            ></p>
+
+                            <p
+                                id="selectedFileSize"
+                                class="text-xs text-slate-400"
+                            ></p>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Message -->
+                <div
+                    id="uploadMessage"
+                    class="mt-5 text-center text-sm font-medium text-emerald-600"
+                ></div>
+
+                <div
+                    id="uploadError"
+                    class="mt-2 text-center text-sm font-medium text-red-600"
+                ></div>
+
+
+                <!-- Submit -->
+                <button
+                    type="submit"
+                    id="uploadButton"
+                    class="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-gold-500 px-5 py-3.5 font-semibold text-white shadow-lg shadow-gold-500/20 transition hover:bg-gold-600 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+
+                    Upload Document
+
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- Back -->
+        <div class="mt-6">
+
+            <a
+                href="lecturer-dashboard.html"
+                class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-gold-600"
+            >
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Dashboard
+            </a>
+
+        </div>
+
+    </main>
+
+
+    <script src="js/api.js"></script>
+
+    <script>
+
+        function toggleMobileMenu() {
+
+            document
+                .getElementById("mobileMenu")
+                .classList.toggle("hidden");
+
         }
 
 
-        document.getElementById(
-            "lecturerClass"
-        ).textContent =
-            `Class: ${user.class_year}`;
+        function formatFileSize(bytes) {
 
-    } catch (error) {
-
-        document.getElementById(
-            "uploadError"
-        ).textContent =
-            error.message;
-
-    }
-
-}
-
-
-document
-    .getElementById("uploadForm")
-    .addEventListener(
-        "submit",
-        async function(event) {
-
-            event.preventDefault();
-
-
-            const file =
-                document.getElementById(
-                    "file"
-                ).files[0];
-
-
-            const message =
-                document.getElementById(
-                    "uploadMessage"
-                );
-
-            const error =
-                document.getElementById(
-                    "uploadError"
-                );
-
-
-            message.textContent = "";
-
-            error.textContent = "";
-
-
-            if (!file) {
-
-                error.textContent =
-                    "Please select a file.";
-
-                return;
+            if (bytes < 1024) {
+                return `${bytes} B`;
             }
 
+            if (bytes < 1024 * 1024) {
+                return `${(bytes / 1024).toFixed(2)} KB`;
+            }
+
+            return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+
+        }
+
+
+        document
+            .getElementById("file")
+            .addEventListener("change", function () {
+
+                const file = this.files[0];
+
+                const selectedFile =
+                    document.getElementById("selectedFile");
+
+                if (!file) {
+
+                    selectedFile.classList.add("hidden");
+
+                    return;
+
+                }
+
+                document.getElementById("selectedFileName")
+                    .textContent = file.name;
+
+                document.getElementById("selectedFileSize")
+                    .textContent = formatFileSize(file.size);
+
+                selectedFile.classList.remove("hidden");
+
+            });
+
+
+        async function loadLecturerUploadPage() {
 
             try {
 
-                message.textContent =
-                    "Uploading...";
+                const user = await getCurrentUser();
 
+                if (user.role !== "lecturer") {
 
-                const result =
-                    await uploadLecturerDocument(
-                        file
-                    );
+                    window.location.href = "login.html";
+                    return;
 
+                }
 
-                message.textContent =
-                    `Upload successful: ${result.file_name}`;
+                document.getElementById("lecturerClass")
+                    .textContent =
+                    `Class: ${user.class_year || "Not assigned"}`;
 
+            } catch (error) {
 
-                document
-                    .getElementById(
-                        "uploadForm"
-                    )
-                    .reset();
-
-
-            } catch (err) {
-
-                message.textContent =
-                    "";
-
-                error.textContent =
-                    err.message;
+                document.getElementById("uploadError")
+                    .textContent = error.message;
 
             }
 
         }
-    );
 
 
-loadLecturerUploadPage();
+        document
+            .getElementById("uploadForm")
+            .addEventListener(
+                "submit",
+                async function (event) {
 
-</script>
+                    event.preventDefault();
+
+                    const file =
+                        document.getElementById("file")
+                            .files[0];
+
+                    const message =
+                        document.getElementById("uploadMessage");
+
+                    const error =
+                        document.getElementById("uploadError");
+
+                    const button =
+                        document.getElementById("uploadButton");
+
+
+                    message.textContent = "";
+                    error.textContent = "";
+
+
+                    if (!file) {
+
+                        error.textContent =
+                            "Please select a file.";
+
+                        return;
+
+                    }
+
+
+                    try {
+
+                        button.disabled = true;
+
+                        button.innerHTML = `
+                            <i class="fa-solid fa-spinner fa-spin"></i>
+                            Uploading...
+                        `;
+
+                        const result =
+                            await uploadLecturerDocument(file);
+
+
+                        message.textContent =
+                            `Upload successful: ${result.file_name}`;
+
+
+                        document
+                            .getElementById("uploadForm")
+                            .reset();
+
+                        document
+                            .getElementById("selectedFile")
+                            .classList.add("hidden");
+
+
+                    } catch (err) {
+
+                        error.textContent =
+                            err.message;
+
+                    } finally {
+
+                        button.disabled = false;
+
+                        button.innerHTML = `
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            Upload Document
+                        `;
+
+                    }
+
+                }
+            );
+
+
+        loadLecturerUploadPage();
+
+    </script>
 
 </body>
 </html>

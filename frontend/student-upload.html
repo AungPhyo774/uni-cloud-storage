@@ -12,238 +12,536 @@
 
     <title>Upload Document</title>
 
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <link
         rel="stylesheet"
-        href="css/style.css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
 
 </head>
 
-<body>
 
-<div class="container">
-
-    <h1>Upload Document</h1>
-
-    <p id="studentClass"></p>
-
-    <form id="uploadForm">
-
-        <label for="lecturer">
-            Select Lecturer
-        </label>
-
-        <select
-            id="lecturer"
-            required
-        >
-            <option value="">
-                Loading lecturers...
-            </option>
-        </select>
-
-        <br><br>
-
-        <label for="file">
-            Select Document
-        </label>
-
-        <input
-            type="file"
-            id="file"
-            required
-        >
-
-        <br><br>
-
-        <button type="submit">
-            Upload Document
-        </button>
-
-    </form>
-
-    <p
-        id="uploadMessage"
-        class="message"
-    ></p>
-
-    <p
-        id="uploadError"
-        class="error"
-    ></p>
-
-    <br>
-
-    <a href="student-dashboard.html">
-        Back to Dashboard
-    </a>
-
-</div>
-
-<script src="js/api.js"></script>
-
-<script>
-
-async function loadUploadPage() {
-
-    try {
-
-        // -----------------------------------------
-        // Current user
-        // -----------------------------------------
-
-        const user =
-            await getCurrentUser();
-
-        if (
-            user.role !== "student"
-        ) {
-
-            window.location.href =
-                "login.html";
-
-            return;
-        }
-
-        document.getElementById(
-            "studentClass"
-        ).textContent =
-            `Your class: ${user.class_year}`;
+<body class="min-h-screen bg-slate-50 text-slate-800">
 
 
-        // -----------------------------------------
-        // Get lecturers
-        // Backend already filters
-        // same class lecturers
-        // -----------------------------------------
+    <!-- =====================================================
+         SHARED NAVBAR
+    ====================================================== -->
 
-        const lecturers =
-            await getLecturers();
+    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
 
-        const select =
-            document.getElementById(
-                "lecturer"
-            );
+        <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
-        select.innerHTML =
-            '<option value="">Select Lecturer</option>';
+            <a
+                href="student-dashboard.html"
+                class="flex items-center gap-3"
+            >
 
-        lecturers.forEach(
-            lecturer => {
+                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-600 text-white shadow-lg">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
 
-                const option =
-                    document.createElement(
-                        "option"
-                    );
+                <div class="hidden sm:block">
+                    <p class="font-bold text-slate-900">
+                        EduPortal
+                    </p>
 
-                option.value =
-                    lecturer.id;
+                    <p class="text-xs text-slate-500">
+                        Student Learning System
+                    </p>
+                </div>
 
-                option.textContent =
-                    `${lecturer.full_name} (${lecturer.class_year})`;
-
-                select.appendChild(
-                    option
-                );
-            }
-        );
-
-    } catch (error) {
-
-        document.getElementById(
-            "uploadError"
-        ).textContent =
-            error.message;
-
-    }
-
-}
+            </a>
 
 
-document
-    .getElementById("uploadForm")
-    .addEventListener(
-        "submit",
-        async function(event) {
+            <div class="hidden items-center gap-1 md:flex">
 
-            event.preventDefault();
+                <a
+                    href="student-dashboard.html"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                >
+                    <i class="fa-solid fa-house mr-2"></i>
+                    Dashboard
+                </a>
 
-            const lecturerId =
-                document.getElementById(
-                    "lecturer"
-                ).value;
+                <a
+                    href="student-upload.html"
+                    class="rounded-xl bg-teal-50 px-4 py-2.5 text-sm font-semibold text-teal-700"
+                >
+                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
+                    Upload
+                </a>
 
-            const file =
-                document.getElementById(
-                    "file"
-                ).files[0];
+                <a
+                    href="student-documents.html"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                >
+                    <i class="fa-solid fa-folder-open mr-2"></i>
+                    My Documents
+                </a>
 
-            const message =
-                document.getElementById(
-                    "uploadMessage"
-                );
+                <a
+                    href="lecturer-documents.html"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                >
+                    <i class="fa-solid fa-book-open mr-2"></i>
+                    Lecturer Materials
+                </a>
 
-            const error =
-                document.getElementById(
-                    "uploadError"
-                );
-
-            message.textContent = "";
-            error.textContent = "";
+            </div>
 
 
-            if (!lecturerId) {
+            <button
+                type="button"
+                onclick="logout()"
+                class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+            >
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </button>
 
-                error.textContent =
-                    "Please select a lecturer.";
+        </div>
 
-                return;
-            }
+    </nav>
 
-            if (!file) {
 
-                error.textContent =
-                    "Please select a file.";
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
 
-                return;
-            }
+    <main class="mx-auto max-w-5xl px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+
+
+        <!-- Header -->
+
+        <div class="mb-8">
+
+            <p class="mb-2 text-sm font-semibold text-teal-600">
+                DOCUMENT SUBMISSION
+            </p>
+
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900">
+                Submit your document
+            </h1>
+
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                Choose your lecturer and upload your assignment or academic
+                document securely.
+            </p>
+
+        </div>
+
+
+        <!-- =================================================
+             UPLOAD CARD
+        ================================================== -->
+
+        <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+
+
+            <!-- Card Header -->
+
+            <div class="border-b border-slate-100 px-6 py-5 sm:px-8">
+
+                <div class="flex items-center gap-4">
+
+                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+                        <i class="fa-solid fa-file-arrow-up text-lg"></i>
+                    </div>
+
+                    <div>
+
+                        <h2 class="font-bold text-slate-900">
+                            New Submission
+                        </h2>
+
+                        <p
+                            id="studentClass"
+                            class="mt-1 text-sm text-slate-500"
+                        >
+                            Loading class...
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Form -->
+
+            <form
+                id="uploadForm"
+                class="space-y-7 p-6 sm:p-8"
+            >
+
+
+                <!-- Lecturer -->
+
+                <div>
+
+                    <label
+                        for="lecturer"
+                        class="mb-2 block text-sm font-semibold text-slate-700"
+                    >
+                        Select Lecturer
+                    </label>
+
+                    <div class="relative">
+
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
+                            <i class="fa-solid fa-user-tie"></i>
+                        </div>
+
+                        <select
+                            id="lecturer"
+                            required
+                            class="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-11 py-3.5 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
+                        >
+
+                            <option value="">
+                                Loading lecturers...
+                            </option>
+
+                        </select>
+
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400">
+                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- File -->
+
+                <div>
+
+                    <label
+                        for="file"
+                        class="mb-2 block text-sm font-semibold text-slate-700"
+                    >
+                        Select Document
+                    </label>
+
+
+                    <label
+                        for="file"
+                        class="group flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center transition hover:border-teal-400 hover:bg-teal-50/50"
+                    >
+
+                        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-teal-600 shadow-sm ring-1 ring-slate-100 transition group-hover:scale-105">
+                            <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+                        </div>
+
+                        <p class="font-semibold text-slate-800">
+                            Click to choose a document
+                        </p>
+
+                        <p class="mt-2 text-sm text-slate-500">
+                            PDF, DOC, DOCX or other supported files
+                        </p>
+
+                        <input
+                            type="file"
+                            id="file"
+                            required
+                            class="hidden"
+                        >
+
+                        <div
+                            id="fileName"
+                            class="mt-4 hidden rounded-lg bg-teal-50 px-4 py-2 text-sm font-medium text-teal-700"
+                        ></div>
+
+                    </label>
+
+                </div>
+
+
+                <!-- Message -->
+
+                <div
+                    id="uploadMessage"
+                    class="hidden rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700"
+                ></div>
+
+
+                <div
+                    id="uploadError"
+                    class="text-sm font-medium text-red-600"
+                ></div>
+
+
+                <!-- Submit -->
+
+                <button
+                    type="submit"
+                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-teal-600/20 transition hover:bg-teal-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
+                >
+
+                    <i class="fa-solid fa-paper-plane"></i>
+
+                    Submit Document
+
+                </button>
+
+            </form>
+
+        </div>
+
+
+        <!-- Info -->
+
+        <div class="mt-6 flex gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+
+            <i class="fa-solid fa-circle-info mt-0.5 text-blue-600"></i>
+
+            <div>
+
+                <p class="text-sm font-semibold text-blue-900">
+                    Submission information
+                </p>
+
+                <p class="mt-1 text-sm leading-6 text-blue-700">
+                    Make sure you select the correct lecturer before submitting
+                    your document.
+                </p>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <script src="js/api.js"></script>
+
+
+    <script>
+
+        async function loadUploadPage() {
+
             try {
 
-                message.textContent =
-                    "Uploading...";
+                const user =
+                    await getCurrentUser();
 
 
-                const result =
-                    await uploadStudentDocument(
-                        lecturerId,
-                        file
+                if (user.role !== "student") {
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+                }
+
+
+                document.getElementById(
+                    "studentClass"
+                ).textContent =
+                    `Your class: ${user.class_year}`;
+
+
+                const lecturers =
+                    await getLecturers();
+
+
+                const select =
+                    document.getElementById(
+                        "lecturer"
                     );
 
 
-                message.textContent =
-                    `Upload successful: ${result.file_name}`;
+                select.innerHTML =
+                    '<option value="">Select Lecturer</option>';
 
 
-                document
-                    .getElementById("uploadForm")
-                    .reset();
+                lecturers.forEach(
+                    lecturer => {
+
+                        const option =
+                            document.createElement(
+                                "option"
+                            );
+
+                        option.value =
+                            lecturer.id;
+
+                        option.textContent =
+                            `${lecturer.full_name} (${lecturer.class_year})`;
+
+                        select.appendChild(
+                            option
+                        );
+
+                    }
+                );
 
 
-            } catch (err) {
+            } catch (error) {
 
-                message.textContent = "";
+                document.getElementById(
+                    "uploadError"
+                ).textContent =
+                    error.message;
 
-                error.textContent =
-                    err.message;
             }
 
         }
-    );
 
 
-loadUploadPage();
+        document
+            .getElementById("file")
+            .addEventListener(
+                "change",
+                function () {
 
-</script>
+                    const file =
+                        this.files[0];
+
+                    const fileName =
+                        document.getElementById(
+                            "fileName"
+                        );
+
+                    if (file) {
+
+                        fileName.textContent =
+                            file.name;
+
+                        fileName.classList.remove(
+                            "hidden"
+                        );
+
+                    } else {
+
+                        fileName.classList.add(
+                            "hidden"
+                        );
+
+                    }
+
+                }
+            );
+
+
+        document
+            .getElementById("uploadForm")
+            .addEventListener(
+                "submit",
+                async function(event) {
+
+                    event.preventDefault();
+
+
+                    const lecturerId =
+                        document.getElementById(
+                            "lecturer"
+                        ).value;
+
+
+                    const file =
+                        document.getElementById(
+                            "file"
+                        ).files[0];
+
+
+                    const message =
+                        document.getElementById(
+                            "uploadMessage"
+                        );
+
+
+                    const error =
+                        document.getElementById(
+                            "uploadError"
+                        );
+
+
+                    message.textContent = "";
+                    message.classList.add("hidden");
+
+                    error.textContent = "";
+
+
+                    if (!lecturerId) {
+
+                        error.textContent =
+                            "Please select a lecturer.";
+
+                        return;
+                    }
+
+
+                    if (!file) {
+
+                        error.textContent =
+                            "Please select a file.";
+
+                        return;
+                    }
+
+
+                    try {
+
+                        message.textContent =
+                            "Uploading...";
+
+                        message.classList.remove(
+                            "hidden"
+                        );
+
+
+                        const result =
+                            await uploadStudentDocument(
+                                lecturerId,
+                                file
+                            );
+
+
+                        message.textContent =
+                            `Upload successful: ${result.file_name}`;
+
+
+                        document
+                            .getElementById(
+                                "uploadForm"
+                            )
+                            .reset();
+
+
+                        document
+                            .getElementById(
+                                "fileName"
+                            )
+                            .classList.add(
+                                "hidden"
+                            );
+
+
+                    } catch (err) {
+
+                        message.textContent = "";
+
+                        message.classList.add(
+                            "hidden"
+                        );
+
+                        error.textContent =
+                            err.message;
+
+                    }
+
+                }
+            );
+
+
+        loadUploadPage();
+
+    </script>
 
 </body>
 </html>

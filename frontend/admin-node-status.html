@@ -1,278 +1,152 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Storage Node Status</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6',
+          600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a'
+        }
+      }
+    }
+  }
+}
+</script>
 
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Node Status</title>
-
-    <link
-        rel="stylesheet"
-        href="css/style.css"
-    >
+<style>
+.mobile-nav-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  padding:.65rem .25rem;font-size:1rem;color:#64748b;font-weight:600;
+}
+.mobile-nav-item span{font-size:.65rem}
+.mobile-nav-item.active{color:#2563eb;background:#eff6ff}
+</style>
 
 </head>
+<body class="bg-slate-100 text-slate-800 min-h-screen pb-16 lg:pb-0">
+<div class="flex min-h-screen">
 
-<body>
-
-<div class="container">
-
-    <h1>Storage Node Status</h1>
-
-    <a href="admin-dashboard.html">
-        Back to Dashboard
-    </a>
-
-    <br><br>
-
-
-    <button
-        onclick="loadNodeStatus()"
-    >
-        Refresh
-    </button>
-
-
-    <div
-        id="nodesContainer"
-    >
-
-        Loading...
-
+<aside class="hidden lg:flex lg:w-64 lg:shrink-0 bg-slate-950 text-white flex-col min-h-screen sticky top-0 h-screen">
+  <div class="px-6 py-6 border-b border-slate-800">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl shadow-lg shadow-blue-900/30">☁</div>
+      <div>
+        <h1 class="font-bold text-lg">Cloud Storage</h1>
+        <p class="text-xs text-slate-400">Administration</p>
+      </div>
     </div>
+  </div>
 
+  <nav class="flex-1 p-4 space-y-1">
+    <p class="px-3 py-2 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Workspace</p>
+    <a href="admin-dashboard.html" data-page="dashboard"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+      <span class="w-5 text-center">📊</span><span>Dashboard</span>
+    </a>
+    <a href="admin-users.html" data-page="users"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+      <span class="w-5 text-center">👥</span><span>User Management</span>
+    </a>
+    <a href="admin-node-status.html" data-page="nodes"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+      <span class="w-5 text-center">🖥️</span><span>Node Status</span>
+    </a>
+    <a href="admin-recovery-logs.html" data-page="recovery"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+      <span class="w-5 text-center">🔄</span><span>Recovery Monitoring</span>
+    </a>
+  </nav>
 
-    <h2>Replication Status</h2>
+  <div class="p-4 border-t border-slate-800">
+    <button onclick="logout()"
+      class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition font-medium">
+      🚪 Logout
+    </button>
+  </div>
+</aside>
 
-
-    <table>
-
-        <thead>
-
-            <tr>
-
-                <th>Document</th>
-
-                <th>Primary</th>
-
-                <th>Replica</th>
-
-                <th>Status</th>
-
-            </tr>
-
-        </thead>
-
-
-        <tbody
-            id="replicationBody"
-        ></tbody>
-
-    </table>
-
-
-    <p
-        id="nodeError"
-        class="error"
-    ></p>
-
+<div class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-slate-200 shadow-2xl">
+  <nav class="grid grid-cols-4">
+    <a href="admin-dashboard.html" data-page="dashboard" class="mobile-nav-item">📊<span>Dashboard</span></a>
+    <a href="admin-users.html" data-page="users" class="mobile-nav-item">👥<span>Users</span></a>
+    <a href="admin-node-status.html" data-page="nodes" class="mobile-nav-item">🖥️<span>Nodes</span></a>
+    <a href="admin-recovery-logs.html" data-page="recovery" class="mobile-nav-item">🔄<span>Recovery</span></a>
+  </nav>
 </div>
 
+<main class="flex-1 min-w-0">
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Administration</p>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Storage Node Status</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:block text-right">
+          <p id="topUser" class="text-sm font-semibold text-slate-900">Administrator</p>
+          <p id="topEmail" class="text-xs text-slate-500"></p>
+        </div>
+        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">A</div>
+      </div>
+    </div>
+  </header>
+  
+<div class="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+  <div class="mb-7 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+    <div><h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Storage Node Status</h2><p class="mt-1 text-sm text-slate-500">Monitor storage node health and document replication.</p></div>
+    <button onclick="loadNodeStatus()" class="px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition shadow-sm">↻ Refresh</button>
+  </div>
 
+  <div id="nodesContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+
+  <section class="mt-7 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100"><h2 class="font-bold text-slate-900">Replication Status</h2><p class="text-xs text-slate-500 mt-1">Primary and replica placement for documents.</p></div>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[750px] text-sm">
+        <thead class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500"><tr><th class="px-5 py-3 text-left font-semibold">Document</th><th class="px-5 py-3 text-left font-semibold">Primary</th><th class="px-5 py-3 text-left font-semibold">Replica</th><th class="px-5 py-3 text-left font-semibold">Status</th></tr></thead>
+        <tbody id="replicationBody" class="divide-y divide-slate-100"></tbody>
+      </table>
+    </div>
+  </section>
+  <p id="nodeError" class="hidden mt-5 p-3 rounded-xl bg-red-50 text-red-700 text-sm"></p>
+</div>
+
+</main>
+</div>
 <script src="js/api.js"></script>
-
 <script>
+document.querySelectorAll('[data-page="nodes"]').forEach(el => el.classList.add('active'));
 
-async function loadNodeStatus() {
-
-    try {
-
-        const user =
-            await getCurrentUser();
-
-
-        if (
-            user.role !== "admin"
-        ) {
-
-            window.location.href =
-                "login.html";
-
-            return;
-        }
-
-
-        // =========================================
-        // NODE HEALTH
-        // =========================================
-
-        const health =
-            await getNodeHealth();
-
-
-        const nodeContainer =
-            document.getElementById(
-                "nodesContainer"
-            );
-
-
-        nodeContainer.innerHTML = "";
-
-
-        health.nodes.forEach(
-            node => {
-
-                const div =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                div.innerHTML = `
-
-                    <h3>
-                        ${
-                            node.status ===
-                            "online"
-                                ? "🟢"
-                                : "🔴"
-                        }
-
-                        ${node.name}
-                    </h3>
-
-                    <p>
-                        ${node.url}
-                    </p>
-
-                    <p>
-                        Status:
-                        ${node.status}
-                    </p>
-
-                `;
-
-
-                nodeContainer.appendChild(
-                    div
-                );
-
-            }
-        );
-
-
-        // =========================================
-        // REPLICATION
-        // =========================================
-
-        const replication =
-            await getReplicationStatus();
-
-
-        const tbody =
-            document.getElementById(
-                "replicationBody"
-            );
-
-
-        tbody.innerHTML = "";
-
-
-        const documents =
-            replication.documents || [];
-
-
-        documents.forEach(
-            item => {
-
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                row.innerHTML = `
-
-                    <td>
-                        ${escapeHtml(
-                            item.file_name
-                        )}
-                    </td>
-
-                    <td>
-                        ${item.primary_node}
-                    </td>
-
-                    <td>
-                        ${item.replica_node}
-                    </td>
-
-                    <td>
-                        ${item.status}
-                    </td>
-
-                `;
-
-
-                tbody.appendChild(
-                    row
-                );
-
-            }
-        );
-
-    } catch (error) {
-
-        document.getElementById(
-            "nodeError"
-        ).textContent =
-            error.message;
-
-    }
-
+async function loadNodeStatus(){
+  try{
+    const user=await getCurrentUser();if(user.role!=="admin"){window.location.href="login.html";return;}
+    document.getElementById("topUser").textContent=user.full_name||"Administrator";document.getElementById("topEmail").textContent=user.email||"";
+    const health=await getNodeHealth(),c=document.getElementById("nodesContainer");c.innerHTML="";
+    health.nodes.forEach(node=>{
+      const online=node.status==="online",el=document.createElement("div");el.className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm";
+      el.innerHTML=`<div class="flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><div class="w-11 h-11 shrink-0 rounded-xl ${online?"bg-emerald-100":"bg-red-100"} flex items-center justify-center">${online?"🟢":"🔴"}</div><div class="min-w-0"><h3 class="font-bold text-slate-900 truncate">${escapeHtml(node.name)}</h3><p class="text-xs text-slate-500 truncate">${escapeHtml(node.url)}</p></div></div><span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold ${online?"bg-emerald-100 text-emerald-700":"bg-red-100 text-red-700"}">${escapeHtml(node.status)}</span></div>`;
+      c.appendChild(el);
+    });
+    const replication=await getReplicationStatus(),tbody=document.getElementById("replicationBody");tbody.innerHTML="";const documents=replication.documents||[];
+    if(!documents.length){tbody.innerHTML='<tr><td colspan="4" class="px-5 py-10 text-center text-slate-500">No replication records found.</td></tr>';return;}
+    documents.forEach(item=>{
+      const row=document.createElement("tr");row.className="hover:bg-slate-50";const cls=item.status==="HEALTHY"?"bg-emerald-100 text-emerald-700":item.status==="CHECKSUM_MISMATCH"?"bg-purple-100 text-purple-700":"bg-red-100 text-red-700";
+      row.innerHTML=`<td class="px-5 py-4 font-semibold text-slate-900">${escapeHtml(item.file_name)}</td><td class="px-5 py-4 text-slate-600">${escapeHtml(item.primary_node)}</td><td class="px-5 py-4 text-slate-600">${escapeHtml(item.replica_node)}</td><td class="px-5 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${cls}">${escapeHtml(item.status)}</span></td>`;
+      tbody.appendChild(row);
+    });
+  }catch(error){showError("nodeError",error.message);}
 }
-
-
-function escapeHtml(
-    value
-) {
-
-    return String(
-        value ?? ""
-    )
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-
-}
-
-
+function showError(id,msg){const el=document.getElementById(id);el.textContent=msg;el.classList.remove("hidden");}
+function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 loadNodeStatus();
 
 </script>
-
 </body>
 </html>

@@ -1,436 +1,178 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Management</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6',
+          600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a'
+        }
+      }
+    }
+  }
+}
+</script>
 
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Admin - Users</title>
-
-    <link
-        rel="stylesheet"
-        href="css/style.css"
-    >
+<style>
+.mobile-nav-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  padding:.65rem .25rem;font-size:1rem;color:#64748b;font-weight:600;
+}
+.mobile-nav-item span{font-size:.65rem}
+.mobile-nav-item.active{color:#2563eb;background:#eff6ff}
+</style>
 
 </head>
+<body class="bg-slate-100 text-slate-800 min-h-screen pb-16 lg:pb-0">
+<div class="flex min-h-screen">
 
-<body>
+<aside class="hidden lg:flex lg:w-64 lg:shrink-0 bg-slate-950 text-white flex-col min-h-screen sticky top-0 h-screen">
+  <div class="px-6 py-6 border-b border-slate-800">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl shadow-lg shadow-blue-900/30">☁</div>
+      <div>
+        <h1 class="font-bold text-lg">Cloud Storage</h1>
+        <p class="text-xs text-slate-400">Administration</p>
+      </div>
+    </div>
+  </div>
 
-<div class="container">
-
-    <h1>User Management</h1>
-
-    <a href="admin-dashboard.html">
-        Back to Dashboard
+  <nav class="flex-1 p-4 space-y-1">
+    <p class="px-3 py-2 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Workspace</p>
+    <a href="admin-dashboard.html" data-page="dashboard"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+      <span class="w-5 text-center">📊</span><span>Dashboard</span>
     </a>
+    <a href="admin-users.html" data-page="users"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+      <span class="w-5 text-center">👥</span><span>User Management</span>
+    </a>
+    <a href="admin-node-status.html" data-page="nodes"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+      <span class="w-5 text-center">🖥️</span><span>Node Status</span>
+    </a>
+    <a href="admin-recovery-logs.html" data-page="recovery"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+      <span class="w-5 text-center">🔄</span><span>Recovery Monitoring</span>
+    </a>
+  </nav>
 
-    <br><br>
+  <div class="p-4 border-t border-slate-800">
+    <button onclick="logout()"
+      class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition font-medium">
+      🚪 Logout
+    </button>
+  </div>
+</aside>
 
-
-    <h2>Create User</h2>
-
-
-    <form id="createUserForm">
-
-        <input
-            type="text"
-            id="fullName"
-            placeholder="Full Name"
-            required
-        >
-
-
-        <input
-            type="email"
-            id="email"
-            placeholder="Email"
-            required
-        >
-
-
-        <input
-            type="password"
-            id="password"
-            placeholder="Password"
-            required
-        >
-
-
-        <select
-            id="role"
-            required
-        >
-
-            <option value="">
-                Select Role
-            </option>
-
-            <option value="student">
-                Student
-            </option>
-
-            <option value="lecturer">
-                Lecturer
-            </option>
-
-        </select>
-
-
-        <select
-            id="classYear"
-            required
-        >
-
-            <option value="">
-                Select Class
-            </option>
-
-            <option value="first_year">
-                First Year
-            </option>
-
-            <option value="second_year">
-                Second Year
-            </option>
-
-            <option value="third_year">
-                Third Year
-            </option>
-
-            <option value="fourth_year">
-                Fourth Year
-            </option>
-
-            <option value="fifth_year">
-                Fifth Year
-            </option>
-
-        </select>
-
-
-        <button type="submit">
-            Create User
-        </button>
-
-    </form>
-
-
-    <p
-        id="createMessage"
-    ></p>
-
-
-    <h2>Users</h2>
-
-
-    <table>
-
-        <thead>
-
-            <tr>
-
-                <th>Name</th>
-
-                <th>Email</th>
-
-                <th>Role</th>
-
-                <th>Class</th>
-
-                <th>Status</th>
-
-                <th>Action</th>
-
-            </tr>
-
-        </thead>
-
-
-        <tbody
-            id="usersBody"
-        ></tbody>
-
-    </table>
-
-
-    <p
-        id="usersError"
-        class="error"
-    ></p>
-
+<div class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-slate-200 shadow-2xl">
+  <nav class="grid grid-cols-4">
+    <a href="admin-dashboard.html" data-page="dashboard" class="mobile-nav-item">📊<span>Dashboard</span></a>
+    <a href="admin-users.html" data-page="users" class="mobile-nav-item">👥<span>Users</span></a>
+    <a href="admin-node-status.html" data-page="nodes" class="mobile-nav-item">🖥️<span>Nodes</span></a>
+    <a href="admin-recovery-logs.html" data-page="recovery" class="mobile-nav-item">🔄<span>Recovery</span></a>
+  </nav>
 </div>
 
+<main class="flex-1 min-w-0">
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Administration</p>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">User Management</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:block text-right">
+          <p id="topUser" class="text-sm font-semibold text-slate-900">Administrator</p>
+          <p id="topEmail" class="text-xs text-slate-500"></p>
+        </div>
+        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">A</div>
+      </div>
+    </div>
+  </header>
+  
+<div class="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+  <div class="mb-7">
+    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">User Management</h2>
+    <p class="mt-1 text-sm text-slate-500">Create accounts and manage activation status.</p>
+  </div>
 
+  <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100">
+      <h2 class="font-bold text-slate-900">Create User</h2>
+      <p class="text-xs text-slate-500 mt-1">Add a new student or lecturer account.</p>
+    </div>
+    <div class="p-6">
+      <form id="createUserForm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div><label class="block text-xs font-semibold text-slate-600 mb-1.5" for="fullName">Full Name</label><input class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" id="fullName" placeholder="Enter full name" required></div>
+          <div><label class="block text-xs font-semibold text-slate-600 mb-1.5" for="email">Email</label><input class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="email" id="email" placeholder="name@example.com" required></div>
+          <div><label class="block text-xs font-semibold text-slate-600 mb-1.5" for="password">Password</label><input class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="password" id="password" placeholder="Create password" required></div>
+          <div><label class="block text-xs font-semibold text-slate-600 mb-1.5" for="role">Role</label><select class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" id="role" required><option value="">Select Role</option><option value="student">Student</option><option value="lecturer">Lecturer</option></select></div>
+          <div><label class="block text-xs font-semibold text-slate-600 mb-1.5" for="classYear">Class Year</label><select class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" id="classYear" required><option value="">Select Class</option><option value="first_year">First Year</option><option value="second_year">Second Year</option><option value="third_year">Third Year</option><option value="fourth_year">Fourth Year</option><option value="fifth_year">Fifth Year</option></select></div>
+        </div>
+        <div class="flex justify-end mt-6"><button class="px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition shadow-sm" type="submit">Create User</button></div>
+      </form>
+      <p id="createMessage" class="hidden mt-4 p-3 rounded-xl text-sm"></p>
+    </div>
+  </section>
+
+  <section class="mt-7 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+    <div class="px-6 py-5 border-b border-slate-100">
+      <h2 class="font-bold text-slate-900">Users</h2>
+      <p class="text-xs text-slate-500 mt-1">Manage existing accounts and access status.</p>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[850px] text-sm">
+        <thead class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500"><tr><th class="px-5 py-3 text-left font-semibold">Name</th><th class="px-5 py-3 text-left font-semibold">Email</th><th class="px-5 py-3 text-left font-semibold">Role</th><th class="px-5 py-3 text-left font-semibold">Class</th><th class="px-5 py-3 text-left font-semibold">Status</th><th class="px-5 py-3 text-left font-semibold">Action</th></tr></thead>
+        <tbody id="usersBody" class="divide-y divide-slate-100"></tbody>
+      </table>
+    </div>
+    <p id="usersError" class="hidden m-5 p-3 rounded-xl bg-red-50 text-red-700 text-sm"></p>
+  </section>
+</div>
+
+</main>
+</div>
 <script src="js/api.js"></script>
-
 <script>
+document.querySelectorAll('[data-page="users"]').forEach(el => el.classList.add('active'));
 
-async function loadUsers() {
-
-    try {
-
-        const user =
-            await getCurrentUser();
-
-
-        if (
-            user.role !== "admin"
-        ) {
-
-            window.location.href =
-                "login.html";
-
-            return;
-        }
-
-
-        const users =
-            await getAdminUsers();
-
-
-        const tbody =
-            document.getElementById(
-                "usersBody"
-            );
-
-
-        tbody.innerHTML = "";
-
-
-        users.forEach(
-            item => {
-
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                row.innerHTML = `
-
-                    <td>
-                        ${escapeHtml(
-                            item.full_name
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            item.email
-                        )}
-                    </td>
-
-                    <td>
-                        ${item.role}
-                    </td>
-
-                    <td>
-                        ${item.class_year ?? "-"}
-                    </td>
-
-                    <td>
-                        ${
-                            item.is_active
-                                ? "Active"
-                                : "Inactive"
-                        }
-                    </td>
-
-                    <td>
-
-                        <button
-                            onclick="changeStatus(
-                                ${item.id},
-                                ${item.is_active}
-                            )"
-                        >
-                            ${
-                                item.is_active
-                                    ? "Deactivate"
-                                    : "Activate"
-                            }
-                        </button>
-                    </td>
-                `;
-
-
-                tbody.appendChild(
-                    row
-                );
-
-            }
-        );
-
-    } catch (error) {
-
-        document.getElementById(
-            "usersError"
-        ).textContent =
-            error.message;
-
-    }
-
+async function loadUsers(){
+  try{
+    const user=await getCurrentUser();if(user.role!=="admin"){window.location.href="login.html";return;}
+    document.getElementById("topUser").textContent=user.full_name||"Administrator";document.getElementById("topEmail").textContent=user.email||"";
+    const users=await getAdminUsers(),tbody=document.getElementById("usersBody");tbody.innerHTML="";
+    if(!users.length){tbody.innerHTML='<tr><td colspan="6" class="px-5 py-10 text-center text-slate-500">No users found.</td></tr>';return;}
+    users.forEach(item=>{
+      const row=document.createElement("tr");row.className="hover:bg-slate-50";
+      row.innerHTML=`<td class="px-5 py-4 font-semibold text-slate-900">${escapeHtml(item.full_name)}</td><td class="px-5 py-4 text-slate-600">${escapeHtml(item.email)}</td>
+      <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">${escapeHtml(item.role)}</span></td>
+      <td class="px-5 py-4 text-slate-600">${escapeHtml(item.class_year??"-")}</td>
+      <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${item.is_active?"bg-emerald-100 text-emerald-700":"bg-red-100 text-red-700"}">${item.is_active?"Active":"Inactive"}</span></td>
+      <td class="px-5 py-4"><button class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-semibold hover:bg-slate-50" onclick="changeStatus(${item.id},${item.is_active})">${item.is_active?"Deactivate":"Activate"}</button></td>`;
+      tbody.appendChild(row);
+    });
+  }catch(error){showError("usersError",error.message);}
 }
-
-
-// =================================================
-// CREATE USER
-// =================================================
-
-document
-    .getElementById(
-        "createUserForm"
-    )
-    .addEventListener(
-        "submit",
-        async function(event) {
-
-            event.preventDefault();
-
-
-            const message =
-                document.getElementById(
-                    "createMessage"
-                );
-
-
-            const data = {
-
-                full_name:
-                    document.getElementById(
-                        "fullName"
-                    ).value,
-
-                email:
-                    document.getElementById(
-                        "email"
-                    ).value,
-
-                password:
-                    document.getElementById(
-                        "password"
-                    ).value,
-
-                role:
-                    document.getElementById(
-                        "role"
-                    ).value,
-
-                class_year:
-                    document.getElementById(
-                        "classYear"
-                    ).value
-
-            };
-
-
-            try {
-
-                const result =
-                    await createAdminUser(
-                        data
-                    );
-
-
-                message.textContent =
-                    `User created: ${result.full_name}`;
-
-
-                document
-                    .getElementById(
-                        "createUserForm"
-                    )
-                    .reset();
-
-
-                await loadUsers();
-
-            } catch (error) {
-
-                message.textContent =
-                    error.message;
-
-            }
-
-        }
-    );
-
-
-// =================================================
-// CHANGE STATUS
-// =================================================
-
-async function changeStatus(
-    userId,
-    currentStatus
-) {
-
-    try {
-
-        await updateAdminUser(
-            userId,
-            {
-                is_active:
-                    !currentStatus
-            }
-        );
-
-
-        await loadUsers();
-
-    } catch (error) {
-
-        alert(
-            error.message
-        );
-
-    }
-
-}
-
-// =================================================
-// HELPERS
-// =================================================
-
-function escapeHtml(
-    value
-) {
-
-    return String(
-        value ?? ""
-    )
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-
-}
-
-
+document.getElementById("createUserForm").addEventListener("submit",async function(event){
+  event.preventDefault();const message=document.getElementById("createMessage");
+  const data={full_name:document.getElementById("fullName").value,email:document.getElementById("email").value,password:document.getElementById("password").value,role:document.getElementById("role").value,class_year:document.getElementById("classYear").value};
+  try{const result=await createAdminUser(data);message.className="mt-4 p-3 rounded-xl text-sm bg-emerald-50 text-emerald-700";message.classList.remove("hidden");message.textContent=`User created: ${result.full_name}`;this.reset();await loadUsers();}
+  catch(error){message.className="mt-4 p-3 rounded-xl text-sm bg-red-50 text-red-700";message.classList.remove("hidden");message.textContent=error.message;}
+});
+async function changeStatus(userId,currentStatus){try{await updateAdminUser(userId,{is_active:!currentStatus});await loadUsers();}catch(error){alert(error.message);}}
+function showError(id,msg){const el=document.getElementById(id);el.textContent=msg;el.classList.remove("hidden");}
+function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 loadUsers();
 
 </script>
-
 </body>
 </html>

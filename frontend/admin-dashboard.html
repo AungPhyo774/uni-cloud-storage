@@ -1,451 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6',
+          600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a'
+        }
+      }
+    }
+  }
+}
+</script>
 
-    <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>Admin Dashboard</title>
-
-    <link
-        rel="stylesheet"
-        href="css/style.css"
-    >
+<style>
+.mobile-nav-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  padding:.65rem .25rem;font-size:1rem;color:#64748b;font-weight:600;
+}
+.mobile-nav-item span{font-size:.65rem}
+.mobile-nav-item.active{color:#2563eb;background:#eff6ff}
+</style>
 
 </head>
+<body class="bg-slate-100 text-slate-800 min-h-screen pb-16 lg:pb-0">
+<div class="flex min-h-screen">
 
-<body>
-
-<div class="container">
-
-    <h1>Admin Dashboard</h1>
-
-    <div class="user-card">
-
-        <h2 id="welcome">
-            Welcome
-        </h2>
-
-        <p id="email"></p>
-
+<aside class="hidden lg:flex lg:w-64 lg:shrink-0 bg-slate-950 text-white flex-col min-h-screen sticky top-0 h-screen">
+  <div class="px-6 py-6 border-b border-slate-800">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl shadow-lg shadow-blue-900/30">☁</div>
+      <div>
+        <h1 class="font-bold text-lg">Cloud Storage</h1>
+        <p class="text-xs text-slate-400">Administration</p>
+      </div>
     </div>
+  </div>
 
+  <nav class="flex-1 p-4 space-y-1">
+    <p class="px-3 py-2 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Workspace</p>
+    <a href="admin-dashboard.html" data-page="dashboard"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+      <span class="w-5 text-center">📊</span><span>Dashboard</span>
+    </a>
+    <a href="admin-users.html" data-page="users"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+      <span class="w-5 text-center">👥</span><span>User Management</span>
+    </a>
+    <a href="admin-node-status.html" data-page="nodes"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+      <span class="w-5 text-center">🖥️</span><span>Node Status</span>
+    </a>
+    <a href="admin-recovery-logs.html" data-page="recovery"
+       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
+      <span class="w-5 text-center">🔄</span><span>Recovery Monitoring</span>
+    </a>
+  </nav>
 
-    <!-- ========================================= -->
-    <!-- NAVIGATION -->
-    <!-- ========================================= -->
+  <div class="p-4 border-t border-slate-800">
+    <button onclick="logout()"
+      class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition font-medium">
+      🚪 Logout
+    </button>
+  </div>
+</aside>
 
-    <div class="menu">
-
-        <a href="admin-users.html">
-            User Management
-        </a>
-
-        <a href="admin-node-status.html">
-            Node Status
-        </a>
-
-        <a href="admin-recovery-logs.html">
-            Recovery Monitoring
-        </a>
-
-        <button
-            type="button"
-            onclick="logout()"
-        >
-            Logout
-        </button>
-
-    </div>
-
-
-    <!-- ========================================= -->
-    <!-- CLASS SUMMARY -->
-    <!-- ========================================= -->
-
-    <h2>Class Summary</h2>
-
-    <div id="classSummary">
-
-        Loading...
-
-    </div>
-
-
-    <!-- ========================================= -->
-    <!-- NODE SUMMARY -->
-    <!-- ========================================= -->
-
-    <h2>Storage Nodes</h2>
-
-    <div id="nodeSummary">
-
-        Loading...
-
-    </div>
-
-
-    <!-- ========================================= -->
-    <!-- REPLICATION SUMMARY -->
-    <!-- ========================================= -->
-
-    <h2>Replication</h2>
-
-    <div id="replicationSummary">
-
-        Loading...
-
-    </div>
-
-
-    <!-- ========================================= -->
-    <!-- RECOVERY SUMMARY -->
-    <!-- ========================================= -->
-
-    <h2>Recovery</h2>
-
-    <div id="recoverySummary">
-
-        Loading...
-
-    </div>
-
-
-    <p
-        id="dashboardError"
-        class="error"
-    ></p>
-
+<div class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-slate-200 shadow-2xl">
+  <nav class="grid grid-cols-4">
+    <a href="admin-dashboard.html" data-page="dashboard" class="mobile-nav-item">📊<span>Dashboard</span></a>
+    <a href="admin-users.html" data-page="users" class="mobile-nav-item">👥<span>Users</span></a>
+    <a href="admin-node-status.html" data-page="nodes" class="mobile-nav-item">🖥️<span>Nodes</span></a>
+    <a href="admin-recovery-logs.html" data-page="recovery" class="mobile-nav-item">🔄<span>Recovery</span></a>
+  </nav>
 </div>
 
+<main class="flex-1 min-w-0">
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-4">
+    <div class="flex items-center justify-between gap-4">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Administration</p>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Admin Dashboard</h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:block text-right">
+          <p id="topUser" class="text-sm font-semibold text-slate-900">Administrator</p>
+          <p id="topEmail" class="text-xs text-slate-500"></p>
+        </div>
+        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">A</div>
+      </div>
+    </div>
+  </header>
+  
+<div class="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
+  <div class="mb-7">
+    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Admin Dashboard</h2>
+    <p class="mt-1 text-sm text-slate-500">Overview of users, storage nodes, replication, and recovery operations.</p>
+  </div>
 
+  <div id="classSummary" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4"></div>
+
+  <section class="mt-8">
+    <div class="mb-4">
+      <h2 class="text-lg font-bold text-slate-900">Storage Nodes</h2>
+      <p class="text-sm text-slate-500">Current health of your distributed storage infrastructure.</p>
+    </div>
+    <div id="nodeSummary" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+  </section>
+
+  <section class="mt-8 grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <div><h2 class="font-bold text-slate-900">Replication Health</h2><p class="text-xs text-slate-500 mt-1">Document replication status</p></div>
+        <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">Live</span>
+      </div>
+      <div id="replicationSummary" class="p-5 space-y-2"></div>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
+        <div><h2 class="font-bold text-slate-900">Recovery</h2><p class="text-xs text-slate-500 mt-1">File recovery statistics</p></div>
+        <span class="px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold">Monitoring</span>
+      </div>
+      <div id="recoverySummary" class="p-5 space-y-2"></div>
+    </div>
+  </section>
+
+  <p id="dashboardError" class="hidden mt-6 p-3 rounded-xl bg-red-50 text-red-700 text-sm"></p>
+</div>
+
+</main>
+</div>
 <script src="js/api.js"></script>
-
 <script>
+document.querySelectorAll('[data-page="dashboard"]').forEach(el => el.classList.add('active'));
 
-async function loadAdminDashboard() {
-
-    try {
-
-        // =========================================
-        // CURRENT USER
-        // =========================================
-
-        const user =
-            await getCurrentUser();
-
-
-        if (
-            user.role !== "admin"
-        ) {
-
-            window.location.href =
-                "login.html";
-
-            return;
-        }
-
-
-        document.getElementById(
-            "welcome"
-        ).textContent =
-            `Welcome, ${user.full_name}`;
-
-
-        document.getElementById(
-            "email"
-        ).textContent =
-            `Email: ${user.email}`;
-
-
-        // =========================================
-        // LOAD ALL DATA
-        // =========================================
-
-        await Promise.all([
-            loadClassSummary(),
-            loadNodeSummary(),
-            loadReplicationSummary(),
-            loadRecoverySummary()
-        ]);
-
-    } catch (error) {
-
-        document.getElementById(
-            "dashboardError"
-        ).textContent =
-            error.message;
-
-    }
-
+async function loadAdminDashboard(){
+  try{
+    const user=await getCurrentUser();
+    if(user.role!=="admin"){window.location.href="login.html";return;}
+    document.getElementById("topUser").textContent=user.full_name||"Administrator";
+    document.getElementById("topEmail").textContent=user.email||"";
+    await Promise.all([loadClassSummary(),loadNodeSummary(),loadReplicationSummary(),loadRecoverySummary()]);
+  }catch(error){showError("dashboardError",error.message);}
 }
-
-
-// =================================================
-// CLASS SUMMARY
-// =================================================
-
-async function loadClassSummary() {
-
-    const data =
-        await getClassSummary();
-
-
-    const container =
-        document.getElementById(
-            "classSummary"
-        );
-
-
-    container.innerHTML = "";
-
-
-    for (
-        const [year, counts]
-        of Object.entries(data)
-    ) {
-
-        const div =
-            document.createElement(
-                "div"
-            );
-
-
-        div.innerHTML = `
-            <strong>
-                ${formatClassYear(year)}
-            </strong>
-
-            <p>
-                Students:
-                ${counts.students}
-            </p>
-
-            <p>
-                Lecturers:
-                ${counts.lecturers}
-            </p>
-        `;
-
-
-        container.appendChild(
-            div
-        );
-
-    }
-
+function showError(id,msg){const el=document.getElementById(id);el.textContent=msg;el.classList.remove("hidden");}
+function formatClassYear(value){return value.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());}
+async function loadClassSummary(){
+  const data=await getClassSummary(),c=document.getElementById("classSummary");c.innerHTML="";
+  for(const [year,counts] of Object.entries(data)){
+    const el=document.createElement("div");el.className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm";
+    el.innerHTML=`<div class="flex items-center justify-between mb-4"><div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-lg">🎓</div><span class="text-[10px] font-bold tracking-wider text-slate-400">CLASS</span></div>
+    <p class="text-sm font-bold text-slate-900">${formatClassYear(year)}</p>
+    <div class="flex gap-7 mt-3"><div><p class="text-2xl font-bold text-blue-600">${counts.students}</p><p class="text-xs text-slate-500">Students</p></div><div><p class="text-2xl font-bold text-purple-600">${counts.lecturers}</p><p class="text-xs text-slate-500">Lecturers</p></div></div>`;
+    c.appendChild(el);
+  }
 }
-
-
-// =================================================
-// NODE SUMMARY
-// =================================================
-
-async function loadNodeSummary() {
-
-    const data =
-        await getNodeHealth();
-
-
-    const container =
-        document.getElementById(
-            "nodeSummary"
-        );
-
-
-    container.innerHTML = "";
-
-
-    data.nodes.forEach(
-        node => {
-
-            const div =
-                document.createElement(
-                    "div"
-                );
-
-
-            const icon =
-                node.status === "online"
-                    ? "🟢"
-                    : "🔴";
-
-
-            div.innerHTML = `
-                <p>
-                    ${icon}
-                    <strong>
-                        ${node.name}
-                    </strong>
-
-                    -
-                    ${node.status}
-                </p>
-            `;
-
-
-            container.appendChild(
-                div
-            );
-
-        }
-    );
-
+async function loadNodeSummary(){
+  const data=await getNodeHealth(),c=document.getElementById("nodeSummary");c.innerHTML="";
+  data.nodes.forEach(node=>{
+    const online=node.status==="online",el=document.createElement("div");
+    el.className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm";
+    el.innerHTML=`<div class="flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><div class="w-11 h-11 shrink-0 rounded-xl ${online?"bg-emerald-100":"bg-red-100"} flex items-center justify-center">${online?"🟢":"🔴"}</div><div class="min-w-0"><h3 class="font-bold text-slate-900 truncate">${escapeHtml(node.name)}</h3><p class="text-xs text-slate-500 truncate">${escapeHtml(node.url)}</p></div></div><span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold ${online?"bg-emerald-100 text-emerald-700":"bg-red-100 text-red-700"}">${escapeHtml(node.status)}</span></div>`;
+    c.appendChild(el);
+  });
 }
-
-
-// =================================================
-// REPLICATION SUMMARY
-// =================================================
-
-async function loadReplicationSummary() {
-
-    const data =
-        await getReplicationStatus();
-
-
-    const summary =
-        document.getElementById(
-            "replicationSummary"
-        );
-
-
-    const items =
-        data.documents || [];
-
-
-    const healthy =
-        items.filter(
-            item =>
-                item.status ===
-                "HEALTHY"
-        ).length;
-
-
-    const primaryMissing =
-        items.filter(
-            item =>
-                item.status ===
-                "PRIMARY_MISSING"
-        ).length;
-
-
-    const replicaMissing =
-        items.filter(
-            item =>
-                item.status ===
-                "REPLICA_MISSING"
-        ).length;
-
-
-    const mismatch =
-        items.filter(
-            item =>
-                item.status ===
-                "CHECKSUM_MISMATCH"
-        ).length;
-
-
-    summary.innerHTML = `
-        <p>
-            Total Documents:
-            ${items.length}
-        </p>
-
-        <p>
-            Healthy:
-            ${healthy}
-        </p>
-
-        <p>
-            Primary Missing:
-            ${primaryMissing}
-        </p>
-
-        <p>
-            Replica Missing:
-            ${replicaMissing}
-        </p>
-
-        <p>
-            Checksum Mismatch:
-            ${mismatch}
-        </p>
-    `;
-
+async function loadReplicationSummary(){
+  const data=await getReplicationStatus(),items=data.documents||[],c=document.getElementById("replicationSummary"),count=s=>items.filter(x=>x.status===s).length;
+  c.innerHTML=`${listRow("Total Documents",items.length,"text-slate-900")} ${listRow("Healthy",count("HEALTHY"),"text-emerald-600")} ${listRow("Primary Missing",count("PRIMARY_MISSING"),"text-red-600")} ${listRow("Replica Missing",count("REPLICA_MISSING"),"text-orange-600")} ${listRow("Checksum Mismatch",count("CHECKSUM_MISMATCH"),"text-purple-600")}`;
 }
-
-
-// =================================================
-// RECOVERY SUMMARY
-// =================================================
-
-async function loadRecoverySummary() {
-
-    const data =
-        await getRecoveryStats();
-
-
-    const container =
-        document.getElementById(
-            "recoverySummary"
-        );
-
-
-    container.innerHTML = `
-        <p>
-            Total Attempts:
-            ${data.total_recovery_attempts}
-        </p>
-
-        <p>
-            Successful:
-            ${data.successful}
-        </p>
-
-        <p>
-            Failed:
-            ${data.failed}
-        </p>
-
-        <p>
-            Checksum Mismatch:
-            ${data.checksum_mismatch ?? 0}
-        </p>
-    `;
-
+async function loadRecoverySummary(){
+  const data=await getRecoveryStats(),c=document.getElementById("recoverySummary");
+  c.innerHTML=`${listRow("Total Attempts",data.total_recovery_attempts,"text-slate-900")} ${listRow("Successful",data.successful,"text-emerald-600")} ${listRow("Failed",data.failed,"text-red-600")} ${listRow("Checksum Mismatch",data.checksum_mismatch??0,"text-purple-600")}`;
 }
-
-
-// =================================================
-// HELPERS
-// =================================================
-
-function formatClassYear(
-    value
-) {
-
-    return value
-        .replaceAll(
-            "_",
-            " "
-        )
-        .replace(
-            /\b\w/g,
-            char =>
-                char.toUpperCase()
-        );
-}
-
-
+function listRow(label,value,color){return `<div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50"><span class="text-sm text-slate-600">${label}</span><span class="font-bold ${color}">${value}</span></div>`;}
+function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 loadAdminDashboard();
 
 </script>
-
 </body>
 </html>

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
     <meta charset="UTF-8">
@@ -12,330 +11,585 @@
 
     <title>My Documents</title>
 
+    <script src="https://cdn.tailwindcss.com"></script>
+
     <link
         rel="stylesheet"
-        href="css/style.css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#fffdf2',
+                            100: '#fff8d9',
+                            200: '#fceca8',
+                            300: '#f7d96b',
+                            400: '#e8c23a',
+                            500: '#cb9c0d',
+                            600: '#a77d08',
+                            700: '#806008'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+                BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+    </style>
 
 </head>
 
-<body>
+<body class="min-h-screen bg-slate-50 text-slate-800">
 
-<div class="container">
+    <!-- NAVBAR -->
 
-    <h1>My Documents</h1>
+    <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
 
-    <a href="lecturer-dashboard.html">
-        Back to Dashboard
-    </a>
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-    <br><br>
+            <div class="flex h-20 items-center justify-between">
 
+                <a
+                    href="lecturer-dashboard.html"
+                    class="flex items-center gap-3"
+                >
 
-    <p
-        id="documentsError"
-        class="error"
-    ></p>
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-gold-500 text-white shadow-lg shadow-gold-500/20">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
 
+                    <div class="hidden sm:block">
 
-    <table>
+                        <h1 class="text-lg font-bold text-slate-900">
+                            Lecturer Portal
+                        </h1>
 
-        <thead>
+                        <p class="text-xs text-slate-500">
+                            Academic Management System
+                        </p>
 
-            <tr>
+                    </div>
 
-                <th>File Name</th>
-
-                <th>Size</th>
-
-                <th>Created</th>
-
-                <th>Action</th>
-
-            </tr>
-
-        </thead>
+                </a>
 
 
-        <tbody
-            id="documentsBody"
-        >
+                <nav class="hidden items-center gap-1 lg:flex">
 
-        </tbody>
+                    <a href="lecturer-dashboard.html" class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-chart-line"></i>
+                        Dashboard
+                    </a>
 
-    </table>
+                    <a href="lecturer-upload.html" class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        Upload
+                    </a>
 
-</div>
+                    <a href="student-submissions.html" class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-user-graduate"></i>
+                        Submissions
+                    </a>
+
+                    <a href="lecturer-my-documents.html" class="flex items-center gap-2 rounded-xl bg-gold-50 px-4 py-2.5 text-sm font-semibold text-gold-600">
+                        <i class="fa-solid fa-folder-open"></i>
+                        My Documents
+                    </a>
+                </nav>
 
 
-<script src="js/api.js"></script>
-
-<script>
-
-async function loadMyDocuments() {
-
-    try {
-
-        const user =
-            await getCurrentUser();
+                <button
+                    onclick="logout()"
+                    class="hidden h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600 hover:bg-red-100 lg:flex"
+                >
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
 
 
-        if (
-            user.role !== "lecturer"
-        ) {
+                <button
+                    onclick="toggleMobileMenu()"
+                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 lg:hidden"
+                >
+                    <i class="fa-solid fa-bars"></i>
+                </button>
 
-            window.location.href =
-                "login.html";
+            </div>
 
-            return;
+
+            <div
+                id="mobileMenu"
+                class="hidden border-t border-slate-100 pb-4 pt-3 lg:hidden"
+            >
+
+                <div class="space-y-1">
+
+                    <a href="lecturer-dashboard.html" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-chart-line w-5"></i>
+                        Dashboard
+                    </a>
+
+                    <a href="lecturer-upload.html" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-cloud-arrow-up w-5"></i>
+                        Upload Document
+                    </a>
+
+                    <a href="student-submissions.html" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-user-graduate w-5"></i>
+                        Student Submissions
+                    </a>
+
+                    <a href="lecturer-my-documents.html" class="flex items-center gap-3 rounded-xl bg-gold-50 px-4 py-3 text-sm font-semibold text-gold-600">
+                        <i class="fa-solid fa-folder-open w-5"></i>
+                        My Documents
+                    </a>
+
+                    <a href="lecturer-documents.html" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-book-open w-5"></i>
+                        Lecturer Documents
+                    </a>
+
+                    <button onclick="logout()" class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50">
+                        <i class="fa-solid fa-right-from-bracket w-5"></i>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- MAIN -->
+
+    <main class="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+
+        <div class="mb-8 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+
+            <div>
+
+                <div class="mb-3 flex items-center gap-2 text-sm font-semibold text-blue-600">
+                    <i class="fa-solid fa-folder-open"></i>
+                    File Management
+                </div>
+
+                <h2 class="text-3xl font-bold tracking-tight text-slate-900">
+                    My Documents
+                </h2>
+
+                <p class="mt-2 text-slate-500">
+                    View, download, and manage your uploaded lecture materials.
+                </p>
+
+            </div>
+
+
+            <a
+                href="lecturer-upload.html"
+                class="inline-flex items-center justify-center gap-2 rounded-xl bg-gold-500 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-gold-500/20 transition hover:bg-gold-600"
+            >
+                <i class="fa-solid fa-plus"></i>
+                Upload New
+            </a>
+
+        </div>
+
+
+        <p
+            id="documentsError"
+            class="mb-5 text-center text-sm font-medium text-red-600"
+        ></p>
+
+
+        <!-- Table -->
+
+        <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+
+            <div class="border-b border-slate-100 px-5 py-5 sm:px-6">
+
+                <div class="flex items-center gap-3">
+
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <i class="fa-solid fa-folder"></i>
+                    </div>
+
+                    <div>
+
+                        <h3 class="font-bold text-slate-900">
+                            Uploaded Documents
+                        </h3>
+
+                        <p class="mt-1 text-xs text-slate-500">
+                            Your personal lecture document library
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <div class="overflow-x-auto">
+
+                <table class="w-full min-w-[750px] text-left">
+
+                    <thead class="bg-slate-50">
+
+                        <tr>
+
+                            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                File Name
+                            </th>
+
+                            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                Size
+                            </th>
+
+                            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                Created
+                            </th>
+
+                            <th class="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                Actions
+                            </th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody
+                        id="documentsBody"
+                        class="divide-y divide-slate-100"
+                    ></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <div class="mt-6">
+
+            <a
+                href="lecturer-dashboard.html"
+                class="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-gold-600"
+            >
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Dashboard
+            </a>
+
+        </div>
+
+    </main>
+
+
+    <script src="js/api.js"></script>
+
+    <script>
+
+        function toggleMobileMenu() {
+
+            document
+                .getElementById("mobileMenu")
+                .classList.toggle("hidden");
+
         }
 
 
-        const documents =
-            await getMyDocuments();
+        async function loadMyDocuments() {
+
+            try {
+
+                const user =
+                    await getCurrentUser();
 
 
-        const tbody =
-            document.getElementById(
-                "documentsBody"
-            );
+                if (user.role !== "lecturer") {
+
+                    window.location.href =
+                        "login.html";
+
+                    return;
+
+                }
 
 
-        tbody.innerHTML = "";
+                const documents =
+                    await getMyDocuments();
 
 
-        if (
-            documents.length === 0
-        ) {
-
-            tbody.innerHTML = `
-                <tr>
-                    <td colspan="4">
-                        No documents found.
-                    </td>
-                </tr>
-            `;
-
-            return;
-        }
-
-
-        documents.forEach(
-            item => {
-
-                const row =
-                    document.createElement(
-                        "tr"
+                const tbody =
+                    document.getElementById(
+                        "documentsBody"
                     );
 
 
-                row.innerHTML = `
-
-                    <td>
-                        ${escapeHtml(
-                            item.file_name
-                        )}
-                    </td>
-
-                    <td>
-                        ${formatFileSize(
-                            item.file_size
-                        )}
-                    </td>
-
-                    <td>
-                        ${item.created_at}
-                    </td>
-
-                    <td>
-
-                        <button
-                            onclick="downloadMyFile(
-                                ${item.id},
-                                '${escapeJs(
-                                    item.file_name
-                                )}'
-                            )"
-                        >
-                            Download
-                        </button>
+                tbody.innerHTML = "";
 
 
-                        <button
-                            onclick="deleteMyFile(
-                                ${item.id}
-                            )"
-                        >
-                            Delete
-                        </button>
+                if (documents.length === 0) {
 
-                    </td>
+                    tbody.innerHTML = `
 
-                `;
+                        <tr>
+
+                            <td colspan="4" class="px-6 py-16 text-center">
+
+                                <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                                    <i class="fa-solid fa-folder-open text-xl"></i>
+                                </div>
+
+                                <p class="mt-4 font-semibold text-slate-700">
+                                    No documents found
+                                </p>
+
+                                <p class="mt-1 text-sm text-slate-400">
+                                    Upload your first lecture document to see it here.
+                                </p>
+
+                                <a
+                                    href="lecturer-upload.html"
+                                    class="mt-5 inline-flex items-center gap-2 rounded-lg bg-gold-500 px-4 py-2 text-sm font-semibold text-white hover:bg-gold-600"
+                                >
+                                    <i class="fa-solid fa-plus"></i>
+                                    Upload Document
+                                </a>
+
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                    return;
+
+                }
 
 
-                tbody.appendChild(
-                    row
+                documents.forEach(item => {
+
+                    const row =
+                        document.createElement("tr");
+
+                    row.className =
+                        "transition hover:bg-slate-50";
+
+
+                    row.innerHTML = `
+
+                        <td class="px-6 py-4">
+
+                            <div class="flex items-center gap-3">
+
+                                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+
+                                    <i class="fa-solid fa-file-lines"></i>
+
+                                </div>
+
+                                <div class="min-w-0">
+
+                                    <p class="max-w-xs truncate text-sm font-semibold text-slate-800">
+                                        ${escapeHtml(item.file_name)}
+                                    </p>
+
+                                    <p class="text-xs text-slate-400">
+                                        Lecture material
+                                    </p>
+
+                                </div>
+
+                            </div>
+
+                        </td>
+
+
+                        <td class="px-6 py-4 text-sm text-slate-500">
+
+                            ${formatFileSize(item.file_size)}
+
+                        </td>
+
+
+                        <td class="px-6 py-4 text-sm text-slate-500">
+
+                            ${escapeHtml(item.created_at)}
+
+                        </td>
+
+
+                        <td class="px-6 py-4">
+
+                            <div class="flex justify-end gap-2">
+
+                                <button
+                                    onclick="downloadMyFile(
+                                        ${item.id},
+                                        '${escapeJs(item.file_name)}'
+                                    )"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-600 hover:bg-blue-600 hover:text-white"
+                                >
+
+                                    <i class="fa-solid fa-download"></i>
+
+                                    Download
+
+                                </button>
+
+
+                                <button
+                                    onclick="deleteMyFile(${item.id})"
+                                    class="inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-600 hover:text-white"
+                                >
+
+                                    <i class="fa-solid fa-trash"></i>
+
+                                    Delete
+
+                                </button>
+
+                            </div>
+
+                        </td>
+
+                    `;
+
+
+                    tbody.appendChild(row);
+
+                });
+
+
+            } catch (error) {
+
+                document.getElementById(
+                    "documentsError"
+                ).textContent =
+                    error.message;
+
+            }
+
+        }
+
+
+        async function downloadMyFile(
+            documentId,
+            fileName
+        ) {
+
+            try {
+
+                await downloadDocument(
+                    documentId,
+                    fileName
+                );
+
+            } catch (error) {
+
+                alert(
+                    `Download failed: ${error.message}`
                 );
 
             }
-        );
 
-    } catch (error) {
-
-        document.getElementById(
-            "documentsError"
-        ).textContent =
-            error.message;
-
-    }
-
-}
+        }
 
 
-async function downloadMyFile(
-    documentId,
-    fileName
-) {
-
-    try {
-
-        await downloadDocument(
-            documentId,
-            fileName
-        );
-
-    } catch (error) {
-
-        alert(
-            `Download failed: ${error.message}`
-        );
-
-    }
-
-}
-
-
-async function deleteMyFile(
-    documentId
-) {
-
-    const confirmed =
-        confirm(
-            "Are you sure you want to delete this document?"
-        );
-
-
-    if (!confirmed) {
-
-        return;
-    }
-
-
-    try {
-
-        await deleteDocument(
+        async function deleteMyFile(
             documentId
-        );
+        ) {
+
+            const confirmed =
+                confirm(
+                    "Are you sure you want to delete this document?"
+                );
 
 
-        alert(
-            "Document deleted successfully."
-        );
+            if (!confirmed) {
+                return;
+            }
 
 
-        await loadMyDocuments();
+            try {
 
-    } catch (error) {
-
-        alert(
-            `Delete failed: ${error.message}`
-        );
-
-    }
-
-}
+                await deleteDocument(
+                    documentId
+                );
 
 
-function formatFileSize(bytes) {
-
-    if (bytes < 1024) {
-
-        return `${bytes} B`;
-
-    }
+                alert(
+                    "Document deleted successfully."
+                );
 
 
-    if (bytes < 1024 * 1024) {
-
-        return `${(
-            bytes / 1024
-        ).toFixed(2)} KB`;
-
-    }
+                await loadMyDocuments();
 
 
-    return `${(
-        bytes /
-        (1024 * 1024)
-    ).toFixed(2)} MB`;
+            } catch (error) {
 
-}
+                alert(
+                    `Delete failed: ${error.message}`
+                );
 
+            }
 
-function escapeHtml(value) {
-
-    return String(value)
-        .replaceAll(
-            "&",
-            "&amp;"
-        )
-        .replaceAll(
-            "<",
-            "&lt;"
-        )
-        .replaceAll(
-            ">",
-            "&gt;"
-        )
-        .replaceAll(
-            '"',
-            "&quot;"
-        )
-        .replaceAll(
-            "'",
-            "&#039;"
-        );
-
-}
+        }
 
 
-function escapeJs(value) {
+        function formatFileSize(bytes) {
 
-    return String(value)
-        .replaceAll(
-            "\\",
-            "\\\\"
-        )
-        .replaceAll(
-            "'",
-            "\\'"
-        )
-        .replaceAll(
-            "\n",
-            "\\n"
-        )
-        .replaceAll(
-            "\r",
-            "\\r"
-        );
+            if (bytes < 1024) {
+                return `${bytes} B`;
+            }
 
-}
+            if (bytes < 1024 * 1024) {
+                return `${(bytes / 1024).toFixed(2)} KB`;
+            }
+
+            return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+
+        }
 
 
-loadMyDocuments();
+        function escapeHtml(value) {
 
-</script>
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+
+        }
+
+
+        function escapeJs(value) {
+
+            return String(value ?? "")
+                .replaceAll("\\", "\\\\")
+                .replaceAll("'", "\\'")
+                .replaceAll("\n", "\\n")
+                .replaceAll("\r", "\\r");
+
+        }
+
+
+        loadMyDocuments();
+
+    </script>
 
 </body>
 </html>

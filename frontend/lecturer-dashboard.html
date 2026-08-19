@@ -1,138 +1,544 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Lecturer Dashboard</title>
 
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
     <link
         rel="stylesheet"
-        href="css/style.css"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
 
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#fffdf2',
+                            100: '#fff8d9',
+                            200: '#fceca8',
+                            300: '#f7d96b',
+                            400: '#e8c23a',
+                            500: '#cb9c0d',
+                            600: '#a77d08',
+                            700: '#806008'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+                BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+        }
+
+        .nav-scroll::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-scroll {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
 </head>
 
-<body>
+<body class="min-h-screen bg-slate-50 text-slate-800">
 
-<div class="container">
+    <!-- =========================================================
+         NAVBAR
+    ========================================================== -->
 
-    <h1>Lecturer Dashboard</h1>
+    <header class="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
 
-    <div class="user-card">
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
-        <h2 id="welcome">
-            Welcome
-        </h2>
+            <div class="flex h-20 items-center justify-between">
 
-        <p id="email"></p>
+                <!-- Logo -->
+                <a
+                    href="lecturer-dashboard.html"
+                    class="flex items-center gap-3"
+                >
+                    <div
+                        class="flex h-11 w-11 items-center justify-center rounded-xl bg-gold-500 text-white shadow-lg shadow-gold-500/20"
+                    >
+                        <i class="fa-solid fa-graduation-cap text-lg"></i>
+                    </div>
 
-        <p id="classYear"></p>
+                    <div class="hidden sm:block">
+                        <h1 class="text-lg font-bold tracking-tight text-slate-900">
+                            Lecturer Portal
+                        </h1>
 
-    </div>
-
-
-    <div class="menu">
-
-        <a href="lecturer-upload.html">
-            Upload Lecture Document
-        </a>
-
-        <a href="student-submissions.html">
-            Student Submissions
-        </a>
-
-        <a href="lecturer-my-documents.html">
-            My Documents
-        </a>
-
-        <button
-            type="button"
-            onclick="logout()"
-        >
-            Logout
-        </button>
-
-    </div>
+                        <p class="text-xs text-slate-500">
+                            Academic Management System
+                        </p>
+                    </div>
+                </a>
 
 
-    <p
-        id="dashboardError"
-        class="error"
-    ></p>
+                <!-- Desktop Navigation -->
+                <nav class="nav-scroll hidden max-w-3xl items-center gap-1 overflow-x-auto lg:flex">
 
-</div>
+                    <a
+                        href="lecturer-dashboard.html"
+                        class="flex items-center gap-2 rounded-xl bg-gold-50 px-4 py-2.5 text-sm font-semibold text-gold-600 transition hover:bg-gold-100"
+                    >
+                        <i class="fa-solid fa-chart-line"></i>
+                        <span>Dashboard</span>
+                    </a>
+
+                    <a
+                        href="lecturer-upload.html"
+                        class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                    >
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span>Upload</span>
+                    </a>
+
+                    <a
+                        href="student-submissions.html"
+                        class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                    >
+                        <i class="fa-solid fa-user-graduate"></i>
+                        <span>Submissions</span>
+                    </a>
+
+                    <a
+                        href="lecturer-my-documents.html"
+                        class="flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                    >
+                        <i class="fa-solid fa-folder-open"></i>
+                        <span>My Documents</span>
+                    </a>
+
+                   
+                </nav>
 
 
-<script src="js/api.js"></script>
+                <!-- User / Logout -->
+                <div class="hidden items-center gap-3 lg:flex">
 
-<script>
+                    <div class="text-right">
+                        <p
+                            id="navUserName"
+                            class="text-sm font-semibold text-slate-900"
+                        >
+                            Lecturer
+                        </p>
 
-async function loadLecturerDashboard() {
+                        <p
+                            id="navUserClass"
+                            class="text-xs text-slate-500"
+                        >
+                            Lecturer
+                        </p>
+                    </div>
 
-    try {
+                    <button
+                        onclick="logout()"
+                        class="flex h-10 w-10 items-center justify-center rounded-xl bg-red-50 text-red-600 transition hover:bg-red-100"
+                        title="Logout"
+                    >
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
 
-        const user =
-            await getCurrentUser();
+                </div>
 
 
-        // -----------------------------------------
-        // Role check
-        // -----------------------------------------
+                <!-- Mobile menu button -->
+                <button
+                    id="mobileMenuButton"
+                    class="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700 lg:hidden"
+                    onclick="toggleMobileMenu()"
+                >
+                    <i class="fa-solid fa-bars"></i>
+                </button>
 
-        if (
-            user.role !== "lecturer"
-        ) {
+            </div>
 
-            window.location.href =
-                "login.html";
 
-            return;
+            <!-- Mobile Navigation -->
+            <div
+                id="mobileMenu"
+                class="hidden border-t border-slate-100 pb-4 pt-3 lg:hidden"
+            >
+
+                <div class="space-y-1">
+
+                    <a
+                        href="lecturer-dashboard.html"
+                        class="flex items-center gap-3 rounded-xl bg-gold-50 px-4 py-3 text-sm font-semibold text-gold-600"
+                    >
+                        <i class="fa-solid fa-chart-line w-5"></i>
+                        Dashboard
+                    </a>
+
+                    <a
+                        href="lecturer-upload.html"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    >
+                        <i class="fa-solid fa-cloud-arrow-up w-5"></i>
+                        Upload Document
+                    </a>
+
+                    <a
+                        href="student-submissions.html"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    >
+                        <i class="fa-solid fa-user-graduate w-5"></i>
+                        Student Submissions
+                    </a>
+
+                    <a
+                        href="lecturer-my-documents.html"
+                        class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    >
+                        <i class="fa-solid fa-folder-open w-5"></i>
+                        My Documents
+                    </a>
+
+        
+
+                    <button
+                        onclick="logout()"
+                        class="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-red-600 hover:bg-red-50"
+                    >
+                        <i class="fa-solid fa-right-from-bracket w-5"></i>
+                        Logout
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <!-- =========================================================
+         MAIN
+    ========================================================== -->
+
+    <main class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+        <!-- Welcome -->
+        <section class="mb-8">
+
+            <div class="rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-gold-700 p-6 text-white shadow-xl sm:p-8">
+
+                <div class="flex flex-col justify-between gap-6 md:flex-row md:items-center">
+
+                    <div>
+
+                        <div class="mb-3 flex items-center gap-2 text-sm text-gold-200">
+                            <i class="fa-solid fa-sun"></i>
+                            Lecturer Dashboard
+                        </div>
+
+                        <h2 class="text-2xl font-bold tracking-tight sm:text-3xl">
+                            Welcome back,
+                            <span id="welcomeName">Lecturer</span>
+                        </h2>
+
+                        <p class="mt-2 max-w-xl text-sm leading-6 text-slate-300">
+                            Manage your lecture materials, review student submissions,
+                            and keep your academic documents organized.
+                        </p>
+
+                    </div>
+
+
+                    <div class="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20">
+
+                        <i class="fa-solid fa-chalkboard-user text-3xl text-gold-300"></i>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Quick Actions -->
+        <section class="mb-8">
+
+            <div class="mb-5 flex items-center justify-between">
+
+                <div>
+                    <h3 class="text-xl font-bold text-slate-900">
+                        Quick Actions
+                    </h3>
+
+                    <p class="mt-1 text-sm text-slate-500">
+                        Frequently used lecturer tools
+                    </p>
+                </div>
+
+            </div>
+
+
+            <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+
+                <!-- Upload -->
+                <a
+                    href="lecturer-upload.html"
+                    class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-gold-300 hover:shadow-xl"
+                >
+
+                    <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-gold-50 text-gold-600 transition group-hover:bg-gold-500 group-hover:text-white">
+                        <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+                    </div>
+
+                    <h4 class="font-bold text-slate-900">
+                        Upload Document
+                    </h4>
+
+                    <p class="mt-2 text-sm leading-5 text-slate-500">
+                        Upload lecture notes and teaching materials.
+                    </p>
+
+                    <div class="mt-4 text-sm font-semibold text-gold-600">
+                        Upload now
+                        <i class="fa-solid fa-arrow-right ml-1 transition group-hover:ml-2"></i>
+                    </div>
+
+                </a>
+
+
+                <!-- Submissions -->
+                <a
+                    href="student-submissions.html"
+                    class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-emerald-300 hover:shadow-xl"
+                >
+
+                    <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                        <i class="fa-solid fa-user-graduate text-lg"></i>
+                    </div>
+
+                    <h4 class="font-bold text-slate-900">
+                        Student Submissions
+                    </h4>
+
+                    <p class="mt-2 text-sm leading-5 text-slate-500">
+                        Review student assignment submissions.
+                    </p>
+
+                    <div class="mt-4 text-sm font-semibold text-emerald-600">
+                        View submissions
+                        <i class="fa-solid fa-arrow-right ml-1 transition group-hover:ml-2"></i>
+                    </div>
+
+                </a>
+
+
+                <!-- My Documents -->
+                <a
+                    href="lecturer-my-documents.html"
+                    class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-xl"
+                >
+
+                    <div class="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <i class="fa-solid fa-folder-open text-lg"></i>
+                    </div>
+
+                    <h4 class="font-bold text-slate-900">
+                        My Documents
+                    </h4>
+
+                    <p class="mt-2 text-sm leading-5 text-slate-500">
+                        Manage documents you have uploaded.
+                    </p>
+
+                    <div class="mt-4 text-sm font-semibold text-blue-600">
+                        Manage files
+                        <i class="fa-solid fa-arrow-right ml-1 transition group-hover:ml-2"></i>
+                    </div>
+
+                </a>
+
+            </div>
+
+        </section>
+
+
+        <!-- Profile Information -->
+        <section>
+
+            <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+                <div class="mb-6 flex items-center gap-3">
+
+                    <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-slate-900">
+                            Account Information
+                        </h3>
+
+                        <p class="text-sm text-slate-500">
+                            Your lecturer profile
+                        </p>
+                    </div>
+
+                </div>
+
+
+                <div class="grid gap-4 sm:grid-cols-3">
+
+                    <div class="rounded-xl bg-slate-50 p-4">
+
+                        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
+                            Name
+                        </p>
+
+                        <p
+                            id="profileName"
+                            class="mt-1 font-semibold text-slate-800"
+                        >
+                            Loading...
+                        </p>
+
+                    </div>
+
+
+                    <div class="rounded-xl bg-slate-50 p-4">
+
+                        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
+                            Email
+                        </p>
+
+                        <p
+                            id="profileEmail"
+                            class="mt-1 break-all font-semibold text-slate-800"
+                        >
+                            Loading...
+                        </p>
+
+                    </div>
+
+
+                    <div class="rounded-xl bg-slate-50 p-4">
+
+                        <p class="text-xs font-medium uppercase tracking-wide text-slate-400">
+                            Class
+                        </p>
+
+                        <p
+                            id="profileClass"
+                            class="mt-1 font-semibold text-slate-800"
+                        >
+                            Loading...
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <p
+            id="dashboardError"
+            class="mt-5 text-center text-sm font-medium text-red-600"
+        ></p>
+
+    </main>
+
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 bg-white">
+
+        <div class="mx-auto max-w-7xl px-4 py-5 text-center text-xs text-slate-400 sm:px-6 lg:px-8">
+            Lecturer Portal &copy; 2026. Academic Management System.
+        </div>
+
+    </footer>
+
+
+    <script src="js/api.js"></script>
+
+    <script>
+
+        function toggleMobileMenu() {
+            document
+                .getElementById("mobileMenu")
+                .classList.toggle("hidden");
         }
 
 
-        // -----------------------------------------
-        // Display user information
-        // -----------------------------------------
+        async function loadLecturerDashboard() {
 
-        document.getElementById(
-            "welcome"
-        ).textContent =
-            `Welcome, ${user.full_name}`;
+            try {
 
+                const user = await getCurrentUser();
 
-        document.getElementById(
-            "email"
-        ).textContent =
-            `Email: ${user.email}`;
+                if (user.role !== "lecturer") {
+
+                    window.location.href = "login.html";
+                    return;
+
+                }
 
 
-        document.getElementById(
-            "classYear"
-        ).textContent =
-            `Class: ${user.class_year}`;
+                document.getElementById("welcomeName").textContent =
+                    user.full_name || "Lecturer";
 
-    } catch (error) {
+                document.getElementById("navUserName").textContent =
+                    user.full_name || "Lecturer";
 
-        document.getElementById(
-            "dashboardError"
-        ).textContent =
-            error.message;
-
-    }
-
-}
+                document.getElementById("navUserClass").textContent =
+                    user.class_year
+                        ? `Class ${user.class_year}`
+                        : "Lecturer";
 
 
-loadLecturerDashboard();
+                document.getElementById("profileName").textContent =
+                    user.full_name || "-";
 
-</script>
+                document.getElementById("profileEmail").textContent =
+                    user.email || "-";
+
+                document.getElementById("profileClass").textContent =
+                    user.class_year || "-";
+
+            } catch (error) {
+
+                document.getElementById("dashboardError").textContent =
+                    error.message;
+
+            }
+
+        }
+
+
+        loadLecturerDashboard();
+
+    </script>
 
 </body>
 </html>
