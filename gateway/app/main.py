@@ -10,9 +10,11 @@ from app.routers import admin
 
 from app.models.user import User
 from app.models.document import Document
+from app.models.document_class import DocumentClass
 from app.models.recovery_log import RecoveryLog
 from app.routers.recovery import router as recovery_router
 from app.routers import admin_import
+from app.routers import lecturer_classes
 
 from app.routers import health
 
@@ -73,6 +75,7 @@ app.include_router(users.router)
 app.include_router(documents.router)
 app.include_router(admin.router)
 app.include_router(admin_import.router)
+app.include_router(lecturer_classes.router)
 
 @app.get("/")
 def home():

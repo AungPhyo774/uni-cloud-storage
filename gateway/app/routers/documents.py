@@ -3,12 +3,14 @@ import io
 import os
 
 import httpx
+from sqlalchemy import and_, or_
 
 from fastapi import (
     APIRouter,
     Depends,
     UploadFile,
     File,
+    Form,
     HTTPException
 )
 
@@ -26,6 +28,9 @@ from app.database.session import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.models.document import Document
+from app.models.document_class import DocumentClass
+from app.models.class_year import ClassYear
+from app.models.lecturer_teaching_class import LecturerTeachingClass
 
 from app.utils.checksum import calculate_checksum
 
@@ -64,8 +69,7 @@ async def upload_document(
         db.query(User)
         .filter(
             User.id == lecturer_id,
-            User.role == "lecturer",
-            User.class_year == current_user.class_year
+            User.role == "lecturer"
         )
         .first()
     )
@@ -78,6 +82,31 @@ async def upload_document(
                 "You can only upload documents "
                 "to lecturers from your own class"
             )
+        )
+
+    can_upload_to_lecturer = (
+        db.query(LecturerTeachingClass)
+        .join(
+            ClassYear,
+            ClassYear.id == LecturerTeachingClass.class_id
+        )
+        .filter(
+            LecturerTeachingClass.lecturer_id == lecturer.id,
+            ClassYear.class_year == current_user.class_year
+        )
+        .first()
+        is not None
+    )
+
+    can_upload_to_lecturer = (
+        can_upload_to_lecturer
+        or lecturer.class_year == current_user.class_year
+    )
+
+    if not can_upload_to_lecturer:
+        raise HTTPException(
+            status_code=403,
+            detail="The selected lecturer does not teach your class"
         )
 
     # -------------------------------------------------
@@ -191,25 +220,55 @@ def get_lecturers(
 
     lecturers = (
         db.query(User)
-        .filter(
-            User.role == "lecturer",
-            User.class_year == current_user.class_year
-        )
-        .order_by(
-            User.full_name
-        )
+        .filter(User.role == "lecturer")
+        .order_by(User.full_name)
         .all()
     )
 
-    return [
-        {
-            "id": lecturer.id,
-            "full_name": lecturer.full_name,
-            "email": lecturer.email,
-            "class_year": lecturer.class_year
-        }
-        for lecturer in lecturers
-    ]
+    result = []
+
+    for lecturer in lecturers:
+        assigned_classes = (
+            db.query(ClassYear)
+            .join(
+                LecturerTeachingClass,
+                LecturerTeachingClass.class_id == ClassYear.id
+            )
+            .filter(
+                LecturerTeachingClass.lecturer_id == lecturer.id
+            )
+            .order_by(ClassYear.id.asc())
+            .all()
+        )
+
+        teaches_student_class = (
+            current_user.class_year in
+            [item.class_year for item in assigned_classes]
+            or lecturer.class_year == current_user.class_year
+        )
+
+        if not teaches_student_class:
+            continue
+
+        class_years = [item.class_year for item in assigned_classes]
+        class_names = [item.display_name for item in assigned_classes]
+
+        if lecturer.class_year == current_user.class_year and not class_years:
+            class_years = [lecturer.class_year]
+            class_names = [lecturer.class_year]
+
+        result.append(
+            {
+                "id": lecturer.id,
+                "full_name": lecturer.full_name,
+                "email": lecturer.email,
+                "class_year": current_user.class_year,
+                "class_years": class_years,
+                "class_names": class_names
+            }
+        )
+
+    return result
 
 # ------Lecturer Documents List
 
@@ -239,9 +298,17 @@ def get_lecturer_documents(
             User,
             Document.owner_id == User.id
         )
+        .join(
+            DocumentClass,
+            DocumentClass.document_id == Document.id
+        )
+        .join(
+            ClassYear,
+            ClassYear.id == DocumentClass.class_id
+        )
         .filter(
             User.role == "lecturer",
-            User.class_year == current_user.class_year
+            ClassYear.class_year == current_user.class_year
         )
         .order_by(
             Document.created_at.desc()
@@ -297,11 +364,26 @@ def get_student_documents(
             User,
             Document.owner_id == User.id
         )
+        .outerjoin(
+            LecturerTeachingClass,
+            LecturerTeachingClass.lecturer_id == current_user.id
+        )
+        .outerjoin(
+            ClassYear,
+            ClassYear.id == LecturerTeachingClass.class_id
+        )
         .filter(
             User.role == "student",
-            User.class_year == current_user.class_year,
+            or_(
+                User.class_year == ClassYear.class_year,
+                and_(
+                    ClassYear.id.is_(None),
+                    User.class_year == current_user.class_year
+                )
+            ),
             Document.lecturer_id == current_user.id
         )
+        .distinct()
         .order_by(
             Document.created_at.desc()
         )
@@ -315,7 +397,14 @@ def get_student_documents(
             "file_size": document.file_size,
             "content_type": document.content_type,
             "student_id": document.owner_id,
-            "student_name": db.query(User).filter(User.id == document.owner_id).first().full_name,
+            "student_name": (student := db.query(User).filter(User.id == document.owner_id).first()).full_name,
+            "student_class": student.class_year,
+            "student_class_name": (
+                db.query(ClassYear.display_name)
+                .filter(ClassYear.class_year == student.class_year)
+                .scalar()
+                or student.class_year
+            ),
             "storage_node": document.storage_node,
             "created_at": document.created_at,
         }
@@ -354,7 +443,20 @@ def get_my_documents(
             "created_at": document.created_at,
             "lecturer_class":lecturer.class_year if (lecturer := db.query(User).filter(User.id == document.lecturer_id).first()) else None,
             
-            "lecturer_name":lecturer.full_name,
+            "lecturer_name": lecturer.full_name,
+            "class_names": [
+                class_record.display_name
+                for class_record in db.query(ClassYear)
+                .join(
+                    DocumentClass,
+                    DocumentClass.class_id == ClassYear.id
+                )
+                .filter(
+                    DocumentClass.document_id == document.id
+                )
+                .order_by(ClassYear.id.asc())
+                .all()
+            ],
         }
         for document in documents
     ]
@@ -595,8 +697,13 @@ async def download_document(
     elif (
         current_user.role == "student"
         and owner.role == "lecturer"
-        and owner.class_year
-            == current_user.class_year
+        and db.query(DocumentClass)
+        .join(ClassYear, ClassYear.id == DocumentClass.class_id)
+        .filter(
+            DocumentClass.document_id == document.id,
+            ClassYear.class_year == current_user.class_year
+        )
+        .first()
     ):
         allowed = True
 
@@ -606,8 +713,24 @@ async def download_document(
         current_user.role == "lecturer"
         and owner.role == "student"
         and document.lecturer_id == current_user.id
-        and owner.class_year
-            == current_user.class_year
+        and db.query(LecturerTeachingClass)
+        .join(
+            ClassYear,
+            ClassYear.id == LecturerTeachingClass.class_id
+        )
+        .filter(
+            LecturerTeachingClass.lecturer_id == current_user.id,
+            ClassYear.class_year == owner.class_year
+        )
+        .first()
+        or (
+            owner.class_year == current_user.class_year
+            and not db.query(LecturerTeachingClass)
+            .filter(
+                LecturerTeachingClass.lecturer_id == current_user.id
+            )
+            .first()
+        )
     ):
         allowed = True
 
@@ -936,6 +1059,7 @@ async def delete_document(
 @router.post("/lecturer/upload")
 async def lecturer_upload_document(
     file: UploadFile = File(...),
+    class_years: list[str] = Form(...),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -948,6 +1072,41 @@ async def lecturer_upload_document(
         raise HTTPException(
             status_code=403,
             detail="Only lecturers can upload documents"
+        )
+
+    selected_class_years = list(dict.fromkeys(class_years))
+
+    if not selected_class_years:
+        raise HTTPException(
+            status_code=400,
+            detail="Select at least one recipient class"
+        )
+
+    assigned_class_years = {
+        row.class_year
+        for row in db.query(ClassYear.class_year)
+        .join(
+            LecturerTeachingClass,
+            LecturerTeachingClass.class_id == ClassYear.id
+        )
+        .filter(
+            LecturerTeachingClass.lecturer_id == current_user.id
+        )
+        .all()
+    }
+
+    invalid_classes = [
+        item for item in selected_class_years
+        if item not in assigned_class_years
+    ]
+
+    if invalid_classes:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "You can only share documents with your assigned classes: "
+                + ", ".join(invalid_classes)
+            )
         )
 
     # -------------------------------------------------
@@ -1016,11 +1175,28 @@ async def lecturer_upload_document(
         db.commit()
         db.refresh(new_document)
 
+        class_records = (
+            db.query(ClassYear)
+            .filter(ClassYear.class_year.in_(selected_class_years))
+            .all()
+        )
+
+        for class_record in class_records:
+            db.add(
+                DocumentClass(
+                    document_id=new_document.id,
+                    class_id=class_record.id
+                )
+            )
+
+        db.commit()
+
         return {
             "message": "Lecturer document uploaded successfully",
             "document_id": new_document.id,
             "file_name": new_document.file_name,
             "lecturer": current_user.full_name,
+            "class_years": selected_class_years,
             "storage_node": new_document.storage_node,
             "replica_node": new_document.replica_node,
             "checksum": new_document.checksum

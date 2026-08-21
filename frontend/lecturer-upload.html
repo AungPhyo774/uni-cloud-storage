@@ -259,6 +259,18 @@
                 class="p-6 sm:p-8"
             >
 
+                <fieldset class="mb-6 rounded-2xl border border-slate-200 p-5">
+                    <legend class="px-2 text-sm font-bold text-slate-900">Share with classes</legend>
+                    <p class="mb-4 text-sm text-slate-500">These classes come from your teaching-class assignment.</p>
+                    <div id="recipientClasses" class="grid gap-3 sm:grid-cols-2">
+                        <p class="text-sm text-slate-500">Loading classes...</p>
+                    </div>
+                    <a href="lecturer-classes.html" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700">
+                        <i class="fa-solid fa-sliders"></i>
+                        Manage teaching classes
+                    </a>
+                </fieldset>
+
                 <!-- File Upload -->
                 <label
                     for="file"
@@ -370,7 +382,7 @@
     </main>
 
 
-    <script src="js/api.js"></script>
+    <script src="js/api.js?v=20260822"></script>
 
     <script>
 
@@ -441,7 +453,28 @@
 
                 document.getElementById("lecturerClass")
                     .textContent =
-                    `Class: ${user.class_year || "Not assigned"}`;
+                    "Select the classes that should receive this document.";
+
+                const currentResult = await getMyTeachingClasses();
+                const assignedClasses = (Array.isArray(currentResult?.classes)
+                    ? currentResult.classes
+                    : []);
+                const container = document.getElementById("recipientClasses");
+                container.innerHTML = "";
+
+                assignedClasses.forEach(item => {
+                        const label = document.createElement("label");
+                        label.className = "flex cursor-pointer items-center gap-3 rounded-xl border border-slate-200 p-3 hover:bg-slate-50";
+                        label.innerHTML = `
+                            <input type="checkbox" name="class_years" value="${item.class_year}" class="recipient-class h-4 w-4 accent-gold-600" checked>
+                            <span class="text-sm font-medium text-slate-700">${item.display_name}</span>
+                        `;
+                        container.appendChild(label);
+                    });
+
+                if (!container.children.length) {
+                    container.innerHTML = '<p class="text-sm text-red-600">Assign teaching classes before uploading.</p>';
+                }
 
             } catch (error) {
 
@@ -488,6 +521,14 @@
 
                     }
 
+                    const classYears = [...document.querySelectorAll(".recipient-class:checked")]
+                        .map(checkbox => checkbox.value);
+
+                    if (!classYears.length) {
+                        error.textContent = "Select at least one recipient class.";
+                        return;
+                    }
+
 
                     try {
 
@@ -499,7 +540,7 @@
                         `;
 
                         const result =
-                            await uploadLecturerDocument(file);
+                            await uploadLecturerDocument(file, classYears);
 
 
                         message.textContent =

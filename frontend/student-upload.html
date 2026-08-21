@@ -317,7 +317,7 @@
     </main>
 
 
-    <script src="js/api.js"></script>
+    <script src="js/api.js?v=20260822"></script>
 
 
     <script>
@@ -370,8 +370,12 @@
                         option.value =
                             lecturer.id;
 
+                        const classNames = Array.isArray(lecturer.class_names)
+                            ? lecturer.class_names
+                            : [lecturer.class_year].filter(Boolean);
+
                         option.textContent =
-                            `${lecturer.full_name} (${lecturer.class_year})`;
+                            `${lecturer.full_name} (${classNames.join(", ")})`;
 
                         select.appendChild(
                             option

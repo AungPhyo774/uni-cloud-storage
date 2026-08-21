@@ -104,7 +104,8 @@ tailwind.config = {
     <p class="mt-1 text-sm text-slate-500">Overview of users, storage nodes, replication, and recovery operations.</p>
   </div>
 
-  <div id="classSummary" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4"></div>
+  <div id="classTotals" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+  <div id="classSummary" class="mt-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4"></div>
 
   <section class="mt-8">
     <div class="mb-4">
@@ -153,11 +154,13 @@ async function loadAdminDashboard(){
 function showError(id,msg){const el=document.getElementById(id);el.textContent=msg;el.classList.remove("hidden");}
 function formatClassYear(value){return value.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());}
 async function loadClassSummary(){
-  const data=await getClassSummary(),c=document.getElementById("classSummary");c.innerHTML="";
-  for(const [year,counts] of Object.entries(data)){
+  const data=await getClassSummary(),c=document.getElementById("classSummary"),totals=document.getElementById("classTotals");
+  totals.innerHTML=`${listRow("Total Students",data.totals?.students??0,"text-blue-600")} ${listRow("Total Lecturers",data.totals?.lecturers??0,"text-purple-600")}`;
+  c.innerHTML="";
+  for(const [year,counts] of Object.entries(data.classes||{})){
     const el=document.createElement("div");el.className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm";
     el.innerHTML=`<div class="flex items-center justify-between mb-4"><div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-lg">🎓</div><span class="text-[10px] font-bold tracking-wider text-slate-400">CLASS</span></div>
-    <p class="text-sm font-bold text-slate-900">${formatClassYear(year)}</p>
+    <p class="text-sm font-bold text-slate-900">${escapeHtml(counts.display_name||formatClassYear(year))}</p>
     <div class="flex gap-7 mt-3"><div><p class="text-2xl font-bold text-blue-600">${counts.students}</p><p class="text-xs text-slate-500">Students</p></div><div><p class="text-2xl font-bold text-purple-600">${counts.lecturers}</p><p class="text-xs text-slate-500">Lecturers</p></div></div>`;
     c.appendChild(el);
   }
@@ -183,6 +186,7 @@ async function loadRecoverySummary(){
 function listRow(label,value,color){return `<div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50"><span class="text-sm text-slate-600">${label}</span><span class="font-bold ${color}">${value}</span></div>`;}
 function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 loadAdminDashboard();
+setInterval(loadClassSummary, 30000);
 
 </script>
 </body>

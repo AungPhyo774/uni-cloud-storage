@@ -2,49 +2,84 @@
 const API_BASE_URL = "";
 
 
+// =========================================================
+// API REQUEST
+// =========================================================
+
 async function apiRequest(
     endpoint,
     options = {}
 ) {
-    const token = localStorage.getItem("access_token");
+
+    const token =
+        localStorage.getItem(
+            "access_token"
+        );
 
     const headers = {
+        "Accept": "application/json",
         ...(options.headers || {})
     };
 
     if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
+
+        headers["Authorization"] =
+            `Bearer ${token}`;
     }
 
-    const response = await fetch(
-        `${API_BASE_URL}${endpoint}`,
-        {
-            ...options,
-            headers
-        }
-    );
+    const response =
+        await fetch(
+            `${API_BASE_URL}${endpoint}`,
+            {
+                ...options,
+                headers,
+                cache: "no-store"
+            }
+        );
+
+    const rawText =
+        await response.text();
 
     let data = null;
 
     try {
-        data = await response.json();
+
+        data =
+            JSON.parse(
+                rawText
+            );
+
     } catch {
+
         data = null;
     }
 
     if (!response.ok) {
 
-        const message =
-            data?.detail ||
-            `Request failed: ${response.status}`;
+        throw new Error(
+            data?.detail
+            ||
+            `Request failed: ${response.status}`
+        );
+    }
 
-        throw new Error(message);
+    if (data === null) {
+
+        console.error(
+            "Non-JSON response:",
+            rawText
+        );
+
+        throw new Error(
+            `Expected JSON response from ${endpoint}, ` +
+            `but received non-JSON content. ` +
+            `HTTP ${response.status}. ` +
+            "Please reload the page and verify the API route."
+        );
     }
 
     return data;
 }
-
-
 // #Login API
 async function loginUser(
     email,
@@ -252,14 +287,29 @@ async function downloadDocument(
 //Lecturer APIs
 //Lecturer upload—
 async function uploadLecturerDocument(
-    file
+    file,
+    classYears = []
 ) {
 
     const formData =new FormData();
 
+    const selectedClassYears = Array.isArray(classYears)
+        ? classYears.filter(Boolean)
+        : [];
+
+    if (!selectedClassYears.length) {
+        throw new Error(
+            "Select at least one teaching class before uploading."
+        );
+    }
+
     formData.append(
         "file",
         file
+    );
+
+    selectedClassYears.forEach(
+        classYear => formData.append("class_years", classYear)
     );
 
     return await apiRequest(
@@ -414,6 +464,44 @@ async function importLecturersExcel(
         {
             method: "POST",
             body: formData
+        }
+    );
+}
+
+async function getAvailableClasses() {
+
+    return await apiRequest(
+        "/lecturers/classes"
+    );
+}
+
+
+async function getMyTeachingClasses() {
+
+    return await apiRequest(
+        "/lecturers/me/classes"
+    );
+}
+
+
+async function updateMyTeachingClasses(
+    classYears
+) {
+
+    return await apiRequest(
+        "/lecturers/me/classes",
+        {
+            method: "PUT",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify({
+                class_years:
+                    classYears
+            })
         }
     );
 }

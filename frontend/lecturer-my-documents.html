@@ -257,6 +257,10 @@
                             </th>
 
                             <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+                                Classes
+                            </th>
+
+                            <th class="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
                                 Created
                             </th>
 
@@ -346,7 +350,7 @@
 
                         <tr>
 
-                            <td colspan="4" class="px-6 py-16 text-center">
+                            <td colspan="5" class="px-6 py-16 text-center">
 
                                 <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
                                     <i class="fa-solid fa-folder-open text-xl"></i>
@@ -420,6 +424,17 @@
                         <td class="px-6 py-4 text-sm text-slate-500">
 
                             ${formatFileSize(item.file_size)}
+
+                        </td>
+
+
+                        <td class="px-6 py-4 text-sm text-slate-600">
+
+                            ${escapeHtml(
+                                Array.isArray(item.class_names) && item.class_names.length
+                                    ? item.class_names.join(", ")
+                                    : "No class assigned"
+                            )}
 
                         </td>
 

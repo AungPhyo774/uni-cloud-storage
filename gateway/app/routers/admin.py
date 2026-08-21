@@ -11,6 +11,8 @@ from app.database.session import get_db
 from app.dependencies.auth import get_current_user
 from app.models.user import User
 from app.models.document import Document
+from app.models.class_year import ClassYear
+from app.models.lecturer_teaching_class import LecturerTeachingClass
 
 from app.services.node_health_service import (
     check_node_health
@@ -129,17 +131,28 @@ def get_class_summary(
     db: Session = Depends(get_db)
 ):
 
-    result = {}
+    classes = {}
+    total_student_ids = {
+        student_id
+        for (student_id,) in db.query(User.id).filter(
+            User.role == "student"
+        ).all()
+    }
+    total_lecturer_ids = {
+        lecturer_id
+        for (lecturer_id,) in db.query(User.id).filter(
+            User.role == "lecturer"
+        ).all()
+    }
 
-    class_years = [
-        "first_year",
-        "second_year",
-        "third_year",
-        "fourth_year",
-        "fifth_year"
-    ]
+    class_records = (
+        db.query(ClassYear)
+        .order_by(ClassYear.id.asc())
+        .all()
+    )
 
-    for year in class_years:
+    for class_record in class_records:
+        year = class_record.class_year
 
         student_count = (
             db.query(User)
@@ -150,21 +163,38 @@ def get_class_summary(
             .count()
         )
 
-        lecturer_count = (
-            db.query(User)
-            .filter(
+        assigned_lecturer_ids = {
+            lecturer_id
+            for (lecturer_id,) in db.query(
+                LecturerTeachingClass.lecturer_id
+            ).filter(
+                LecturerTeachingClass.class_id == class_record.id
+            ).distinct().all()
+        }
+        legacy_lecturer_ids = {
+            lecturer_id
+            for (lecturer_id,) in db.query(User.id).filter(
                 User.role == "lecturer",
                 User.class_year == year
-            )
-            .count()
-        )
+            ).all()
+        }
+        class_lecturer_ids = assigned_lecturer_ids | legacy_lecturer_ids
+        lecturer_count = len(class_lecturer_ids)
 
-        result[year] = {
+
+        classes[year] = {
+            "display_name": class_record.display_name,
             "students": student_count,
             "lecturers": lecturer_count
         }
 
-    return result
+    return {
+        "totals": {
+            "students": len(total_student_ids),
+            "lecturers": len(total_lecturer_ids)
+        },
+        "classes": classes
+    }
 
 
 @router.get("/nodes/health")
