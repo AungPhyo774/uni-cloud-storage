@@ -12,6 +12,8 @@ class User(Base):  # user Table ကို ကိုယ်စားပြုတ�
 
     id = Column(Integer, primary_key=True, index=True)
 
+    roll_number = Column(String(50),nullable=True,unique=True)
+
     full_name = Column(String(100), nullable=False)
 
     email = Column(String(100), unique=True, nullable=False)

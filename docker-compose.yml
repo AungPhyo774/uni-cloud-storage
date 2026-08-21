@@ -1,8 +1,161 @@
-services:
+# services:
 
-  # =====================================================
-  # POSTGRESQL
-  # =====================================================
+#   # =====================================================
+#   # POSTGRESQL
+#   # =====================================================
+
+#   postgres:
+#     image: postgres:16
+
+#     container_name: distributed-postgres
+
+#     environment:
+#       POSTGRES_DB: distributed_storage
+#       POSTGRES_USER: postgres
+#       POSTGRES_PASSWORD: postgres
+
+#     volumes:
+#       - postgres_data:/var/lib/postgresql/data
+
+#     healthcheck:
+#       test:
+#         [
+#           "CMD-SHELL",
+#           "pg_isready -U postgres -d distributed_storage"
+#         ]
+#       interval: 5s
+#       timeout: 5s
+#       retries: 10
+
+#     networks:
+#       - distributed-network
+
+
+#   # =====================================================
+#   # STORAGE NODE 1
+#   # =====================================================
+
+#   storage-node-1:
+#     build:
+#       context: ./storage-node-1
+
+#     container_name: storage-node-1
+
+#     volumes:
+#       - ./storage-node-1/storage:/app/storage
+
+#     networks:
+#       - distributed-network
+
+
+#   # =====================================================
+#   # STORAGE NODE 2
+#   # =====================================================
+
+#   storage-node-2:
+#     build:
+#       context: ./storage-node-2
+
+#     container_name: storage-node-2
+
+#     volumes:
+#       - ./storage-node-2/storage:/app/storage
+
+#     networks:
+#       - distributed-network
+
+
+#   # =====================================================
+#   # STORAGE NODE 3
+#   # =====================================================
+
+#   storage-node-3:
+#     build:
+#       context: ./storage-node-3
+
+#     container_name: storage-node-3
+
+#     volumes:
+#       - ./storage-node-3/storage:/app/storage
+
+#     networks:
+#       - distributed-network
+
+
+#   # =====================================================
+#   # GATEWAY
+#   # =====================================================
+
+#   gateway:
+#     build:
+#       context: ./gateway
+
+#     container_name: distributed-gateway
+
+#     environment:
+#       DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/distributed_storage
+
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+
+#       storage-node-1:
+#         condition: service_started
+
+#       storage-node-2:
+#         condition: service_started
+
+#       storage-node-3:
+#         condition: service_started
+
+#     networks:
+#       - distributed-network
+
+
+#   # =====================================================
+#   # NGINX
+#   # =====================================================
+
+#   nginx:
+#     image: nginx:alpine
+
+#     container_name: distributed-nginx
+
+#     ports:
+#       - "8080:80"
+
+#     volumes:
+#       - ./frontend:/usr/share/nginx/html:ro
+#       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+#     depends_on:
+#       gateway:
+#         condition: service_started
+
+#     networks:
+#       - distributed-network
+
+
+# # =======================================================
+# # VOLUMES
+# # =======================================================
+
+# volumes:
+
+#   postgres_data:
+
+
+# # =======================================================
+# # NETWORK
+# # =======================================================
+
+# networks:
+
+#   distributed-network:
+#     driver: bridge
+
+
+services:
 
   postgres:
     image: postgres:16
@@ -31,26 +184,28 @@ services:
       - distributed-network
 
 
-  # =====================================================
-  # STORAGE NODE 1
-  # =====================================================
-
   storage-node-1:
     build:
       context: ./storage-node-1
 
     container_name: storage-node-1
 
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "9001"
+      - --reload
+
     volumes:
+      - ./storage-node-1/app:/app/app
       - ./storage-node-1/storage:/app/storage
 
     networks:
       - distributed-network
 
-
-  # =====================================================
-  # STORAGE NODE 2
-  # =====================================================
 
   storage-node-2:
     build:
@@ -58,16 +213,22 @@ services:
 
     container_name: storage-node-2
 
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "9002"
+      - --reload
+
     volumes:
+      - ./storage-node-2/app:/app/app
       - ./storage-node-2/storage:/app/storage
 
     networks:
       - distributed-network
 
-
-  # =====================================================
-  # STORAGE NODE 3
-  # =====================================================
 
   storage-node-3:
     build:
@@ -75,16 +236,22 @@ services:
 
     container_name: storage-node-3
 
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "9003"
+      - --reload
+
     volumes:
+      - ./storage-node-3/app:/app/app
       - ./storage-node-3/storage:/app/storage
 
     networks:
       - distributed-network
 
-
-  # =====================================================
-  # GATEWAY
-  # =====================================================
 
   gateway:
     build:
@@ -92,8 +259,20 @@ services:
 
     container_name: distributed-gateway
 
+    command:
+      - uvicorn
+      - app.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload
+
     environment:
       DATABASE_URL: postgresql+psycopg2://postgres:postgres@postgres:5432/distributed_storage
+
+    volumes:
+      - ./gateway/app:/app/app
 
     depends_on:
       postgres:
@@ -111,10 +290,6 @@ services:
     networks:
       - distributed-network
 
-
-  # =====================================================
-  # NGINX
-  # =====================================================
 
   nginx:
     image: nginx:alpine
@@ -136,18 +311,10 @@ services:
       - distributed-network
 
 
-# =======================================================
-# VOLUMES
-# =======================================================
-
 volumes:
 
   postgres_data:
 
-
-# =======================================================
-# NETWORK
-# =======================================================
 
 networks:
 

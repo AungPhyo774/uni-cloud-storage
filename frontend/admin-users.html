@@ -5,20 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>User Management</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script>
-tailwind.config = {
-  theme: {
-    extend: {
-      colors: {
-        primary: {
-          50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6',
-          600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a'
-        }
-      }
-    }
-  }
-}
-</script>
+
 
 <style>
 .mobile-nav-item{
@@ -111,19 +98,320 @@ tailwind.config = {
     </div>
     <div class="p-6">
       <form id="createUserForm">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div><label class="block text-xs font-semibold text-slate-600 mb-1.5" for="fullName">Full Name</label><input class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="text" id="fullName" placeholder="Enter full name" required></div>
-          <div><label class="block text-xs font-semibold text-slate-600 mb-1.5" for="email">Email</label><input class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="email" id="email" placeholder="name@example.com" required></div>
-          <div><label class="block text-xs font-semibold text-slate-600 mb-1.5" for="password">Password</label><input class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" type="password" id="password" placeholder="Create password" required></div>
-          <div><label class="block text-xs font-semibold text-slate-600 mb-1.5" for="role">Role</label><select class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" id="role" required><option value="">Select Role</option><option value="student">Student</option><option value="lecturer">Lecturer</option></select></div>
-          <div><label class="block text-xs font-semibold text-slate-600 mb-1.5" for="classYear">Class Year</label><select class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100" id="classYear" required><option value="">Select Class</option><option value="first_year">First Year</option><option value="second_year">Second Year</option><option value="third_year">Third Year</option><option value="fourth_year">Fourth Year</option><option value="fifth_year">Fifth Year</option></select></div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+        <div>
+            <label
+                class="block text-xs font-semibold text-slate-600 mb-1.5"
+            >
+                Full Name
+            </label>
+
+            <input
+                class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm"
+                type="text"
+                id="fullName"
+                placeholder="Enter full name"
+                required
+            >
         </div>
-        <div class="flex justify-end mt-6"><button class="px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition shadow-sm" type="submit">Create User</button></div>
-      </form>
-      <p id="createMessage" class="hidden mt-4 p-3 rounded-xl text-sm"></p>
+
+
+        <div>
+            <label
+                class="block text-xs font-semibold text-slate-600 mb-1.5"
+            >
+                Email
+            </label>
+
+            <input
+                class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm"
+                type="email"
+                id="email"
+                placeholder="name@example.com"
+                required
+            >
+        </div>
+
+
+        <div>
+            <label
+                class="block text-xs font-semibold text-slate-600 mb-1.5"
+            >
+                Role
+            </label>
+
+            <select
+                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm"
+                id="role"
+                required
+            >
+
+                <option value="">
+                    Select Role
+                </option>
+
+                <option value="student">
+                    Student
+                </option>
+
+                <option value="lecturer">
+                    Lecturer
+                </option>
+
+            </select>
+        </div>
+
+
+        <!-- STUDENT CLASS -->
+
+        <div id="studentClassField">
+
+            <label
+                class="block text-xs font-semibold text-slate-600 mb-1.5"
+            >
+                Class Year
+            </label>
+
+            <select
+                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm"
+                id="classYear"
+            >
+
+                <option value="">
+                    Select Class
+                </option>
+
+                <option value="first_year">
+                    First Year
+                </option>
+
+                <option value="second_year">
+                    Second Year
+                </option>
+
+                <option value="third_year">
+                    Third Year
+                </option>
+
+                <option value="fourth_year">
+                    Fourth Year
+                </option>
+
+                <option value="fifth_year">
+                    Fifth Year
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <!-- LECTURER CLASSES -->
+
+        <div
+            id="lecturerClassesField"
+            class="hidden md:col-span-2"
+        >
+
+            <label
+                class="block text-xs font-semibold text-slate-600 mb-2"
+            >
+                Teaching Classes
+            </label>
+
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
+
+                <label>
+                    <input
+                        type="checkbox"
+                        value="first_year"
+                        class="lecturer-class"
+                    >
+                    First Year
+                </label>
+
+
+                <label>
+                    <input
+                        type="checkbox"
+                        value="second_year"
+                        class="lecturer-class"
+                    >
+                    Second Year
+                </label>
+
+
+                <label>
+                    <input
+                        type="checkbox"
+                        value="third_year"
+                        class="lecturer-class"
+                    >
+                    Third Year
+                </label>
+
+
+                <label>
+                    <input
+                        type="checkbox"
+                        value="fourth_year"
+                        class="lecturer-class"
+                    >
+                    Fourth Year
+                </label>
+
+
+                <label>
+                    <input
+                        type="checkbox"
+                        value="fifth_year"
+                        class="lecturer-class"
+                    >
+                    Fifth Year
+                </label>
+
+            </div>
+
+        </div>
+
     </div>
+
+
+    <div class="flex justify-end mt-6">
+
+        <button
+            class="px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold"
+            type="submit"
+        >
+            Create User
+        </button>
+
+    </div>
+
+</form>
+
+<p
+    id="createMessage"
+    class="hidden mt-4 p-4 rounded-xl text-sm"
+></p>
   </section>
 
+<section
+    class="mt-7 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+>
+
+    <div class="px-6 py-5 border-b border-slate-100">
+
+        <h2 class="font-bold text-slate-900">
+            Import Users from Excel
+        </h2>
+
+        <p class="text-xs text-slate-500 mt-1">
+            Create multiple student or lecturer accounts at once.
+        </p>
+
+    </div>
+
+
+    <div class="p-6 space-y-8">
+
+
+        <!-- ========================================= -->
+        <!-- STUDENT EXCEL -->
+        <!-- ========================================= -->
+
+        <div>
+
+            <h3 class="font-semibold text-slate-900">
+                Import Students
+            </h3>
+
+            <p class="text-xs text-slate-500 mt-1 mb-3">
+                Excel columns:
+                <strong>
+                    full_name, email, class_year
+                </strong>
+            </p>
+
+
+            <div class="flex flex-col md:flex-row gap-3">
+
+                <input
+                    type="file"
+                    id="studentExcel"
+                    accept=".xlsx"
+                    class="flex-1 rounded-xl border border-slate-300 px-3 py-2.5 text-sm"
+                >
+
+
+                <button
+                    type="button"
+                    id="importStudentsButton"
+                    class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700"
+                >
+                    Import Students
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================= -->
+        <!-- LECTURER EXCEL -->
+        <!-- ========================================= -->
+
+        <div>
+
+            <h3 class="font-semibold text-slate-900">
+                Import Lecturers
+            </h3>
+
+            <p class="text-xs text-slate-500 mt-1 mb-3">
+                Excel columns:
+                <strong>
+                    full_name, email, classes
+                </strong>
+            </p>
+
+
+            <div class="flex flex-col md:flex-row gap-3">
+
+                <input
+                    type="file"
+                    id="lecturerExcel"
+                    accept=".xlsx"
+                    class="flex-1 rounded-xl border border-slate-300 px-3 py-2.5 text-sm"
+                >
+
+
+                <button
+                    type="button"
+                    id="importLecturersButton"
+                    class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700"
+                >
+                    Import Lecturers
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- ========================================= -->
+        <!-- MESSAGE -->
+        <!-- ========================================= -->
+
+        <p
+            id="importMessage"
+            class="hidden p-4 rounded-xl text-sm"
+        ></p>
+
+    </div>
+</section>
   <section class="mt-7 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
     <div class="px-6 py-5 border-b border-slate-100">
       <h2 class="font-bold text-slate-900">Users</h2>
@@ -137,42 +425,83 @@ tailwind.config = {
     </div>
     <p id="usersError" class="hidden m-5 p-3 rounded-xl bg-red-50 text-red-700 text-sm"></p>
   </section>
+  <section
+    id="importResultSection"
+    class="hidden mt-7 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+>
+
+    <div class="px-6 py-5 border-b border-slate-100">
+
+        <h2 class="font-bold text-slate-900">
+            Import Result
+        </h2>
+
+        <p class="text-xs text-slate-500 mt-1">
+            Generated passwords are shown only in this result.
+        </p>
+
+    </div>
+
+
+    <div class="p-6">
+
+
+        <div
+            id="importSummary"
+            class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
+        ></div>
+
+
+        <div class="overflow-x-auto">
+
+            <table class="w-full min-w-[800px] text-sm">
+
+                <thead class="bg-slate-50">
+
+                    <tr>
+
+                        <th class="px-4 py-3 text-left">
+                            Name
+                        </th>
+
+                        <th class="px-4 py-3 text-left">
+                            Email
+                        </th>
+
+                        <th class="px-4 py-3 text-left">
+                            Role
+                        </th>
+
+                        <th class="px-4 py-3 text-left">
+                            Class
+                        </th>
+
+                        <th class="px-4 py-3 text-left">
+                            Generated Password
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody
+                    id="importResultBody"
+                    class="divide-y divide-slate-100"
+                ></tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</section>
 </div>
 
 </main>
 </div>
 <script src="js/api.js"></script>
-<script>
-document.querySelectorAll('[data-page="users"]').forEach(el => el.classList.add('active'));
-
-async function loadUsers(){
-  try{
-    const user=await getCurrentUser();if(user.role!=="admin"){window.location.href="login.html";return;}
-    document.getElementById("topUser").textContent=user.full_name||"Administrator";document.getElementById("topEmail").textContent=user.email||"";
-    const users=await getAdminUsers(),tbody=document.getElementById("usersBody");tbody.innerHTML="";
-    if(!users.length){tbody.innerHTML='<tr><td colspan="6" class="px-5 py-10 text-center text-slate-500">No users found.</td></tr>';return;}
-    users.forEach(item=>{
-      const row=document.createElement("tr");row.className="hover:bg-slate-50";
-      row.innerHTML=`<td class="px-5 py-4 font-semibold text-slate-900">${escapeHtml(item.full_name)}</td><td class="px-5 py-4 text-slate-600">${escapeHtml(item.email)}</td>
-      <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">${escapeHtml(item.role)}</span></td>
-      <td class="px-5 py-4 text-slate-600">${escapeHtml(item.class_year??"-")}</td>
-      <td class="px-5 py-4"><span class="px-2.5 py-1 rounded-full text-xs font-semibold ${item.is_active?"bg-emerald-100 text-emerald-700":"bg-red-100 text-red-700"}">${item.is_active?"Active":"Inactive"}</span></td>
-      <td class="px-5 py-4"><button class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-semibold hover:bg-slate-50" onclick="changeStatus(${item.id},${item.is_active})">${item.is_active?"Deactivate":"Activate"}</button></td>`;
-      tbody.appendChild(row);
-    });
-  }catch(error){showError("usersError",error.message);}
-}
-document.getElementById("createUserForm").addEventListener("submit",async function(event){
-  event.preventDefault();const message=document.getElementById("createMessage");
-  const data={full_name:document.getElementById("fullName").value,email:document.getElementById("email").value,password:document.getElementById("password").value,role:document.getElementById("role").value,class_year:document.getElementById("classYear").value};
-  try{const result=await createAdminUser(data);message.className="mt-4 p-3 rounded-xl text-sm bg-emerald-50 text-emerald-700";message.classList.remove("hidden");message.textContent=`User created: ${result.full_name}`;this.reset();await loadUsers();}
-  catch(error){message.className="mt-4 p-3 rounded-xl text-sm bg-red-50 text-red-700";message.classList.remove("hidden");message.textContent=error.message;}
-});
-async function changeStatus(userId,currentStatus){try{await updateAdminUser(userId,{is_active:!currentStatus});await loadUsers();}catch(error){alert(error.message);}}
-function showError(id,msg){const el=document.getElementById(id);el.textContent=msg;el.classList.remove("hidden");}
-function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
-loadUsers();
-
-</script>
+<script src="js/admin-users.js"></script>
 </body>
 </html>

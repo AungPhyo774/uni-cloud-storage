@@ -177,7 +177,8 @@ async function loadReplicationSummary(){
 }
 async function loadRecoverySummary(){
   const data=await getRecoveryStats(),c=document.getElementById("recoverySummary");
-  c.innerHTML=`${listRow("Total Attempts",data.total_recovery_attempts,"text-slate-900")} ${listRow("Successful",data.successful,"text-emerald-600")} ${listRow("Failed",data.failed,"text-red-600")} ${listRow("Checksum Mismatch",data.checksum_mismatch??0,"text-purple-600")}`;
+  c.innerHTML=`${listRow("Total Attempts",data.total_recovery_attempts,"text-slate-900")} ${listRow("Successful",data.successful,"text-emerald-600")} ${listRow("Failed",data.failed,"text-red-600")} `;
+  // ${listRow("Checksum Mismatch",data.checksum_mismatch??0,"text-purple-600")}
 }
 function listRow(label,value,color){return `<div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50"><span class="text-sm text-slate-600">${label}</span><span class="font-bold ${color}">${value}</span></div>`;}
 function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}

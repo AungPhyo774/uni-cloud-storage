@@ -117,7 +117,7 @@ async function updateAdminUser(
 ) {
 
     return await apiRequest(
-        `/admin/users/${userId}`,
+        `/users/admin/users/${userId}`,
         {
             method: "PATCH",
 
@@ -130,7 +130,6 @@ async function updateAdminUser(
         }
     );
 }
-
 async function getCurrentUser() {
 
     return await apiRequest(
@@ -286,7 +285,7 @@ async function getStudentSubmissions() {
 async function getAdminUsers() {
 
     return await apiRequest(
-        "/admin/users"
+        "/users/admin/users"
     );
 }
 
@@ -365,6 +364,56 @@ async function deleteDocument(
         `/documents/${documentId}`,
         {
             method: "DELETE"
+        }
+    );
+}
+
+
+// =========================================================
+// ADMIN EXCEL IMPORT
+// =========================================================
+
+async function importStudentsExcel(
+    file
+) {
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "file",
+        file
+    );
+
+
+    return await apiRequest(
+        "/admin/import/students",
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+}
+
+
+async function importLecturersExcel(
+    file
+) {
+
+    const formData =
+        new FormData();
+
+    formData.append(
+        "file",
+        file
+    );
+
+
+    return await apiRequest(
+        "/admin/import/lecturers",
+        {
+            method: "POST",
+            body: formData
         }
     );
 }

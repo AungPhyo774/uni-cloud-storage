@@ -12,14 +12,16 @@ class AdminCreateUser(BaseModel):
 
     full_name: str
     email: EmailStr
-    password: str
     role: str
     class_year: str
+    classes: list[str] = []
+    roll_number: str | None = None
 
 
 class UserResponse(BaseModel):
 
     id: int
+    roll_number: str | None = None
     full_name: str
     email: EmailStr
     role: str

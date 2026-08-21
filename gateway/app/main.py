@@ -12,6 +12,7 @@ from app.models.user import User
 from app.models.document import Document
 from app.models.recovery_log import RecoveryLog
 from app.routers.recovery import router as recovery_router
+from app.routers import admin_import
 
 from app.routers import health
 
@@ -71,6 +72,7 @@ app.include_router(auth.router)
 app.include_router(users.router)
 app.include_router(documents.router)
 app.include_router(admin.router)
+app.include_router(admin_import.router)
 
 @app.get("/")
 def home():
