@@ -19,10 +19,11 @@ from app.models.user import User
 
 from app.schemas.user import (
     AdminCreateUser,
-    UserResponse
+    UserResponse,
+    UserChangePassword
 )
 
-from app.utils.security import hash_password
+from app.utils.security import hash_password, verify_password
 from app.utils.password_generator import generate_password
 from app.models.class_year import ClassYear
 from app.models.lecturer_teaching_class import LecturerTeachingClass
@@ -31,6 +32,45 @@ router = APIRouter(
     prefix="/users",
     tags=["Users"]
 )
+
+
+@router.post(
+    "/change-password",
+    response_model=dict
+)
+def change_password(
+    data: UserChangePassword,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if len(data.new_password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be at least 6 characters"
+        )
+
+    if data.new_password != data.confirm_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New passwords do not match"
+        )
+
+    if data.old_password == data.new_password:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="New password must be different from the old password"
+        )
+
+    if not verify_password(data.old_password, current_user.password_hash):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Old password is incorrect"
+        )
+
+    current_user.password_hash = hash_password(data.new_password)
+    db.commit()
+
+    return {"message": "Password changed successfully"}
 
 
 # =========================================================

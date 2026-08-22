@@ -36,3 +36,10 @@ class AdminUpdateUser(BaseModel):
 
     class_year: str | None = None
     is_active: bool | None = None
+
+
+class UserChangePassword(BaseModel):
+
+    old_password: str
+    new_password: str
+    confirm_password: str

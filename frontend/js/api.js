@@ -172,6 +172,28 @@ async function getCurrentUser() {
     );
 }
 
+async function changeMyPassword(
+    oldPassword,
+    newPassword,
+    confirmPassword
+) {
+
+    return await apiRequest(
+        "/users/change-password",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                old_password: oldPassword,
+                new_password: newPassword,
+                confirm_password: confirmPassword
+            })
+        }
+    );
+}
+
 // Student API Functions
 async function getLecturers() {
 
