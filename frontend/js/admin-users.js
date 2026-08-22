@@ -980,7 +980,7 @@ async function updateAdminUser(
 ) {
 
     return await apiRequest(
-        `/users/admin/users/${userId}`,
+        `/admin/users/${userId}`,
         {
             method: "PATCH",
 
