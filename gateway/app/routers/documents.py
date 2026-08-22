@@ -333,7 +333,20 @@ def get_lecturer_documents(
                 # Lecturer information
                 "lecturer_id": lecturer.id,
                 "lecturer_name": lecturer.full_name,
-                "lecturer_class": lecturer.class_year
+                "lecturer_class": lecturer.class_year,
+                "class_names": [
+                    class_record.display_name
+                    for class_record in db.query(ClassYear)
+                    .join(
+                        DocumentClass,
+                        DocumentClass.class_id == ClassYear.id
+                    )
+                    .filter(
+                        DocumentClass.document_id == document.id
+                    )
+                    .order_by(ClassYear.id.asc())
+                    .all()
+                ]
             }
         )
 

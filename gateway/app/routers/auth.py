@@ -168,6 +168,13 @@ def login(
             detail="Invalid email or password"
         )
 
+    if not authenticated_user.is_active:
+
+        raise HTTPException(
+            status_code=403,
+            detail="This account is deactivated. Contact an administrator."
+        )
+
     # =====================================================
     # 3. CREATE JWT
     # =====================================================

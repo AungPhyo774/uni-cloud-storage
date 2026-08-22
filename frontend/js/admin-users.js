@@ -825,18 +825,36 @@ async function changeStatus(
     currentStatus
 ) {
 
+    const isActive =
+        currentStatus === true
+        || currentStatus === "true"
+        || currentStatus === 1;
+
+    const action = isActive
+        ? "deactivate"
+        : "activate";
+
+    if (!window.confirm(`Are you sure you want to ${action} this account?`)) {
+        return;
+    }
+
     try {
 
         await updateAdminUser(
             userId,
             {
                 is_active:
-                    !currentStatus
+                    !isActive
             }
         );
 
 
         await loadUsers();
+
+        showError(
+            "usersError",
+            `Account ${action}d successfully.`
+        );
 
     } catch (error) {
 

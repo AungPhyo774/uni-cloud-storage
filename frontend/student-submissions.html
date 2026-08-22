@@ -225,6 +225,14 @@
 
             </div>
 
+            <label class="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                <i class="fa-solid fa-filter text-slate-400"></i>
+                <span class="sr-only">Filter by class</span>
+                <select id="submissionClassFilter" class="bg-transparent text-sm font-semibold text-slate-700 outline-none">
+                    <option value="all">All classes</option>
+                </select>
+            </label>
+
         </div>
 
 
@@ -397,7 +405,25 @@
                 }
 
 
-                documents.forEach(item => {
+                const classFilter = document.getElementById("submissionClassFilter");
+                const classes = [...new Map(
+                    documents.map(item => [item.student_class, item.student_class_name || item.student_class])
+                )];
+                classFilter.innerHTML = '<option value="all">All classes</option>';
+                classes.forEach(([classYear, className]) => {
+                    if (classYear) {
+                        classFilter.insertAdjacentHTML("beforeend", `<option value="${escapeHtml(classYear)}">${escapeHtml(className)}</option>`);
+                    }
+                });
+
+                const renderDocuments = () => {
+                    const selectedClass = classFilter.value;
+                    tbody.innerHTML = "";
+                    const filteredDocuments = selectedClass === "all"
+                        ? documents
+                        : documents.filter(item => item.student_class === selectedClass);
+
+                    filteredDocuments.forEach(item => {
 
                     const row =
                         document.createElement("tr");
@@ -502,9 +528,16 @@
                     `;
 
 
-                    tbody.appendChild(row);
+                        tbody.appendChild(row);
+                    });
 
-                });
+                    if (!filteredDocuments.length) {
+                        tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-sm text-slate-500">No submissions for this class.</td></tr>';
+                    }
+                };
+
+                classFilter.onchange = renderDocuments;
+                renderDocuments();
 
 
             } catch (error) {
