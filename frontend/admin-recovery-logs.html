@@ -112,7 +112,7 @@ tailwind.config = {
   <section class="mt-7 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
     <div class="px-6 py-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
       <div><h2 class="font-bold text-slate-900">Recovery Logs</h2><p class="text-xs text-slate-500 mt-1">Detailed history of recovery operations.</p></div>
-      <div class="flex items-center gap-2"><label for="statusFilter" class="text-xs font-semibold text-slate-600">Status</label><select id="statusFilter" onchange="loadLogs()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"><option value="">All</option><option value="SUCCESS">SUCCESS</option><option value="FAILED">FAILED</option><option value="CHECKSUM_MISMATCH">CHECKSUM_MISMATCH</option></select></div>
+      <div class="flex items-center gap-2"><label for="statusFilter" class="text-xs font-semibold text-slate-600">Status</label><select id="statusFilter" onchange="loadLogs()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100"><option value="">All</option><option value="SUCCESS">SUCCESS</option><option value="FAILED">FAILED</option></select></div>
     </div>
     <div class="overflow-x-auto">
       <table class="w-full min-w-[1050px] text-sm">
@@ -152,7 +152,9 @@ function formatMyanmarTime(dateString) {
 
 async function loadStats(){
   const data=await getRecoveryStats(),c=document.getElementById("statsContainer");
-  c.innerHTML=`${statCard("↻","blue","Total Attempts",data.total_recovery_attempts)}${statCard("✓","emerald","Successful",data.successful)}${statCard("!","red","Failed",data.failed)}${statCard("⌁","purple","Checksum Mismatch",data.checksum_mismatch??0)}`;
+  c.innerHTML=`${statCard("↻","blue","Total Attempts",data.total_recovery_attempts)}${statCard("✓","emerald","Successful",data.successful)}${statCard("!","red","Failed",data.failed)}
+  `;
+  // #${statCard("⌁","purple","Checksum Mismatch",data.checksum_mismatch??0)}
 }
 function statCard(icon,color,label,value){const bg={blue:"bg-blue-100 text-blue-700",emerald:"bg-emerald-100 text-emerald-700",red:"bg-red-100 text-red-700",purple:"bg-purple-100 text-purple-700"}[color];return `<div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm"><div class="w-10 h-10 rounded-xl ${bg} flex items-center justify-center text-lg mb-4">${icon}</div><p class="text-xs font-semibold text-slate-500">${label}</p><p class="text-3xl font-bold tracking-tight text-slate-900 mt-1">${value}</p></div>`;}
 async function loadLogs(){

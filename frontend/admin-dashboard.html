@@ -176,7 +176,8 @@ async function loadNodeSummary(){
 }
 async function loadReplicationSummary(){
   const data=await getReplicationStatus(),items=data.documents||[],c=document.getElementById("replicationSummary"),count=s=>items.filter(x=>x.status===s).length;
-  c.innerHTML=`${listRow("Total Documents",items.length,"text-slate-900")} ${listRow("Healthy",count("HEALTHY"),"text-emerald-600")} ${listRow("Primary Missing",count("PRIMARY_MISSING"),"text-red-600")} ${listRow("Replica Missing",count("REPLICA_MISSING"),"text-orange-600")} ${listRow("Checksum Mismatch",count("CHECKSUM_MISMATCH"),"text-purple-600")}`;
+  c.innerHTML=`${listRow("Total Documents",items.length,"text-slate-900")} ${listRow("Healthy",count("HEALTHY"),"text-emerald-600")} ${listRow("Primary Missing",count("PRIMARY_MISSING"),"text-red-600")} ${listRow("Replica Missing",count("REPLICA_MISSING"),"text-orange-600")}`;
+  //${listRow("Checksum Mismatch",count("CHECKSUM_MISMATCH"),"text-purple-600")}
 }
 async function loadRecoverySummary(){
   const data=await getRecoveryStats(),c=document.getElementById("recoverySummary");
