@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distributed Storage System</title>
+  <style>
+    /* Color Palette Variables */
+    :root {
+      --ocean-deep: #031b33;
+      --ocean-mid: #003e6b;
+      --ocean-bright: #0066a2;
+      --ocean-light: #38bdf8;
+      --cyan-glow: #00f2fe;
+      --text-white: #ffffff;
+      --text-soft: #e0f2fe;
+      
+      /* Navigation Bar Glass Effect */
+      --nav-glass: rgba(2, 26, 51, 0.5);
+      --nav-border: rgba(56, 189, 248, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+    }
+
+    /* Inner Container: အပြာရေစို Glossy Background Gradient */
+    .card-container {
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at 70% 30%, #005c97 0%, #003358 50%, #001a33 100%);
+      padding: 40px 80px;
+      color: var(--text-white);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    /* Floating Wet/Glossy Background Overlay Effect */
+    .card-container::before {
+      content: '';
+      position: absolute;
+      top: -10%;
+      right: -5%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(0, 242, 254, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+      pointer-events: none;
+    }
+
+    /* Navigation Bar */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--nav-glass);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--nav-border);
+      padding: 16px 36px;
+      border-radius: 50px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      z-index: 10;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-icon-box {
+      width: 44px;
+      height: 44px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05));
+      outline: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .brand-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-white);
+      letter-spacing: 0.5px;
+    }
+
+    .nav-list {
+      display: flex;
+      list-style: none;
+      gap: 40px;
+    }
+
+    .nav-link {
+      color: var(--text-soft);
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: 600;
+      transition: all 0.3 ease;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--cyan-glow);
+      text-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
+    }
+
+    /* Hero Layout */
+    .hero-layout {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      align-items: center;
+      gap: 60px;
+      flex-grow: 1;
+      z-index: 5;
+    }
+
+    .left-column {
+      max-width: 650px;
+    }
+
+    .sub-heading {
+      color:#f1f5f8;
+      font-size: 24px;
+      font-weight: 600;
+      font-style: italic;
+      display: block;
+      margin-bottom: 16px;
+      letter-spacing: 1px;
+    }
+
+    .main-heading {
+      font-size: 52px;
+      font-weight: 800;
+      line-height: 1.2;
+      color: var(--text-white);
+      margin-bottom: 24px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .description-text {
+      font-size: 18px;
+      color: var(--text-soft);
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    /* Login Button - အပြာရေစိုအတွက် လိုက်ဖက်သော Vibrant Blue/Cyan Button */
+    .btn-login {
+      background: linear-gradient(135deg, #00c6ff 0%, #0072ff 100%);
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 16px 52px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 18px;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(0, 114, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+      transition: all 0.3s ease;
+    }
+
+    .btn-login:hover {
+      transform: translateY(-3px);
+      background: linear-gradient(135deg, #00f2fe 0%, #004e92 100%);
+      box-shadow: 0 12px 30px rgba(0, 242, 254, 0.6);
+    }
+
+    /* Right Side Logo Display (Logo ကိုသီးသန့် အဝိုင်းပုံဖော်ထားပါသည်) */
+    .right-column {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logo-container {
+      width: 380px;
+      height: 380px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 15px;
+      box-shadow: 0 0 50px rgba(0, 242, 254, 0.3), inset 0 0 15px rgba(0, 0, 0, 0.1);
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    .logo-container img {
+      width: 70%;
+      height: 60%;
+      object-fit: cover;
+      /* Image Crop Scale settings to focus on the icon center */
+      transform: scale(1.3);
+      border-radius: 50%;
+    }
+
+    @media (max-width: 1024px) {
+      .card-container {
+        padding: 30px 40px;
+      }
+
+      .hero-layout {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .left-column {
+        max-width: 100%;
+      }
+
+      .main-heading {
+        font-size: 38px;
+      }
+
+      .logo-container {
+        width: 280px;
+        height: 280px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card-container">
+    
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+      <div class="brand-logo">
+        <div class="logo-icon-box">🎓</div>
+        <span class="brand-title">Campus Hub: Distributed Storage System for University Documents</span>
+      </div>
+
+      <ul class="nav-list">
+        <li><a href="#home" class="nav-link active">Home</a></li>
+        <!-- <li><a href="#about" class="nav-link">About</a></li>
+        <li><a href="#contact" class="nav-link">Contact</a></li> -->
+      </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-layout">
+      
+      <!-- Left Content -->
+      <div class="left-column">
+       <span class="sub-heading"><h2>Decentralized & Secure Storage</h2></span><br>
+       
+        
+        <p class="description-text">
+A decentralized storage system powered by IPFS technology that ensures secure, permanent, and tamper-proof storage and sharing for university records, transcripts, and research papers.        </p>
+
+        <div class="cta-button-group">
+          <a href="login.html" class="btn-login">Login</a>
+        </div>
+      </div>
+
+      <!-- Right Visual Element: Logo အဝိုင်းပုံစံသီးသန့် ပြသပေးထားပါသည် -->
+      <div class="right-column">
+        <div class="logo-container">
+          <img src="CH1.jpg" alt="University Documents System Logo Only">
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -10,9 +10,17 @@ tailwind.config = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#eff6ff', 100: '#dbeafe', 500: '#3b82f6',
-          600: '#2563eb', 700: '#1d4ed8', 900: '#1e3a8a'
+        skyblue: {
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0284c7',
+          600: '#0369a1',
+          700: '#075985',
+          800: '#0c4a6e',
+          900: '#0a3751'
         }
       }
     }
@@ -21,58 +29,82 @@ tailwind.config = {
 </script>
 
 <style>
+.glass {
+  background: rgba(224, 242, 254, 0.85);
+  backdrop-filter: blur(8px);
+}
 .mobile-nav-item{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  padding:.65rem .25rem;font-size:1rem;color:#64748b;font-weight:600;
+  padding:.65rem .25rem;font-size:1rem;color:#075985;font-weight:600;
 }
 .mobile-nav-item span{font-size:.65rem}
-.mobile-nav-item.active{color:#2563eb;background:#eff6ff}
+.mobile-nav-item.active{color:#0284c7;background:#f0f9ff}
+
+/* Sidebar Hover Slide-out Effect */
+.sidebar-hover {
+  width: 4.5rem; /* Collapsed width */
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  white-space: nowrap;
+}
+.sidebar-hover:hover {
+  width: 16rem; /* Expanded width on hover */
+}
+.sidebar-hover .hide-on-collapse {
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  pointer-events: none;
+}
+.sidebar-hover:hover .hide-on-collapse {
+  opacity: 1;
+  pointer-events: auto;
+}
 </style>
 
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen pb-16 lg:pb-0">
+<body class="bg-skyblue-200/80 text-skyblue-900 min-h-screen pb-16 lg:pb-0">
 <div class="flex min-h-screen">
 
-<aside class="hidden lg:flex lg:w-64 lg:shrink-0 bg-slate-950 text-white flex-col min-h-screen sticky top-0 h-screen">
-  <div class="px-6 py-6 border-b border-slate-800">
+<aside class="sidebar-hover hidden lg:flex lg:shrink-0 bg-skyblue-900 text-white flex-col min-h-screen sticky top-0 h-screen z-50">
+  <div class="px-5 py-6 border-b border-skyblue-800">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl shadow-lg shadow-blue-900/30">☁</div>
-      <div>
-        <h1 class="font-bold text-lg">Cloud Storage</h1>
-        <p class="text-xs text-slate-400">Administration</p>
+      <div class="w-10 h-10 shrink-0 rounded-xl bg-skyblue-500 flex items-center justify-center text-xl shadow-lg shadow-skyblue-900/30">☁</div>
+      <div class="hide-on-collapse">
+        <h1 class="font-bold text-lg text-white">Cloud Storage</h1>
+        <p class="text-xs text-skyblue-200">Administration</p>
       </div>
     </div>
   </div>
 
-  <nav class="flex-1 p-4 space-y-1">
-    <p class="px-3 py-2 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Workspace</p>
+  <nav class="flex-1 p-3 space-y-1">
+    <p class="hide-on-collapse px-3 py-2 text-[10px] uppercase tracking-widest text-skyblue-300 font-semibold">Workspace</p>
     <a href="admin-dashboard.html" data-page="dashboard"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
-      <span class="w-5 text-center">📊</span><span>Dashboard</span>
+       class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-skyblue-100 hover:bg-skyblue-800 hover:text-white transition">
+      <span class="w-5 shrink-0 text-center text-lg">📊</span><span class="hide-on-collapse">Dashboard</span>
     </a>
     <a href="admin-users.html" data-page="users"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
-      <span class="w-5 text-center">👥</span><span>User Management</span>
+       class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-skyblue-100 hover:bg-skyblue-800 hover:text-white transition">
+      <span class="w-5 shrink-0 text-center text-lg">👥</span><span class="hide-on-collapse">User Management</span>
     </a>
     <a href="admin-node-status.html" data-page="nodes"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
-      <span class="w-5 text-center">🖥️</span><span>Node Status</span>
+       class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-skyblue-100 hover:bg-skyblue-800 hover:text-white transition">
+      <span class="w-5 shrink-0 text-center text-lg">🖥️</span><span class="hide-on-collapse">Node Status</span>
     </a>
     <a href="admin-recovery-logs.html" data-page="recovery"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
-      <span class="w-5 text-center">🔄</span><span>Recovery Monitoring</span>
+       class="flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-skyblue-100 hover:bg-skyblue-800 hover:text-white transition">
+      <span class="w-5 shrink-0 text-center text-lg">🔄</span><span class="hide-on-collapse">Recovery Monitoring</span>
     </a>
   </nav>
 
-  <div class="p-4 border-t border-slate-800">
+  <div class="p-3 border-t border-skyblue-800">
     <button onclick="logout()"
-      class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition font-medium">
-      🚪 Logout
+      class="w-full flex items-center justify-start gap-3 px-3 py-3 rounded-xl bg-red-500/10 text-red-300 hover:bg-red-500 hover:text-white transition font-medium">
+      <span class="w-5 shrink-0 text-center text-lg">🚪</span><span class="hide-on-collapse">Logout</span>
     </button>
   </div>
 </aside>
 
-<div class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-slate-200 shadow-2xl">
+<div class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 border-t border-skyblue-200 shadow-2xl backdrop-blur">
   <nav class="grid grid-cols-4">
     <a href="admin-dashboard.html" data-page="dashboard" class="mobile-nav-item">📊<span>Dashboard</span></a>
     <a href="admin-users.html" data-page="users" class="mobile-nav-item">👥<span>Users</span></a>
@@ -82,26 +114,31 @@ tailwind.config = {
 </div>
 
 <main class="flex-1 min-w-0">
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-4">
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-skyblue-200 px-4 sm:px-6 lg:px-8 py-4">
     <div class="flex items-center justify-between gap-4">
       <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Administration</p>
-        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Admin Dashboard</h1>
+        <p class="text-xs font-semibold uppercase tracking-wider text-skyblue-600">Administration</p>
+        
       </div>
       <div class="flex items-center gap-3">
         <div class="hidden sm:block text-right">
-          <p id="topUser" class="text-sm font-semibold text-slate-900">Administrator</p>
-          <p id="topEmail" class="text-xs text-slate-500"></p>
+          <p id="topUser" class="text-sm font-semibold text-skyblue-900">Administrator</p>
+          <p id="topEmail" class="text-xs text-skyblue-600"></p>
         </div>
-        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">A</div>
+        <div class="w-10 h-10 rounded-full bg-skyblue-100 text-skyblue-700 flex items-center justify-center font-bold border border-skyblue-200">A</div>
       </div>
     </div>
   </header>
   
 <div class="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
-  <div class="mb-7">
-    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">Admin Dashboard</h2>
-    <p class="mt-1 text-sm text-slate-500">Overview of users, storage nodes, replication, and recovery operations.</p>
+  <div class="mb-7 bg-gradient-to-r from-skyblue-700 via-skyblue-600 to-skyblue-500 rounded-2xl p-6 text-white shadow-lg">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-white/15 ring-1 ring-white/25 flex items-center justify-center text-xl">☁</div>
+      <div>
+        <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-white">Admin Dashboard</h2>
+        <p class="mt-1 text-sm text-skyblue-100">Overview of users, storage nodes, replication, and recovery operations.</p>
+      </div>
+    </div>
   </div>
 
   <div id="classTotals" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
@@ -109,31 +146,31 @@ tailwind.config = {
 
   <section class="mt-8">
     <div class="mb-4">
-      <h2 class="text-lg font-bold text-slate-900">Storage Nodes</h2>
-      <p class="text-sm text-slate-500">Current health of your distributed storage infrastructure.</p>
+      <h2 class="text-lg font-bold text-skyblue-900">Storage Nodes</h2>
+      <p class="text-sm text-skyblue-600">Current health of your distributed storage infrastructure.</p>
     </div>
     <div id="nodeSummary" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
   </section>
 
   <section class="mt-8 grid grid-cols-1 xl:grid-cols-2 gap-6">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-        <div><h2 class="font-bold text-slate-900">Replication Health</h2><p class="text-xs text-slate-500 mt-1">Document replication status</p></div>
-        <span class="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">Live</span>
+    <div class="bg-white/90 backdrop-blur rounded-2xl border border-skyblue-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-5 border-b border-skyblue-100 flex items-center justify-between">
+        <div><h2 class="font-bold text-skyblue-900">Replication Health</h2><p class="text-xs text-skyblue-600 mt-1">Document replication status</p></div>
+        <span class="px-2.5 py-1 rounded-full bg-skyblue-100 text-skyblue-700 text-xs font-semibold">Live</span>
       </div>
       <div id="replicationSummary" class="p-5 space-y-2"></div>
     </div>
 
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-        <div><h2 class="font-bold text-slate-900">Recovery</h2><p class="text-xs text-slate-500 mt-1">File recovery statistics</p></div>
-        <span class="px-2.5 py-1 rounded-full bg-purple-50 text-purple-700 text-xs font-semibold">Monitoring</span>
+    <div class="bg-white/90 backdrop-blur rounded-2xl border border-skyblue-200 shadow-sm overflow-hidden">
+      <div class="px-6 py-5 border-b border-skyblue-100 flex items-center justify-between">
+        <div><h2 class="font-bold text-skyblue-900">Recovery</h2><p class="text-xs text-skyblue-600 mt-1">File recovery statistics</p></div>
+        <span class="px-2.5 py-1 rounded-full bg-skyblue-100 text-skyblue-700 text-xs font-semibold">Monitoring</span>
       </div>
       <div id="recoverySummary" class="p-5 space-y-2"></div>
     </div>
   </section>
 
-  <p id="dashboardError" class="hidden mt-6 p-3 rounded-xl bg-red-50 text-red-700 text-sm"></p>
+  <p id="dashboardError" class="hidden mt-6 p-3 rounded-xl bg-red-50 text-red-700 text-sm border border-red-200"></p>
 </div>
 
 </main>
@@ -155,13 +192,13 @@ function showError(id,msg){const el=document.getElementById(id);el.textContent=m
 function formatClassYear(value){return value.replaceAll("_"," ").replace(/\b\w/g,c=>c.toUpperCase());}
 async function loadClassSummary(){
   const data=await getClassSummary(),c=document.getElementById("classSummary"),totals=document.getElementById("classTotals");
-  totals.innerHTML=`${listRow("Total Students",data.totals?.students??0,"text-blue-600")} ${listRow("Total Lecturers",data.totals?.lecturers??0,"text-purple-600")}`;
+  totals.innerHTML=`${listRow("Total Students",data.totals?.students??0,"text-skyblue-600")} ${listRow("Total Lecturers",data.totals?.lecturers??0,"text-skyblue-800")}`;
   c.innerHTML="";
   for(const [year,counts] of Object.entries(data.classes||{})){
-    const el=document.createElement("div");el.className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm";
-    el.innerHTML=`<div class="flex items-center justify-between mb-4"><div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center text-lg">🎓</div><span class="text-[10px] font-bold tracking-wider text-slate-400">CLASS</span></div>
-    <p class="text-sm font-bold text-slate-900">${escapeHtml(counts.display_name||formatClassYear(year))}</p>
-    <div class="flex gap-7 mt-3"><div><p class="text-2xl font-bold text-blue-600">${counts.students}</p><p class="text-xs text-slate-500">Students</p></div><div><p class="text-2xl font-bold text-purple-600">${counts.lecturers}</p><p class="text-xs text-slate-500">Lecturers</p></div></div>`;
+    const el=document.createElement("div");el.className="bg-white/90 backdrop-blur rounded-2xl p-5 border border-skyblue-200 shadow-sm";
+    el.innerHTML=`<div class="flex items-center justify-between mb-4"><div class="w-10 h-10 rounded-xl bg-skyblue-100 flex items-center justify-center text-lg">🎓</div><span class="text-[10px] font-bold tracking-wider text-skyblue-600">CLASS</span></div>
+    <p class="text-sm font-bold text-skyblue-900">${escapeHtml(counts.display_name||formatClassYear(year))}</p>
+    <div class="flex gap-7 mt-3"><div><p class="text-2xl font-bold text-skyblue-600">${counts.students}</p><p class="text-xs text-skyblue-600">Students</p></div><div><p class="text-2xl font-bold text-skyblue-800">${counts.lecturers}</p><p class="text-xs text-skyblue-600">Lecturers</p></div></div>`;
     c.appendChild(el);
   }
 }
@@ -169,22 +206,22 @@ async function loadNodeSummary(){
   const data=await getNodeHealth(),c=document.getElementById("nodeSummary");c.innerHTML="";
   data.nodes.forEach(node=>{
     const online=node.status==="online",el=document.createElement("div");
-    el.className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm";
-    el.innerHTML=`<div class="flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><div class="w-11 h-11 shrink-0 rounded-xl ${online?"bg-emerald-100":"bg-red-100"} flex items-center justify-center">${online?"🟢":"🔴"}</div><div class="min-w-0"><h3 class="font-bold text-slate-900 truncate">${escapeHtml(node.name)}</h3><p class="text-xs text-slate-500 truncate">${escapeHtml(node.url)}</p></div></div><span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold ${online?"bg-emerald-100 text-emerald-700":"bg-red-100 text-red-700"}">${escapeHtml(node.status)}</span></div>`;
+    el.className="bg-white/90 backdrop-blur rounded-2xl p-5 border border-skyblue-200 shadow-sm";
+    el.innerHTML=`<div class="flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><div class="w-11 h-11 shrink-0 rounded-xl ${online?"bg-emerald-100":"bg-red-100"} flex items-center justify-center">${online?"🟢":"🔴"}</div><div class="min-w-0"><h3 class="font-bold text-skyblue-900 truncate">${escapeHtml(node.name)}</h3><p class="text-xs text-skyblue-600 truncate">${escapeHtml(node.url)}</p></div></div><span class="shrink-0 px-2.5 py-1 rounded-full text-xs font-semibold ${online?"bg-emerald-100 text-emerald-700":"bg-red-100 text-red-700"}">${escapeHtml(node.status)}</span></div>`;
     c.appendChild(el);
   });
 }
 async function loadReplicationSummary(){
   const data=await getReplicationStatus(),items=data.documents||[],c=document.getElementById("replicationSummary"),count=s=>items.filter(x=>x.status===s).length;
-  c.innerHTML=`${listRow("Total Documents",items.length,"text-slate-900")} ${listRow("Healthy",count("HEALTHY"),"text-emerald-600")} ${listRow("Primary Missing",count("PRIMARY_MISSING"),"text-red-600")} ${listRow("Replica Missing",count("REPLICA_MISSING"),"text-orange-600")}`;
-  //${listRow("Checksum Mismatch",count("CHECKSUM_MISMATCH"),"text-purple-600")}
+  c.innerHTML=`${listRow("Total Documents",items.length,"text-skyblue-900")} ${listRow("Healthy",count("HEALTHY"),"text-emerald-600")} ${listRow("Primary Missing",count("PRIMARY_MISSING"),"text-red-600")} ${listRow("Replica Missing",count("REPLICA_MISSING"),"text-orange-600")}`;
+  //${listRow("Checksum Mismatch",count("CHECKSUM_MISMATCH"),"text-skyblue-700")}
 }
 async function loadRecoverySummary(){
   const data=await getRecoveryStats(),c=document.getElementById("recoverySummary");
-  c.innerHTML=`${listRow("Total Attempts",data.total_recovery_attempts,"text-slate-900")} ${listRow("Successful",data.successful,"text-emerald-600")} ${listRow("Failed",data.failed,"text-red-600")} `;
-  // ${listRow("Checksum Mismatch",data.checksum_mismatch??0,"text-purple-600")}
+  c.innerHTML=`${listRow("Total Attempts",data.total_recovery_attempts,"text-skyblue-900")} ${listRow("Successful",data.successful,"text-emerald-600")} ${listRow("Failed",data.failed,"text-red-600")} `;
+  // ${listRow("Checksum Mismatch",data.checksum_mismatch??0,"text-skyblue-700")}
 }
-function listRow(label,value,color){return `<div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50"><span class="text-sm text-slate-600">${label}</span><span class="font-bold ${color}">${value}</span></div>`;}
+function listRow(label,value,color){return `<div class="flex items-center justify-between p-3.5 rounded-xl bg-skyblue-50/80 border border-skyblue-100"><span class="text-sm text-skyblue-800">${label}</span><span class="font-bold ${color}">${value}</span></div>`;}
 function escapeHtml(value){return String(value??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 loadAdminDashboard();
 setInterval(loadClassSummary, 30000);

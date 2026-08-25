@@ -5,61 +5,122 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>User Management</title>
 <script src="https://cdn.tailwindcss.com"></script>
-
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        skyblue: {
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8',
+          500: '#0284c7',
+          600: '#0369a1',
+          700: '#075985',
+          800: '#0c4a6e',
+          900: '#0a3751'
+        }
+      }
+    }
+  }
+}
+</script>
 
 <style>
-.mobile-nav-item{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
-  padding:.65rem .25rem;font-size:1rem;color:#64748b;font-weight:600;
+/* Custom Glassmorphism Classes */
+.glass {
+  background-color: rgba(224, 242, 254, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
-.mobile-nav-item span{font-size:.65rem}
-.mobile-nav-item.active{color:#2563eb;background:#eff6ff}
+
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(186, 230, 254, 0.6);
+}
+
+/* Hover Sidebar Animation */
+.hover-sidebar {
+  width: 5.5rem;
+  transition: width 0.3s ease-in-out;
+}
+.hover-sidebar:hover {
+  width: 18rem;
+}
+
+/* Sidebar Text Transition */
+.hover-sidebar .sidebar-text {
+  opacity: 0;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+}
+.hover-sidebar:hover .sidebar-text {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Mobile Nav Styles */
+.mobile-nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  padding: 0.75rem 0.25rem; font-size: 1.25rem; color: #075985; font-weight: 600;
+}
+.mobile-nav-item span { font-size: 0.85rem; }
+.mobile-nav-item.active { color: #0284c7; background: #e0f2fe; }
 </style>
 
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen pb-16 lg:pb-0">
+<body class="bg-skyblue-200/80 text-skyblue-900 min-h-screen pb-20 lg:pb-0 text-base font-sans antialiased">
 <div class="flex min-h-screen">
 
-<aside class="hidden lg:flex lg:w-64 lg:shrink-0 bg-slate-950 text-white flex-col min-h-screen sticky top-0 h-screen">
-  <div class="px-6 py-6 border-b border-slate-800">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-xl shadow-lg shadow-blue-900/30">☁</div>
-      <div>
-        <h1 class="font-bold text-lg">Cloud Storage</h1>
-        <p class="text-xs text-slate-400">Administration</p>
-      </div>
+<aside class="hover-sidebar hidden lg:flex lg:shrink-0 bg-skyblue-900/95 backdrop-blur-md text-white flex-col min-h-screen sticky top-0 h-screen z-50 overflow-hidden shadow-2xl border-r border-skyblue-700/50">
+  <div class="px-5 py-6 border-b border-skyblue-800 flex items-center gap-4">
+    <div class="w-12 h-12 shrink-0 rounded-xl bg-skyblue-500 flex items-center justify-center text-2xl shadow-lg shadow-skyblue-500/30 ring-2 ring-skyblue-300/30">☁</div>
+    <div class="sidebar-text">
+      <h1 class="font-bold text-xl leading-tight text-white">Cloud Storage</h1>
+      <p class="text-sm text-skyblue-200">Administration</p>
     </div>
   </div>
 
-  <nav class="flex-1 p-4 space-y-1">
-    <p class="px-3 py-2 text-[10px] uppercase tracking-widest text-slate-500 font-semibold">Workspace</p>
+  <nav class="flex-1 p-3 space-y-2">
+    <p class="px-3 py-2 text-xs uppercase tracking-widest text-skyblue-300 font-bold sidebar-text">Workspace</p>
+    
     <a href="admin-dashboard.html" data-page="dashboard"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
-      <span class="w-5 text-center">📊</span><span>Dashboard</span>
+       class="flex items-center gap-4 px-3.5 py-3.5 rounded-xl text-base font-semibold text-skyblue-100 hover:bg-skyblue-800 hover:text-white transition group">
+      <span class="w-7 text-center text-xl shrink-0 group-hover:scale-110 transition-transform">📊</span>
+      <span class="sidebar-text">Dashboard</span>
     </a>
     <a href="admin-users.html" data-page="users"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
-      <span class="w-5 text-center">👥</span><span>User Management</span>
+       class="flex items-center gap-4 px-3.5 py-3.5 rounded-xl text-base font-semibold text-skyblue-100 hover:bg-skyblue-800 hover:text-white transition group">
+      <span class="w-7 text-center text-xl shrink-0 group-hover:scale-110 transition-transform">👥</span>
+      <span class="sidebar-text">User Management</span>
     </a>
     <a href="admin-node-status.html" data-page="nodes"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
-      <span class="w-5 text-center">🖥️</span><span>Node Status</span>
+       class="flex items-center gap-4 px-3.5 py-3.5 rounded-xl text-base font-semibold text-skyblue-100 hover:bg-skyblue-800 hover:text-white transition group">
+      <span class="w-7 text-center text-xl shrink-0 group-hover:scale-110 transition-transform">🖥️</span>
+      <span class="sidebar-text">Node Status</span>
     </a>
     <a href="admin-recovery-logs.html" data-page="recovery"
-       class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white transition">
-      <span class="w-5 text-center">🔄</span><span>Recovery Monitoring</span>
+       class="flex items-center gap-4 px-3.5 py-3.5 rounded-xl text-base font-semibold text-skyblue-100 hover:bg-skyblue-800 hover:text-white transition group">
+      <span class="w-7 text-center text-xl shrink-0 group-hover:scale-110 transition-transform">🔄</span>
+      <span class="sidebar-text">Recovery Monitoring</span>
     </a>
   </nav>
 
-  <div class="p-4 border-t border-slate-800">
+  <div class="p-3 border-t border-skyblue-800">
     <button onclick="logout()"
-      class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition font-medium">
-      🚪 Logout
+      class="w-full flex items-center gap-4 px-3.5 py-3.5 rounded-xl bg-red-500/15 text-red-300 hover:bg-red-600 hover:text-white transition font-semibold text-base">
+      <span class="w-7 text-center text-xl shrink-0">🚪</span>
+      <span class="sidebar-text">Logout</span>
     </button>
   </div>
 </aside>
 
-<div class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white border-t border-slate-200 shadow-2xl">
+<div class="lg:hidden fixed bottom-0 inset-x-0 z-50 bg-white/95 backdrop-blur-md border-t border-skyblue-200 shadow-2xl">
   <nav class="grid grid-cols-4">
     <a href="admin-dashboard.html" data-page="dashboard" class="mobile-nav-item">📊<span>Dashboard</span></a>
     <a href="admin-users.html" data-page="users" class="mobile-nav-item">👥<span>Users</span></a>
@@ -69,434 +130,238 @@
 </div>
 
 <main class="flex-1 min-w-0">
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 px-4 sm:px-6 lg:px-8 py-4">
+  <header class="sticky top-0 z-40 bg-gradient-to-r from-skyblue-700 via-skyblue-600 to-skyblue-500 px-6 sm:px-8 lg:px-10 py-5 shadow-md border-b border-skyblue-400/30 text-white">
     <div class="flex items-center justify-between gap-4">
       <div>
-        <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">Administration</p>
-        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">User Management</h1>
+        <p class="text-sm font-bold uppercase tracking-wider text-skyblue-100">Administration</p>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">User Management</h1>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-4">
         <div class="hidden sm:block text-right">
-          <p id="topUser" class="text-sm font-semibold text-slate-900">Administrator</p>
-          <p id="topEmail" class="text-xs text-slate-500"></p>
+          <p id="topUser" class="text-base font-bold text-white">Administrator</p>
+          <p id="topEmail" class="text-sm text-skyblue-100"></p>
         </div>
-        <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center font-bold">A</div>
+        <div class="w-12 h-12 rounded-full bg-white/20 text-white ring-2 ring-white/40 flex items-center justify-center font-bold text-lg shadow-sm backdrop-blur-sm">A</div>
       </div>
     </div>
   </header>
   
-<div class="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto">
-  <div class="mb-7">
-    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">User Management</h2>
-    <p class="mt-1 text-sm text-slate-500">Create accounts and manage activation status.</p>
-  </div>
+<div class="p-6 sm:p-8 lg:p-10 max-w-[1600px] mx-auto space-y-8">
 
-  <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-    <div class="px-6 py-5 border-b border-slate-100">
-      <h2 class="font-bold text-slate-900">Create User</h2>
-      <p class="text-xs text-slate-500 mt-1">Add a new student or lecturer account.</p>
+
+  <section class="glass-card rounded-3xl shadow-sm overflow-hidden">
+    <div class="px-6 py-5 border-b border-skyblue-200/60 bg-white/50">
+      <h2 class="text-lg font-bold text-skyblue-900">Create User</h2>
+      <p class="text-sm text-skyblue-600 mt-0.5">Add a new student or lecturer account.</p>
     </div>
-    <div class="p-6">
+    <div class="p-6 sm:p-8">
       <form id="createUserForm">
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        <div>
-            <label
-                class="block text-xs font-semibold text-slate-600 mb-1.5"
-            >
-                Full Name
+          <div>
+            <label class="block text-sm font-bold text-skyblue-900 mb-2">
+              Full Name
             </label>
-
             <input
-                class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm"
-                type="text"
-                id="fullName"
-                placeholder="Enter full name"
-                required
+              class="w-full rounded-2xl border border-skyblue-300/80 bg-white/80 px-4 py-3 text-base text-skyblue-900 focus:outline-none focus:ring-2 focus:ring-skyblue-500 shadow-sm"
+              type="text"
+              id="fullName"
+              placeholder="Enter full name"
+              required
             >
-        </div>
+          </div>
 
-
-        <div>
-            <label
-                class="block text-xs font-semibold text-slate-600 mb-1.5"
-            >
-                Email
+          <div>
+            <label class="block text-sm font-bold text-skyblue-900 mb-2">
+              Email
             </label>
-
             <input
-                class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm"
-                type="email"
-                id="email"
-                placeholder="name@example.com"
-                required
+              class="w-full rounded-2xl border border-skyblue-300/80 bg-white/80 px-4 py-3 text-base text-skyblue-900 focus:outline-none focus:ring-2 focus:ring-skyblue-500 shadow-sm"
+              type="email"
+              id="email"
+              placeholder="name@example.com"
+              required
             >
-        </div>
+          </div>
 
-
-        <div>
-            <label
-                class="block text-xs font-semibold text-slate-600 mb-1.5"
-            >
-                Role
+          <div>
+            <label class="block text-sm font-bold text-skyblue-900 mb-2">
+              Role
             </label>
-
             <select
-                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm"
-                id="role"
-                required
+              class="w-full rounded-2xl border border-skyblue-300/80 bg-white/80 px-4 py-3 text-base text-skyblue-900 focus:outline-none focus:ring-2 focus:ring-skyblue-500 shadow-sm"
+              id="role"
+              required
             >
-
-                <option value="">
-                    Select Role
-                </option>
-
-                <option value="student">
-                    Student
-                </option>
-
-                <option value="lecturer">
-                    Lecturer
-                </option>
-
+              <option value="">Select Role</option>
+              <option value="student">Student</option>
+              <option value="lecturer">Lecturer</option>
             </select>
-        </div>
+          </div>
 
-
-        <!-- STUDENT CLASS -->
-
-        <div id="studentClassField">
-
-            <label
-                class="block text-xs font-semibold text-slate-600 mb-1.5"
-            >
-                Class Year
+          <div id="studentClassField">
+            <label class="block text-sm font-bold text-skyblue-900 mb-2">
+              Class Year
             </label>
-
             <select
-                class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm"
-                id="classYear"
+              class="w-full rounded-2xl border border-skyblue-300/80 bg-white/80 px-4 py-3 text-base text-skyblue-900 focus:outline-none focus:ring-2 focus:ring-skyblue-500 shadow-sm"
+              id="classYear"
             >
-
-                <option value="">
-                    Select Class
-                </option>
-
-                <option value="first_year">
-                    First Year
-                </option>
-
-                <option value="second_year">
-                    Second Year
-                </option>
-
-                <option value="third_year">
-                    Third Year
-                </option>
-
-                <option value="fourth_year">
-                    Fourth Year
-                </option>
-
-                <option value="fifth_year">
-                    Fifth Year
-                </option>
-
+              <option value="">Select Class</option>
+              <option value="first_year">First Year</option>
+              <option value="second_year">Second Year</option>
+              <option value="third_year">Third Year</option>
+              <option value="fourth_year">Fourth Year</option>
+              <option value="fifth_year">Fifth Year</option>
             </select>
+          </div>
 
-        </div>
-
-
-        <!-- LECTURER CLASSES -->
-
-        <div
-            id="lecturerClassesField"
-            class="hidden md:col-span-2"
-        >
-
-            <label
-                class="block text-xs font-semibold text-slate-600 mb-2"
-            >
-                Teaching Classes
+          <div id="lecturerClassesField" class="hidden md:col-span-2">
+            <label class="block text-sm font-bold text-skyblue-900 mb-2">
+              Teaching Classes
             </label>
-
-
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-3">
-
-                <label>
-                    <input
-                        type="checkbox"
-                        value="first_year"
-                        class="lecturer-class"
-                    >
-                    First Year
-                </label>
-
-
-                <label>
-                    <input
-                        type="checkbox"
-                        value="second_year"
-                        class="lecturer-class"
-                    >
-                    Second Year
-                </label>
-
-
-                <label>
-                    <input
-                        type="checkbox"
-                        value="third_year"
-                        class="lecturer-class"
-                    >
-                    Third Year
-                </label>
-
-
-                <label>
-                    <input
-                        type="checkbox"
-                        value="fourth_year"
-                        class="lecturer-class"
-                    >
-                    Fourth Year
-                </label>
-
-
-                <label>
-                    <input
-                        type="checkbox"
-                        value="fifth_year"
-                        class="lecturer-class"
-                    >
-                    Fifth Year
-                </label>
-
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <label class="flex items-center gap-2 p-3 rounded-xl bg-white/80 border border-skyblue-200 text-sm font-semibold text-skyblue-900 cursor-pointer hover:bg-skyblue-50">
+                <input type="checkbox" value="first_year" class="lecturer-class w-4 h-4 text-skyblue-600 rounded"> First Year
+              </label>
+              <label class="flex items-center gap-2 p-3 rounded-xl bg-white/80 border border-skyblue-200 text-sm font-semibold text-skyblue-900 cursor-pointer hover:bg-skyblue-50">
+                <input type="checkbox" value="second_year" class="lecturer-class w-4 h-4 text-skyblue-600 rounded"> Second Year
+              </label>
+              <label class="flex items-center gap-2 p-3 rounded-xl bg-white/80 border border-skyblue-200 text-sm font-semibold text-skyblue-900 cursor-pointer hover:bg-skyblue-50">
+                <input type="checkbox" value="third_year" class="lecturer-class w-4 h-4 text-skyblue-600 rounded"> Third Year
+              </label>
+              <label class="flex items-center gap-2 p-3 rounded-xl bg-white/80 border border-skyblue-200 text-sm font-semibold text-skyblue-900 cursor-pointer hover:bg-skyblue-50">
+                <input type="checkbox" value="fourth_year" class="lecturer-class w-4 h-4 text-skyblue-600 rounded"> Fourth Year
+              </label>
+              <label class="flex items-center gap-2 p-3 rounded-xl bg-white/80 border border-skyblue-200 text-sm font-semibold text-skyblue-900 cursor-pointer hover:bg-skyblue-50">
+                <input type="checkbox" value="fifth_year" class="lecturer-class w-4 h-4 text-skyblue-600 rounded"> Fifth Year
+              </label>
             </div>
+          </div>
 
         </div>
 
-    </div>
-
-
-    <div class="flex justify-end mt-6">
-
-        <button
-            class="px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold"
+        <div class="flex justify-end mt-8">
+          <button
+            class="px-6 py-3 rounded-2xl bg-skyblue-500 text-white text-base font-bold shadow-md hover:bg-skyblue-600 transition"
             type="submit"
-        >
+          >
             Create User
-        </button>
+          </button>
+        </div>
 
+      </form>
+
+      <p id="createMessage" class="hidden mt-6 p-4 rounded-2xl text-base font-medium shadow-sm"></p>
     </div>
-
-</form>
-
-<p
-    id="createMessage"
-    class="hidden mt-4 p-4 rounded-xl text-sm"
-></p>
   </section>
 
-<section
-    class="mt-7 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
->
+  <section class="glass-card rounded-3xl shadow-sm overflow-hidden">
+    <div class="px-6 py-5 border-b border-skyblue-200/60 bg-white/50">
+      <h2 class="text-lg font-bold text-skyblue-900">Import Users from Excel</h2>
+      <p class="text-sm text-skyblue-600 mt-0.5">Create multiple student or lecturer accounts at once.</p>
+    </div>
 
-    <div class="px-6 py-5 border-b border-slate-100">
-
-        <h2 class="font-bold text-slate-900">
-            Import Users from Excel
-        </h2>
-
-        <p class="text-xs text-slate-500 mt-1">
-            Create multiple student or lecturer accounts at once.
+    <div class="p-6 sm:p-8 space-y-8">
+      <div>
+        <h3 class="font-bold text-base text-skyblue-900">Import Students</h3>
+        <p class="text-sm text-skyblue-600 mt-1 mb-3">
+          Excel columns: <strong>full_name, email, class_year</strong>
         </p>
 
-    </div>
-
-
-    <div class="p-6 space-y-8">
-
-
-        <!-- ========================================= -->
-        <!-- STUDENT EXCEL -->
-        <!-- ========================================= -->
-
-        <div>
-
-            <h3 class="font-semibold text-slate-900">
-                Import Students
-            </h3>
-
-            <p class="text-xs text-slate-500 mt-1 mb-3">
-                Excel columns:
-                <strong>
-                    full_name, email, class_year
-                </strong>
-            </p>
-
-
-            <div class="flex flex-col md:flex-row gap-3">
-
-                <input
-                    type="file"
-                    id="studentExcel"
-                    accept=".xlsx"
-                    class="flex-1 rounded-xl border border-slate-300 px-3 py-2.5 text-sm"
-                >
-
-
-                <button
-                    type="button"
-                    id="importStudentsButton"
-                    class="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700"
-                >
-                    Import Students
-                </button>
-
-            </div>
-
+        <div class="flex flex-col md:flex-row gap-4">
+          <input
+            type="file"
+            id="studentExcel"
+            accept=".xlsx"
+            class="flex-1 rounded-2xl border border-skyblue-300/80 bg-white/80 px-4 py-3 text-sm text-skyblue-900 shadow-sm"
+          >
+          <button
+            type="button"
+            id="importStudentsButton"
+            class="px-6 py-3 rounded-2xl bg-skyblue-500 text-white text-base font-bold hover:bg-skyblue-600 shadow-md transition"
+          >
+            Import Students
+          </button>
         </div>
+      </div>
 
+      <div>
+        <h3 class="font-bold text-base text-skyblue-900">Import Lecturers</h3>
+        <p class="text-sm text-skyblue-600 mt-1 mb-3">
+          Excel columns: <strong>full_name, email, classes</strong>
+        </p>
 
-        <!-- ========================================= -->
-        <!-- LECTURER EXCEL -->
-        <!-- ========================================= -->
-
-        <div>
-
-            <h3 class="font-semibold text-slate-900">
-                Import Lecturers
-            </h3>
-
-            <p class="text-xs text-slate-500 mt-1 mb-3">
-                Excel columns:
-                <strong>
-                    full_name, email, classes
-                </strong>
-            </p>
-
-
-            <div class="flex flex-col md:flex-row gap-3">
-
-                <input
-                    type="file"
-                    id="lecturerExcel"
-                    accept=".xlsx"
-                    class="flex-1 rounded-xl border border-slate-300 px-3 py-2.5 text-sm"
-                >
-
-
-                <button
-                    type="button"
-                    id="importLecturersButton"
-                    class="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700"
-                >
-                    Import Lecturers
-                </button>
-
-            </div>
-
+        <div class="flex flex-col md:flex-row gap-4">
+          <input
+            type="file"
+            id="lecturerExcel"
+            accept=".xlsx"
+            class="flex-1 rounded-2xl border border-skyblue-300/80 bg-white/80 px-4 py-3 text-sm text-skyblue-900 shadow-sm"
+          >
+          <button
+            type="button"
+            id="importLecturersButton"
+            class="px-6 py-3 rounded-2xl bg-skyblue-600 text-white text-base font-bold hover:bg-skyblue-700 shadow-md transition"
+          >
+            Import Lecturers
+          </button>
         </div>
+      </div>
 
-
-        <!-- ========================================= -->
-        <!-- MESSAGE -->
-        <!-- ========================================= -->
-
-        <p
-            id="importMessage"
-            class="hidden p-4 rounded-xl text-sm"
-        ></p>
-
+      <p id="importMessage" class="hidden p-4 rounded-2xl text-base font-medium shadow-sm"></p>
     </div>
-</section>
-  <section class="mt-7 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-    <div class="px-6 py-5 border-b border-slate-100">
-      <h2 class="font-bold text-slate-900">Users</h2>
-      <p class="text-xs text-slate-500 mt-1">Manage existing accounts and access status.</p>
+  </section>
+
+  <section class="glass-card rounded-3xl shadow-sm overflow-hidden">
+    <div class="px-6 py-5 border-b border-skyblue-200/60 bg-white/50">
+      <h2 class="text-lg font-bold text-skyblue-900">Users</h2>
+      <p class="text-sm text-skyblue-600 mt-0.5">Manage existing accounts and access status.</p>
     </div>
     <div class="overflow-x-auto">
-      <table class="w-full min-w-[850px] text-sm">
-        <thead class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500"><tr><th class="px-5 py-3 text-left font-semibold">Name</th><th class="px-5 py-3 text-left font-semibold">Email</th><th class="px-5 py-3 text-left font-semibold">Role</th><th class="px-5 py-3 text-left font-semibold">Class</th><th class="px-5 py-3 text-left font-semibold">Status</th><th class="px-5 py-3 text-left font-semibold">Action</th></tr></thead>
-        <tbody id="usersBody" class="divide-y divide-slate-100"></tbody>
+      <table class="w-full min-w-[850px] text-base">
+        <thead class="bg-skyblue-100/70 text-xs font-extrabold uppercase tracking-wider text-skyblue-700 border-b border-skyblue-200">
+          <tr>
+            <th class="px-6 py-4 text-left">Name</th>
+            <th class="px-6 py-4 text-left">Email</th>
+            <th class="px-6 py-4 text-left">Role</th>
+            <th class="px-6 py-4 text-left">Class</th>
+            <th class="px-6 py-4 text-left">Status</th>
+            <th class="px-6 py-4 text-left">Action</th>
+          </tr>
+        </thead>
+        <tbody id="usersBody" class="divide-y divide-skyblue-100/80"></tbody>
       </table>
     </div>
-    <p id="usersError" class="hidden m-5 p-3 rounded-xl bg-red-50 text-red-700 text-sm"></p>
+    <p id="usersError" class="hidden m-6 p-4 rounded-2xl bg-red-50 text-red-700 text-base font-semibold border border-red-200 shadow-sm"></p>
   </section>
-  <section
-    id="importResultSection"
-    class="hidden mt-7 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
->
 
-    <div class="px-6 py-5 border-b border-slate-100">
-
-        <h2 class="font-bold text-slate-900">
-            Import Result
-        </h2>
-
-        <p class="text-xs text-slate-500 mt-1">
-            Generated passwords are shown only in this result.
-        </p>
-
+  <section id="importResultSection" class="hidden glass-card rounded-3xl shadow-sm overflow-hidden">
+    <div class="px-6 py-5 border-b border-skyblue-200/60 bg-white/50">
+      <h2 class="text-lg font-bold text-skyblue-900">Import Result</h2>
+      <p class="text-sm text-skyblue-600 mt-0.5">Generated passwords are shown only in this result.</p>
     </div>
 
+    <div class="p-6 sm:p-8">
+      <div id="importSummary" class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6"></div>
 
-    <div class="p-6">
-
-
-        <div
-            id="importSummary"
-            class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
-        ></div>
-
-
-        <div class="overflow-x-auto">
-
-            <table class="w-full min-w-[800px] text-sm">
-
-                <thead class="bg-slate-50">
-
-                    <tr>
-
-                        <th class="px-4 py-3 text-left">
-                            Name
-                        </th>
-
-                        <th class="px-4 py-3 text-left">
-                            Email
-                        </th>
-
-                        <th class="px-4 py-3 text-left">
-                            Role
-                        </th>
-
-                        <th class="px-4 py-3 text-left">
-                            Class
-                        </th>
-
-                        <th class="px-4 py-3 text-left">
-                            Generated Password
-                        </th>
-
-                    </tr>
-
-                </thead>
-
-
-                <tbody
-                    id="importResultBody"
-                    class="divide-y divide-slate-100"
-                ></tbody>
-
-            </table>
-
-        </div>
-
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[800px] text-base">
+          <thead class="bg-skyblue-100/70 text-xs font-extrabold uppercase tracking-wider text-skyblue-700 border-b border-skyblue-200">
+            <tr>
+              <th class="px-5 py-4 text-left">Name</th>
+              <th class="px-5 py-4 text-left">Email</th>
+              <th class="px-5 py-4 text-left">Role</th>
+              <th class="px-5 py-4 text-left">Class</th>
+              <th class="px-5 py-4 text-left">Generated Password</th>
+            </tr>
+          </thead>
+          <tbody id="importResultBody" class="divide-y divide-skyblue-100/80"></tbody>
+        </table>
+      </div>
     </div>
-
-</section>
+  </section>
 </div>
 
 </main>

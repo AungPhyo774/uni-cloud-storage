@@ -19,35 +19,65 @@
         href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     >
 
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        skyblue: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#0a3751',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        .glass {
+            background-color: rgba(224, 242, 254, 0.85);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+
 </head>
 
 
-<body class="min-h-screen bg-slate-50 text-slate-800">
+<body class="min-h-screen bg-skyblue-200/80 text-skyblue-900 text-base">
 
 
     <!-- =====================================================
          SHARED NAVBAR
     ====================================================== -->
 
-    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-skyblue-300 bg-white/95 backdrop-blur-xl">
 
-        <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div class="mx-auto flex h-24 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
             <a
                 href="student-dashboard.html"
                 class="flex items-center gap-3"
             >
 
-                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-600 text-white shadow-lg">
-                    <i class="fa-solid fa-graduation-cap"></i>
+                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-skyblue-500 text-white shadow-lg shadow-skyblue-500/30">
+                    <i class="fa-solid fa-graduation-cap text-2xl"></i>
                 </div>
 
                 <div class="hidden sm:block">
-                    <p class="font-bold text-slate-900">
+                    <p class="text-xl font-bold tracking-tight text-skyblue-900">
                         EduPortal
                     </p>
 
-                    <p class="text-xs text-slate-500">
+                    <p class="text-sm font-medium text-skyblue-600">
                         Student Learning System
                     </p>
                 </div>
@@ -55,11 +85,11 @@
             </a>
 
 
-            <div class="hidden items-center gap-1 md:flex">
+            <div class="hidden items-center gap-2 md:flex">
 
                 <a
                     href="student-dashboard.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    class="rounded-xl px-5 py-3 text-base font-medium text-skyblue-700 transition hover:bg-skyblue-100 hover:text-skyblue-900"
                 >
                     <i class="fa-solid fa-house mr-2"></i>
                     Dashboard
@@ -67,7 +97,7 @@
 
                 <a
                     href="student-upload.html"
-                    class="rounded-xl bg-teal-50 px-4 py-2.5 text-sm font-semibold text-teal-700"
+                    class="rounded-xl bg-skyblue-500 px-5 py-3 text-base font-semibold text-white shadow-sm"
                 >
                     <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
                     Upload
@@ -75,7 +105,7 @@
 
                 <a
                     href="student-documents.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    class="rounded-xl px-5 py-3 text-base font-medium text-skyblue-700 transition hover:bg-skyblue-100 hover:text-skyblue-900"
                 >
                     <i class="fa-solid fa-folder-open mr-2"></i>
                     My Documents
@@ -83,7 +113,7 @@
 
                 <a
                     href="lecturer-documents.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                    class="rounded-xl px-5 py-3 text-base font-medium text-skyblue-700 transition hover:bg-skyblue-100 hover:text-skyblue-900"
                 >
                     <i class="fa-solid fa-book-open mr-2"></i>
                     Lecturer Materials
@@ -95,9 +125,10 @@
             <button
                 type="button"
                 onclick="logout()"
-                class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                class="flex h-11 w-11 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100"
+                title="Logout"
             >
-                <i class="fa-solid fa-right-from-bracket"></i>
+                <i class="fa-solid fa-right-from-bracket text-lg"></i>
             </button>
 
         </div>
@@ -109,25 +140,35 @@
          MAIN
     ====================================================== -->
 
-    <main class="mx-auto max-w-5xl px-4 pb-16 pt-28 sm:px-6 lg:px-8">
+    <main class="mx-auto max-w-5xl px-4 pb-16 pt-32 sm:px-6 lg:px-8">
 
 
-        <!-- Header -->
+        <!-- Banner Hero Container (Single Color Gradient Box) -->
 
-        <div class="mb-8">
+        <div class="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-r from-skyblue-700 via-skyblue-600 to-skyblue-500 p-8 text-white shadow-xl shadow-skyblue-500/20">
 
-            <p class="mb-2 text-sm font-semibold text-teal-600">
-                DOCUMENT SUBMISSION
-            </p>
+            <div class="relative z-10">
 
-            <h1 class="text-3xl font-bold tracking-tight text-slate-900">
-                Submit your document
-            </h1>
+                <div class="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-skyblue-100">
 
-            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                Choose your lecturer and upload your assignment or academic
-                document securely.
-            </p>
+
+                    <span>Document Submission</span>
+
+                </div>
+
+                <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+                    Submit your document
+                </h1>
+
+                <p class="mt-2 max-w-2xl text-base leading-relaxed text-skyblue-100/90">
+                    Choose your lecturer and upload your assignment or academic
+                    document securely.
+                </p>
+
+            </div>
+
+            <!-- Glass Icon Box Decorator -->
+
 
         </div>
 
@@ -136,28 +177,28 @@
              UPLOAD CARD
         ================================================== -->
 
-        <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-hidden rounded-3xl border border-skyblue-200 bg-white/90 shadow-sm backdrop-blur">
 
 
             <!-- Card Header -->
 
-            <div class="border-b border-slate-100 px-6 py-5 sm:px-8">
+            <div class="border-b border-skyblue-100 px-6 py-6 sm:px-8">
 
                 <div class="flex items-center gap-4">
 
-                    <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
-                        <i class="fa-solid fa-file-arrow-up text-lg"></i>
+                    <div class="flex h-14 w-14 items-center justify-center rounded-2xl bg-skyblue-100 text-skyblue-600">
+                        <i class="fa-solid fa-file-arrow-up text-2xl"></i>
                     </div>
 
                     <div>
 
-                        <h2 class="font-bold text-slate-900">
+                        <h2 class="text-xl font-bold text-skyblue-900">
                             New Submission
                         </h2>
 
                         <p
                             id="studentClass"
-                            class="mt-1 text-sm text-slate-500"
+                            class="mt-1 text-base font-medium text-skyblue-600"
                         >
                             Loading class...
                         </p>
@@ -183,21 +224,21 @@
 
                     <label
                         for="lecturer"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
+                        class="mb-2 block text-base font-bold text-skyblue-900"
                     >
                         Select Lecturer
                     </label>
 
                     <div class="relative">
 
-                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400">
-                            <i class="fa-solid fa-user-tie"></i>
+                        <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-skyblue-500">
+                            <i class="fa-solid fa-user-tie text-lg"></i>
                         </div>
 
                         <select
                             id="lecturer"
                             required
-                            class="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-11 py-3.5 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10"
+                            class="w-full appearance-none rounded-xl border border-skyblue-200 bg-skyblue-50/50 px-12 py-4 text-base font-medium text-skyblue-900 outline-none transition focus:border-skyblue-500 focus:bg-white focus:ring-4 focus:ring-skyblue-500/20"
                         >
 
                             <option value="">
@@ -206,8 +247,8 @@
 
                         </select>
 
-                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-slate-400">
-                            <i class="fa-solid fa-chevron-down text-xs"></i>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4 text-skyblue-500">
+                            <i class="fa-solid fa-chevron-down text-sm"></i>
                         </div>
 
                     </div>
@@ -221,7 +262,7 @@
 
                     <label
                         for="file"
-                        class="mb-2 block text-sm font-semibold text-slate-700"
+                        class="mb-2 block text-base font-bold text-skyblue-900"
                     >
                         Select Document
                     </label>
@@ -229,18 +270,18 @@
 
                     <label
                         for="file"
-                        class="group flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-6 py-12 text-center transition hover:border-teal-400 hover:bg-teal-50/50"
+                        class="group flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-skyblue-300 bg-skyblue-50/50 px-6 py-12 text-center transition hover:border-skyblue-500 hover:bg-skyblue-100/50"
                     >
 
-                        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-teal-600 shadow-sm ring-1 ring-slate-100 transition group-hover:scale-105">
-                            <i class="fa-solid fa-cloud-arrow-up text-2xl"></i>
+                        <div class="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-skyblue-600 shadow-sm ring-1 ring-skyblue-200 transition group-hover:scale-105">
+                            <i class="fa-solid fa-cloud-arrow-up text-3xl"></i>
                         </div>
 
-                        <p class="font-semibold text-slate-800">
+                        <p class="text-lg font-bold text-skyblue-900">
                             Click to choose a document
                         </p>
 
-                        <p class="mt-2 text-sm text-slate-500">
+                        <p class="mt-2 text-base text-skyblue-600">
                             PDF, DOC, DOCX or other supported files
                         </p>
 
@@ -253,7 +294,7 @@
 
                         <div
                             id="fileName"
-                            class="mt-4 hidden rounded-lg bg-teal-50 px-4 py-2 text-sm font-medium text-teal-700"
+                            class="mt-4 hidden rounded-xl bg-skyblue-100 px-5 py-2.5 text-base font-bold text-skyblue-800"
                         ></div>
 
                     </label>
@@ -265,13 +306,13 @@
 
                 <div
                     id="uploadMessage"
-                    class="hidden rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700"
+                    class="hidden rounded-xl border border-emerald-200 bg-emerald-50 px-5 py-3.5 text-base font-bold text-emerald-700"
                 ></div>
 
 
                 <div
                     id="uploadError"
-                    class="text-sm font-medium text-red-600"
+                    class="text-base font-semibold text-red-600"
                 ></div>
 
 
@@ -279,10 +320,10 @@
 
                 <button
                     type="submit"
-                    class="flex w-full items-center justify-center gap-2 rounded-xl bg-teal-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-teal-600/20 transition hover:bg-teal-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
+                    class="flex w-full items-center justify-center gap-3 rounded-xl bg-skyblue-500 px-6 py-4 text-base font-bold text-white shadow-lg shadow-skyblue-500/25 transition hover:bg-skyblue-600 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
                 >
 
-                    <i class="fa-solid fa-paper-plane"></i>
+                    <i class="fa-solid fa-paper-plane text-lg"></i>
 
                     Submit Document
 
@@ -295,17 +336,17 @@
 
         <!-- Info -->
 
-        <div class="mt-6 flex gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+        <div class="mt-6 flex gap-4 rounded-2xl border border-skyblue-200 bg-white/90 p-6 shadow-sm backdrop-blur">
 
-            <i class="fa-solid fa-circle-info mt-0.5 text-blue-600"></i>
+            <i class="fa-solid fa-circle-info mt-0.5 text-xl text-skyblue-600"></i>
 
             <div>
 
-                <p class="text-sm font-semibold text-blue-900">
+                <p class="text-base font-bold text-skyblue-900">
                     Submission information
                 </p>
 
-                <p class="mt-1 text-sm leading-6 text-blue-700">
+                <p class="mt-1 text-base leading-relaxed text-skyblue-700">
                     Make sure you select the correct lecturer before submitting
                     your document.
                 </p>

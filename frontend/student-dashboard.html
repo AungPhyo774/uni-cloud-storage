@@ -26,12 +26,16 @@
                 extend: {
                     colors: {
                         primary: {
-                            50: '#f0fdfa',
-                            100: '#ccfbf1',
-                            500: '#14b8a6',
-                            600: '#0d9488',
-                            700: '#0f766e',
-                            800: '#115e59'
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            300: '#7dd3fc',
+                            400: '#38bdf8',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#0a3751'
                         }
                     }
                 }
@@ -40,13 +44,13 @@
     </script>
 </head>
 
-<body class="min-h-screen bg-slate-50 text-slate-800">
+<body class="min-h-screen bg-[#bae6fd]/80 text-[#0a3751]">
 
     <!-- =====================================================
          NAVBAR
     ====================================================== -->
 
-    <nav class="fixed top-0 left-0 right-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-xl">
+    <nav class="fixed top-0 left-0 right-0 z-50 border-b border-[#bae6fd] bg-white/95 backdrop-blur-xl">
 
         <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
 
@@ -56,17 +60,17 @@
                 class="flex items-center gap-3"
             >
 
-                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-600 text-white shadow-lg shadow-teal-600/20">
+                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0284c7] text-white shadow-lg shadow-[#0284c7]/20">
                     <i class="fa-solid fa-graduation-cap text-lg"></i>
                 </div>
 
                 <div class="hidden sm:block">
-                    <p class="text-lg font-bold tracking-tight text-slate-900">
-                        EduPortal
+                    <p class="text-lg font-bold tracking-tight text-[#0a3751]">
+                        Campus-Hub
                     </p>
 
-                    <p class="text-xs font-medium text-slate-500">
-                        Student Learning System
+                    <p class="text-xs font-medium text-[#0369a1]">
+                        Distributed Storage System
                     </p>
                 </div>
 
@@ -78,7 +82,7 @@
 
                 <a
                     href="student-dashboard.html"
-                    class="rounded-xl bg-teal-50 px-4 py-2.5 text-sm font-semibold text-teal-700"
+                    class="rounded-xl bg-[#e0f2fe] px-4 py-2.5 text-sm font-semibold text-[#075985]"
                 >
                     <i class="fa-solid fa-house mr-2"></i>
                     Dashboard
@@ -86,7 +90,7 @@
 
                 <a
                     href="student-upload.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-[#075985] transition hover:bg-[#e0f2fe] hover:text-[#0a3751]"
                 >
                     <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
                     Upload
@@ -94,7 +98,7 @@
 
                 <a
                     href="student-documents.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-[#075985] transition hover:bg-[#e0f2fe] hover:text-[#0a3751]"
                 >
                     <i class="fa-solid fa-folder-open mr-2"></i>
                     My Documents
@@ -102,7 +106,7 @@
 
                 <a
                     href="lecturer-documents.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-[#075985] transition hover:bg-[#e0f2fe] hover:text-[#0a3751]"
                 >
                     <i class="fa-solid fa-book-open mr-2"></i>
                     Lecturer Materials
@@ -117,12 +121,12 @@
                 <div class="hidden text-right sm:block">
                     <p
                         id="navUserName"
-                        class="text-sm font-semibold text-slate-800"
+                        class="text-sm font-semibold text-[#0a3751]"
                     >
                         Student
                     </p>
 
-                    <p class="text-xs text-slate-500">
+                    <p class="text-xs text-[#0369a1]">
                         Student Account
                     </p>
                 </div>
@@ -130,13 +134,13 @@
                 <button
                     type="button"
                     onclick="logout()"
-                    class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+                    class="flex h-10 w-10 items-center justify-center rounded-xl border border-[#bae6fd] text-[#075985] transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
                     title="Logout"
                 >
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </button>
 
-                <a href="change-password.html" class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:border-teal-200 hover:bg-teal-50 hover:text-teal-700" title="Change password" aria-label="Change password">
+                <a href="change-password.html" class="flex h-10 w-10 items-center justify-center rounded-xl border border-[#bae6fd] text-[#075985] transition hover:border-[#7dd3fc] hover:bg-[#e0f2fe] hover:text-[#075985]" title="Change password" aria-label="Change password">
                     <i class="fa-solid fa-lock"></i>
                 </a>
 
@@ -156,14 +160,14 @@
         <!-- Welcome Header -->
         <section class="mb-8">
 
-            <div class="rounded-3xl bg-gradient-to-r from-teal-700 via-teal-600 to-cyan-600 p-6 text-white shadow-xl shadow-teal-900/10 sm:p-8">
+            <div class="rounded-3xl bg-gradient-to-r from-[#075985] via-[#0369a1] to-[#0284c7] p-6 text-white shadow-xl shadow-[#0c4a6e]/10 sm:p-8">
 
                 <div class="flex flex-col justify-between gap-6 md:flex-row md:items-center">
 
                     <div>
 
                         <div class="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1.5 text-xs font-semibold backdrop-blur">
-                            <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                            <span class="h-2 w-2 rounded-full bg-[#7dd3fc]"></span>
                             Student Portal
                         </div>
 
@@ -174,7 +178,7 @@
                             Welcome
                         </h1>
 
-                        <p class="mt-2 max-w-xl text-sm leading-6 text-teal-50 sm:text-base">
+                        <p class="mt-2 max-w-xl text-sm leading-6 text-[#e0f2fe] sm:text-base">
                             Manage your documents, upload assignments, and access
                             lecture materials from one place.
                         </p>
@@ -202,19 +206,19 @@
             <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
                 <!-- Email -->
-                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                <div class="rounded-2xl border border-[#bae6fd] bg-white/90 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
 
-                    <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#e0f2fe] text-[#0284c7]">
                         <i class="fa-solid fa-envelope"></i>
                     </div>
 
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-[#0369a1]">
                         Email Address
                     </p>
 
                     <p
                         id="email"
-                        class="mt-2 break-all text-sm font-semibold text-slate-800"
+                        class="mt-2 break-all text-sm font-semibold text-[#0a3751]"
                     >
                         Loading...
                     </p>
@@ -223,19 +227,19 @@
 
 
                 <!-- Class -->
-                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                <div class="rounded-2xl border border-[#bae6fd] bg-white/90 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
 
-                    <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                    <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#e0f2fe] text-[#0284c7]">
                         <i class="fa-solid fa-users"></i>
                     </div>
 
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-[#0369a1]">
                         Class
                     </p>
 
                     <p
                         id="classYear"
-                        class="mt-2 text-sm font-semibold text-slate-800"
+                        class="mt-2 text-sm font-semibold text-[#0a3751]"
                     >
                         Loading...
                     </p>
@@ -244,21 +248,21 @@
 
 
                 <!-- Account -->
-                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
+                <div class="rounded-2xl border border-[#bae6fd] bg-white/90 p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md">
 
-                    <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                    <div class="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#e0f2fe] text-[#0284c7]">
                         <i class="fa-solid fa-circle-check"></i>
                     </div>
 
-                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                    <p class="text-xs font-semibold uppercase tracking-wider text-[#0369a1]">
                         Account Status
                     </p>
 
                     <div class="mt-2 flex items-center gap-2">
 
-                        <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
+                        <span class="h-2.5 w-2.5 rounded-full bg-[#0284c7]"></span>
 
-                        <span class="text-sm font-semibold text-emerald-700">
+                        <span class="text-sm font-semibold text-[#075985]">
                             Active
                         </span>
 
@@ -280,11 +284,11 @@
             <div class="mb-5 flex items-end justify-between">
 
                 <div>
-                    <h2 class="text-xl font-bold text-slate-900">
+                    <h2 class="text-xl font-bold text-[#0a3751]">
                         Quick Actions
                     </h2>
 
-                    <p class="mt-1 text-sm text-slate-500">
+                    <p class="mt-1 text-sm text-[#0369a1]">
                         Access your most frequently used student tools.
                     </p>
                 </div>
@@ -297,24 +301,24 @@
                 <!-- Upload -->
                 <a
                     href="student-upload.html"
-                    class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-teal-200 hover:shadow-lg"
+                    class="group rounded-2xl border border-[#bae6fd] bg-white/90 p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#7dd3fc] hover:shadow-lg"
                 >
 
                     <div class="mb-5 flex items-center justify-between">
 
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-50 text-teal-600 transition group-hover:bg-teal-600 group-hover:text-white">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#e0f2fe] text-[#0284c7] transition group-hover:bg-[#0284c7] group-hover:text-white">
                             <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
                         </div>
 
-                        <i class="fa-solid fa-arrow-right text-slate-300 transition group-hover:translate-x-1 group-hover:text-teal-600"></i>
+                        <i class="fa-solid fa-arrow-right text-[#7dd3fc] transition group-hover:translate-x-1 group-hover:text-[#0284c7]"></i>
 
                     </div>
 
-                    <h3 class="text-base font-bold text-slate-900">
+                    <h3 class="text-base font-bold text-[#0a3751]">
                         Upload Document
                     </h3>
 
-                    <p class="mt-2 text-sm leading-6 text-slate-500">
+                    <p class="mt-2 text-sm leading-6 text-[#0369a1]">
                         Submit your assignments and documents to your lecturer.
                     </p>
 
@@ -324,24 +328,24 @@
                 <!-- My Documents -->
                 <a
                     href="student-documents.html"
-                    class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-lg"
+                    class="group rounded-2xl border border-[#bae6fd] bg-white/90 p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#7dd3fc] hover:shadow-lg"
                 >
 
                     <div class="mb-5 flex items-center justify-between">
 
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#e0f2fe] text-[#0284c7] transition group-hover:bg-[#0284c7] group-hover:text-white">
                             <i class="fa-solid fa-folder-open text-lg"></i>
                         </div>
 
-                        <i class="fa-solid fa-arrow-right text-slate-300 transition group-hover:translate-x-1 group-hover:text-blue-600"></i>
+                        <i class="fa-solid fa-arrow-right text-[#7dd3fc] transition group-hover:translate-x-1 group-hover:text-[#0284c7]"></i>
 
                     </div>
 
-                    <h3 class="text-base font-bold text-slate-900">
+                    <h3 class="text-base font-bold text-[#0a3751]">
                         My Documents
                     </h3>
 
-                    <p class="mt-2 text-sm leading-6 text-slate-500">
+                    <p class="mt-2 text-sm leading-6 text-[#0369a1]">
                         View, download, and manage documents you have uploaded.
                     </p>
 
@@ -351,24 +355,24 @@
                 <!-- Lecturer Documents -->
                 <a
                     href="lecturer-documents.html"
-                    class="group rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-violet-200 hover:shadow-lg"
+                    class="group rounded-2xl border border-[#bae6fd] bg-white/90 p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:border-[#7dd3fc] hover:shadow-lg"
                 >
 
                     <div class="mb-5 flex items-center justify-between">
 
-                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-50 text-violet-600 transition group-hover:bg-violet-600 group-hover:text-white">
+                        <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-[#e0f2fe] text-[#0284c7] transition group-hover:bg-[#0284c7] group-hover:text-white">
                             <i class="fa-solid fa-book-open text-lg"></i>
                         </div>
 
-                        <i class="fa-solid fa-arrow-right text-slate-300 transition group-hover:translate-x-1 group-hover:text-violet-600"></i>
+                        <i class="fa-solid fa-arrow-right text-[#7dd3fc] transition group-hover:translate-x-1 group-hover:text-[#0284c7]"></i>
 
                     </div>
 
-                    <h3 class="text-base font-bold text-slate-900">
+                    <h3 class="text-base font-bold text-[#0a3751]">
                         Lecturer Materials
                     </h3>
 
-                    <p class="mt-2 text-sm leading-6 text-slate-500">
+                    <p class="mt-2 text-sm leading-6 text-[#0369a1]">
                         Access lecture documents shared by your lecturers.
                     </p>
 
