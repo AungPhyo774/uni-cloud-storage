@@ -46,114 +46,7 @@
 
 <body class="min-h-screen bg-[#bae6fd]/80 text-[#0a3751]">
 
-    <!-- =====================================================
-         NAVBAR
-    ====================================================== -->
-
-    <nav class="fixed top-0 left-0 right-0 z-50 border-b border-[#bae6fd] bg-white/95 backdrop-blur-xl">
-
-        <div class="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-
-            <!-- Logo -->
-            <a
-                href="student-dashboard.html"
-                class="flex items-center gap-3"
-            >
-
-                <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0284c7] text-white shadow-lg shadow-[#0284c7]/20">
-                    <i class="fa-solid fa-graduation-cap text-lg"></i>
-                </div>
-
-                <div class="hidden sm:block">
-                    <p class="text-lg font-bold tracking-tight text-[#0a3751]">
-                        Campus-Hub
-                    </p>
-
-                    <p class="text-xs font-medium text-[#0369a1]">
-                        Distributed Storage System
-                    </p>
-                </div>
-
-            </a>
-
-
-            <!-- Desktop Navigation -->
-            <div class="hidden items-center gap-1 md:flex">
-
-                <a
-                    href="student-dashboard.html"
-                    class="rounded-xl bg-[#e0f2fe] px-4 py-2.5 text-sm font-semibold text-[#075985]"
-                >
-                    <i class="fa-solid fa-house mr-2"></i>
-                    Dashboard
-                </a>
-
-                <a
-                    href="student-upload.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-[#075985] transition hover:bg-[#e0f2fe] hover:text-[#0a3751]"
-                >
-                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
-                    Upload
-                </a>
-
-                <a
-                    href="student-documents.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-[#075985] transition hover:bg-[#e0f2fe] hover:text-[#0a3751]"
-                >
-                    <i class="fa-solid fa-folder-open mr-2"></i>
-                    My Documents
-                </a>
-
-                <a
-                    href="lecturer-documents.html"
-                    class="rounded-xl px-4 py-2.5 text-sm font-medium text-[#075985] transition hover:bg-[#e0f2fe] hover:text-[#0a3751]"
-                >
-                    <i class="fa-solid fa-book-open mr-2"></i>
-                    Lecturer Materials
-                </a>
-
-            </div>
-
-
-            <!-- User / Logout -->
-            <div class="flex items-center gap-3">
-
-                <div class="hidden text-right sm:block">
-                    <p
-                        id="navUserName"
-                        class="text-sm font-semibold text-[#0a3751]"
-                    >
-                        Student
-                    </p>
-
-                    <p class="text-xs text-[#0369a1]">
-                        Student Account
-                    </p>
-                </div>
-
-                <button
-                    type="button"
-                    onclick="logout()"
-                    class="flex h-10 w-10 items-center justify-center rounded-xl border border-[#bae6fd] text-[#075985] transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
-                    title="Logout"
-                >
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
-
-                <a href="change-password.html" class="flex h-10 w-10 items-center justify-center rounded-xl border border-[#bae6fd] text-[#075985] transition hover:border-[#7dd3fc] hover:bg-[#e0f2fe] hover:text-[#075985]" title="Change password" aria-label="Change password">
-                    <i class="fa-solid fa-lock"></i>
-                </a>
-
-            </div>
-
-        </div>
-
-    </nav>
-
-
-    <!-- =====================================================
-         MAIN CONTENT
-    ====================================================== -->
+    <div id="studentNavbar"></div>
 
     <main class="mx-auto max-w-7xl px-4 pb-12 pt-28 sm:px-6 lg:px-8">
 
@@ -390,65 +283,63 @@
 
     </main>
 
+<script src="js/api.js"></script>
+<script src="js/navbar.js"></script>
 
-    <script src="js/api.js"></script>
+<script>
 
-    <script>
-
-        async function loadStudentDashboard() {
-
-            try {
-
-                const user =
-                    await getCurrentUser();
+    loadStudentNavbar();
 
 
-                if (user.role !== "student") {
+    async function loadStudentDashboard() {
 
-                    window.location.href =
-                        "login.html";
+        try {
 
-                    return;
-                }
-
-
-                document.getElementById(
-                    "welcome"
-                ).textContent =
-                    `Welcome back, ${user.full_name}`;
+            const user =
+                await getCurrentUser();
 
 
-                document.getElementById(
-                    "navUserName"
-                ).textContent =
-                    user.full_name;
+            if (user.role !== "student") {
 
+                window.location.href =
+                    "login.html";
 
-                document.getElementById(
-                    "email"
-                ).textContent =
-                    user.email;
-
-
-                document.getElementById(
-                    "classYear"
-                ).textContent =
-                    user.class_year;
-
-            } catch (error) {
-
-                document.getElementById(
-                    "dashboardError"
-                ).textContent =
-                    error.message;
-
+                return;
             }
+
+
+            document.getElementById(
+                "welcome"
+            ).textContent =
+                `Welcome back, ${user.full_name}`;
+
+
+            document.getElementById(
+                "email"
+            ).textContent =
+                user.email;
+
+
+            document.getElementById(
+                "classYear"
+            ).textContent =
+                user.class_year;
+
+        } catch (error) {
+
+            document.getElementById(
+                "dashboardError"
+            ).textContent =
+                error.message;
 
         }
 
-        loadStudentDashboard();
+    }
 
-    </script>
+
+    loadStudentDashboard();
+
+</script>
 
 </body>
 </html>

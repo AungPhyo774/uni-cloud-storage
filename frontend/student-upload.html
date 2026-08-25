@@ -48,102 +48,13 @@
             backdrop-filter: blur(12px);
         }
     </style>
-
 </head>
 
+<body class="min-h-screen bg-[#bae6fd]/80 text-[#0a3751]">
 
-<body class="min-h-screen bg-skyblue-200/80 text-skyblue-900 text-base">
+    <div id="studentNavbar"></div>
 
-
-    <!-- =====================================================
-         SHARED NAVBAR
-    ====================================================== -->
-
-    <nav class="fixed left-0 right-0 top-0 z-50 border-b border-skyblue-300 bg-white/95 backdrop-blur-xl">
-
-        <div class="mx-auto flex h-24 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-
-            <a
-                href="student-dashboard.html"
-                class="flex items-center gap-3"
-            >
-
-                <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-skyblue-500 text-white shadow-lg shadow-skyblue-500/30">
-                    <i class="fa-solid fa-graduation-cap text-2xl"></i>
-                </div>
-
-                <div class="hidden sm:block">
-                    <p class="text-xl font-bold tracking-tight text-skyblue-900">
-                        EduPortal
-                    </p>
-
-                    <p class="text-sm font-medium text-skyblue-600">
-                        Student Learning System
-                    </p>
-                </div>
-
-            </a>
-
-
-            <div class="hidden items-center gap-2 md:flex">
-
-                <a
-                    href="student-dashboard.html"
-                    class="rounded-xl px-5 py-3 text-base font-medium text-skyblue-700 transition hover:bg-skyblue-100 hover:text-skyblue-900"
-                >
-                    <i class="fa-solid fa-house mr-2"></i>
-                    Dashboard
-                </a>
-
-                <a
-                    href="student-upload.html"
-                    class="rounded-xl bg-skyblue-500 px-5 py-3 text-base font-semibold text-white shadow-sm"
-                >
-                    <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
-                    Upload
-                </a>
-
-                <a
-                    href="student-documents.html"
-                    class="rounded-xl px-5 py-3 text-base font-medium text-skyblue-700 transition hover:bg-skyblue-100 hover:text-skyblue-900"
-                >
-                    <i class="fa-solid fa-folder-open mr-2"></i>
-                    My Documents
-                </a>
-
-                <a
-                    href="lecturer-documents.html"
-                    class="rounded-xl px-5 py-3 text-base font-medium text-skyblue-700 transition hover:bg-skyblue-100 hover:text-skyblue-900"
-                >
-                    <i class="fa-solid fa-book-open mr-2"></i>
-                    Lecturer Materials
-                </a>
-
-            </div>
-
-
-            <button
-                type="button"
-                onclick="logout()"
-                class="flex h-11 w-11 items-center justify-center rounded-xl border border-red-200 bg-red-50 text-red-600 transition hover:bg-red-100"
-                title="Logout"
-            >
-                <i class="fa-solid fa-right-from-bracket text-lg"></i>
-            </button>
-
-        </div>
-
-    </nav>
-
-
-    <!-- =====================================================
-         MAIN
-    ====================================================== -->
-
-    <main class="mx-auto max-w-5xl px-4 pb-16 pt-32 sm:px-6 lg:px-8">
-
-
-        <!-- Banner Hero Container (Single Color Gradient Box) -->
+    <main class="mx-auto max-w-7xl px-4 pb-12 pt-28 sm:px-6 lg:px-8">
 
         <div class="relative mb-8 overflow-hidden rounded-3xl bg-gradient-to-r from-skyblue-700 via-skyblue-600 to-skyblue-500 p-8 text-white shadow-xl shadow-skyblue-500/20">
 
@@ -359,9 +270,11 @@
 
 
     <script src="js/api.js?v=20260822"></script>
-
+    <script src="js/navbar.js"></script>
 
     <script>
+
+        loadStudentNavbar();
 
         async function loadUploadPage() {
 
