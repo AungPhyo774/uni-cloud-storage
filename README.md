@@ -798,37 +798,7 @@ ORDER BY id DESC;
 
 ---
 
-## 19. Basic Test Checklist
-
-```text
-[✓] Admin login
-[✓] Student login
-[✓] Lecturer login
-[✓] Role-based authorization
-[✓] Admin user creation
-[✓] Student Excel import
-[✓] Lecturer Excel import
-[✓] Automatic password generation
-[✓] Student upload
-[✓] Lecturer upload
-[✓] Document listing
-[✓] Document download
-[✓] Authorized deletion
-[✓] Class-based access
-[✓] Lecturer multi-class management
-[✓] Round-Robin storage placement
-[✓] Primary + replica creation
-[✓] Node health monitoring
-[✓] Replica fallback
-[✓] SHA-256 verification
-[✓] Automatic recovery
-[✓] Recovery logging
-[✓] LAN client access
-```
-
----
-
-## 20. Troubleshooting
+## 19. Troubleshooting
 
 ### 401 Unauthorized
 
@@ -878,7 +848,7 @@ for a hard refresh.
 
 ---
 
-## 21. Docker Image Export
+## 20. Docker Image Export
 
 Export application images:
 
@@ -902,7 +872,7 @@ docker load -i campus-hub-images.tar
 
 ---
 
-## 22. Current Deployment Limitation
+## 21. Current Deployment Limitation
 
 The current architecture provides **logical distributed storage**, because Node 1, Node 2, and Node 3 are separate containers on the same physical server.
 
@@ -922,7 +892,7 @@ For stronger host-level fault tolerance, the storage nodes can later be distribu
 
 ---
 
-## 23. Future Enhancements
+## 22. Future Enhancements
 
 Possible future improvements include:
 
@@ -931,16 +901,10 @@ Possible future improvements include:
   `First Year → Second Year → Third Year → ...`
 - Graduation management.
 - Document history linked to academic year/class.
-- File versioning.
-- Advanced search and filtering.
-- Pagination.
-- HTTPS for production.
-- Multi-host storage deployment.
-- Stronger monitoring and audit logging.
 
 ---
 
-## 24. Final Architecture Summary
+## 23. Final Architecture Summary
 
 ```text
 Client Browser
