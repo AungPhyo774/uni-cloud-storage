@@ -1,8 +1,14 @@
 # Campus Hub: Distributed Storage System for University Documents
 
-Campus Hub is a web-based university document management system built with **FastAPI, PostgreSQL, Docker, Nginx, and JavaScript**.
+**Campus Hub** is a web-based university document management system built around a distributed storage architecture. It separates application logic, document metadata, and physical file storage so that university documents can be managed through role-based access, multiple logical storage nodes, replication, integrity checking, and recovery.
 
-It provides role-based access, class-based document management, distributed storage across three logical storage nodes, primary/replica copies, SHA-256 integrity verification, node monitoring, automatic recovery, Excel-based user import, lecturer multi-class management, and LAN client access.
+## Overview
+
+Campus Hub is designed for a university environment with three main user roles:
+
+- **Administrator** — manages users, classes, imports, storage health, replication, and recovery.
+- **Lecturer** — manages teaching classes, uploads lecture materials, and reviews student submissions.
+- **Student** — selects lecturers from the same class, uploads documents, and manages or downloads permitted documents.
 
 > **Current deployment:** Laptop A acts as the physical server. Storage Node 1, Node 2, and Node 3 run as separate Docker containers on Laptop A. Other laptops connect as browser-based clients through the LAN.
 
